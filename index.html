@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mkOS — myKaarma</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="shell" class="light">
+
+    <!-- Prototype-only toolbar — quick navigation for reviewing the flow, not part of the product -->
+    <div class="proto-toolbar">
+      <div class="proto-toolbar-brand">
+        <span class="material-icons">apps</span>
+        mkOS Prototype
+      </div>
+      <div class="proto-toolbar-controls">
+        <div class="proto-jump">
+          <label for="proto-jump-select" class="sr-only">Jump to screen</label>
+          <select id="proto-jump-select">
+            <option value="onboarding-role">Onboarding — Pick a role</option>
+            <option value="home">Home Screen</option>
+            <option value="manager">Manager / IT View</option>
+          </select>
+        </div>
+        <div class="proto-device-toggle" role="group" aria-label="Preview device size">
+          <button class="proto-device-btn active" data-device="desktop" title="Desktop"><span class="material-icons">desktop_windows</span></button>
+          <button class="proto-device-btn" data-device="tablet" title="Tablet"><span class="material-icons">tablet_mac</span></button>
+          <button class="proto-device-btn" data-device="mobile" title="Mobile"><span class="material-icons">phone_iphone</span></button>
+        </div>
+        <button class="mk-button tertiary-mk-button" id="proto-reset-btn">Reset</button>
+      </div>
+    </div>
+
+    <div class="app-frame-wrap">
+      <div class="app-frame" id="app-frame" data-device="desktop">
+
+        <!-- ===================== ONBOARDING — ROLE SELECT ===================== -->
+        <section class="screen" id="screen-onboarding-role" data-screen>
+          <div class="onboarding-center">
+            <div class="onboarding-eyebrow myk-subtitle1">Welcome to mkOS</div>
+            <h1 class="onboarding-h1">What's your role?</h1>
+            <p class="onboarding-sub myk-body2">We'll recommend a home screen based on how you work. You can always change it later.</p>
+
+            <div class="role-grid" id="role-grid"></div>
+
+            <button class="manager-entry-link" id="manager-entry-link">
+              <span class="material-icons">admin_panel_settings</span>
+              I'm a manager or dealership admin
+            </button>
+          </div>
+        </section>
+
+        <!-- ===================== ONBOARDING — CHOOSE PATH ===================== -->
+        <section class="screen" id="screen-onboarding-path" data-screen hidden>
+          <div class="onboarding-center">
+            <button class="back-link" data-back-to="onboarding-role"><span class="material-icons">arrow_back</span> Change role</button>
+            <div class="onboarding-eyebrow myk-subtitle1" id="path-role-label"></div>
+            <h1 class="onboarding-h1">How do you want to start?</h1>
+            <p class="onboarding-sub myk-body2">Use our recommended layout for this role, or build your own from scratch.</p>
+
+            <div class="path-choice-grid">
+              <button class="path-card" id="path-recommended-card">
+                <span class="material-icons path-card-icon">auto_awesome</span>
+                <div class="path-card-title">Use recommended view</div>
+                <div class="path-card-sub myk-body2">Pre-built by myKaarma for this role. Fully customizable afterward.</div>
+                <div class="path-card-preview" id="path-recommended-preview"></div>
+              </button>
+              <button class="path-card" id="path-scratch-card">
+                <span class="material-icons path-card-icon">edit_note</span>
+                <div class="path-card-title">Start from scratch</div>
+                <div class="path-card-sub myk-body2">Describe what you do, or pick apps yourself from the full catalog.</div>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================== ONBOARDING — SCRATCH BUILDER ===================== -->
+        <section class="screen" id="screen-onboarding-scratch" data-screen hidden>
+          <div class="scratch-layout">
+            <button class="back-link" data-back-to="onboarding-path"><span class="material-icons">arrow_back</span> Back</button>
+            <h1 class="onboarding-h1">Build your home screen</h1>
+
+            <div class="ai-prompt-card">
+              <div class="ai-prompt-label">
+                <span class="material-icons">auto_awesome</span>
+                Tell mkOS what you want to do
+              </div>
+              <div class="ai-prompt-row">
+                <input type="text" id="ai-prompt-input" placeholder="e.g. &quot;I schedule appointments and text customers about their car&quot;" />
+                <button class="mk-button primary-mk-button" id="ai-prompt-btn">Suggest apps</button>
+              </div>
+              <div class="ai-prompt-result" id="ai-prompt-result" hidden></div>
+            </div>
+
+            <div class="scratch-catalog-header">
+              <div class="myk-subtitle1">Or browse the full app catalog</div>
+              <div class="scratch-selected-count myk-body2" id="scratch-selected-count">0 apps selected</div>
+            </div>
+            <div class="app-catalog-grid" id="scratch-catalog-grid"></div>
+
+            <div class="scratch-footer">
+              <button class="mk-button primary-mk-button" id="scratch-continue-btn">Continue to home screen</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================== HOME SCREEN ===================== -->
+        <section class="screen" id="screen-home" data-screen hidden>
+          <div class="home-topbar">
+            <div class="home-topbar-role">
+              <span class="material-icons" id="home-role-icon">support_agent</span>
+              <div>
+                <div class="home-role-name" id="home-role-name">Service Advisor</div>
+                <div class="home-role-sub myk-body2" id="home-role-sub">Your home screen</div>
+              </div>
+            </div>
+            <div class="home-topbar-actions">
+              <button class="mk-button functional-mk-button" id="home-edit-btn">
+                <span class="material-icons">edit</span> Customize
+              </button>
+              <button class="mk-button tertiary-mk-button" id="home-restart-btn">Restart onboarding</button>
+            </div>
+          </div>
+
+          <div class="home-edit-banner" id="home-edit-banner" hidden>
+            <span class="material-icons">info</span>
+            Customize mode — remove apps with the ✕, or add more from the catalog below.
+            <button class="mk-button primary-mk-button" id="home-edit-done-btn">Done</button>
+          </div>
+
+          <div class="home-grid" id="home-grid"></div>
+
+          <div class="home-add-catalog" id="home-add-catalog" hidden>
+            <div class="myk-subtitle1">Add an app</div>
+            <div class="app-catalog-grid" id="home-add-catalog-grid"></div>
+          </div>
+        </section>
+
+        <!-- ===================== MANAGER / IT VIEW ===================== -->
+        <section class="screen" id="screen-manager" data-screen hidden>
+          <div class="manager-header">
+            <div>
+              <h1 class="onboarding-h1" style="text-align:left">Manage dealership views</h1>
+              <p class="onboarding-sub myk-body2" style="text-align:left;margin:0">
+                Set a default view per role, and decide whether users can customize it themselves.
+              </p>
+            </div>
+          </div>
+
+          <div class="manager-role-list" id="manager-role-list"></div>
+        </section>
+
+        <!-- ===================== MANAGER — EDIT ROLE VIEW ===================== -->
+        <section class="screen" id="screen-manager-edit" data-screen hidden>
+          <div class="scratch-layout">
+            <button class="back-link" data-back-to="manager"><span class="material-icons">arrow_back</span> Back to Manage dealership views</button>
+            <h1 class="onboarding-h1" id="manager-edit-heading">Edit view</h1>
+
+            <div class="scratch-catalog-header">
+              <div class="myk-subtitle1">Apps in this view</div>
+              <div class="scratch-selected-count myk-body2" id="manager-edit-selected-count">0 apps selected</div>
+            </div>
+            <div class="app-catalog-grid" id="manager-edit-catalog-grid"></div>
+
+            <div class="scratch-footer">
+              <button class="mk-button primary-mk-button" id="manager-edit-save-btn">Save view</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
