@@ -81,21 +81,24 @@
               <span class="dot" data-step="1"></span>
               <span class="dot" data-step="2"></span>
             </div>
-            <p class="onboarding-sub myk-body2">Use our recommended layout for this role, or build your own from scratch.</p>
+            <p class="onboarding-sub myk-body2">Pick a starting point — you can reorder, resize, and add or remove widgets anytime from your Dashboard.</p>
 
             <div class="path-choice-grid">
-              <button class="path-card" id="path-recommended-card">
+              <button class="path-card" id="path-myk-recommended-card">
+                <div class="path-card-thumb" id="path-myk-recommended-thumb"></div>
                 <span class="material-icons path-card-icon">auto_awesome</span>
-                <div class="path-card-title">Use recommended view</div>
-                <div class="path-card-sub myk-body2">Pre-built by myKaarma for this role. Fully customizable afterward.</div>
-                <div class="path-card-preview" id="path-recommended-preview"></div>
+                <div class="path-card-title">myKaarma Recommended</div>
+                <div class="path-card-sub myk-body2">Pre-built by myKaarma for this role.</div>
               </button>
-              <button class="path-card" id="path-scratch-card">
-                <span class="material-icons path-card-icon">edit_note</span>
-                <div class="path-card-title">Start from scratch</div>
-                <div class="path-card-sub myk-body2">Describe what you do, or pick apps yourself from the full catalog.</div>
+              <button class="path-card" id="path-dealer-recommended-card">
+                <div class="path-card-thumb" id="path-dealer-recommended-thumb"></div>
+                <span class="material-icons path-card-icon">store</span>
+                <div class="path-card-title">Dealer Recommended</div>
+                <div class="path-card-sub myk-body2">Your dealership's default for this role.</div>
               </button>
             </div>
+
+            <button class="path-scratch-link" id="path-scratch-card">Or start from scratch</button>
           </div>
           <div class="onboarding-actions onboarding-actions--center">
             <button class="mk-button tertiary-mk-button" data-back-to="onboarding-role">‹ Back</button>
@@ -143,7 +146,7 @@
               <span class="material-icons" id="home-role-icon">support_agent</span>
               <div>
                 <div class="home-role-name" id="home-role-name">Service Advisor</div>
-                <div class="home-role-sub myk-body2">Edit home screen — remove apps with the ✕, or add more below</div>
+                <div class="home-role-sub myk-body2">Edit home screen — remove apps with the ✕, or add more below. Reorder and resize anytime from your Dashboard.</div>
               </div>
             </div>
             <div class="home-topbar-actions">
@@ -153,10 +156,16 @@
             </div>
           </div>
 
+          <div class="lock-notice-banner" id="lock-notice-banner" hidden>
+            <span class="material-icons">lock</span>
+            <span id="lock-notice-text"></span>
+            <button class="mk-button tertiary-mk-button" id="lock-notice-dismiss-btn">Got it</button>
+          </div>
+
           <div class="home-grid" id="home-grid"></div>
 
           <div class="home-add-catalog">
-            <div class="myk-subtitle1">Add an app</div>
+            <div class="myk-subtitle1">Add a Widget</div>
             <div id="home-marketplace"></div>
           </div>
         </section>

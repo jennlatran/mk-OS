@@ -22,29 +22,29 @@ open index.html
 A demo-only bar (not part of the product) for reviewing the flow: jump directly to any screen, toggle the preview between Desktop / Tablet / Mobile device-frame widths, and reset the whole session.
 
 ### Onboarding
-- **Pick a role** — BDC Rep, Parts Rep, Service Advisor, Service Manager or Dealership Admin, Technician. Select-then-confirm (tap a role, then **Next**), with a branded welcome sidebar shown only on this step.
-- **Choose how to start** — a myKaarma-recommended app set for the role, or start from scratch.
-- **Start from scratch** — an AI-prompt box ("tell mkOS what you want to do") suggests apps from a mocked keyword match, plus the full app marketplace to browse and pick manually.
+- **Pick a role** — BDC Rep, Parts Rep, Service Advisor, Service Manager or Dealership Admin, Technician, Loaner Manager. Select-then-confirm (tap a role, then **Next**), with a branded welcome sidebar shown only on this step.
+- **Choose how to start** — three options: **myKaarma Recommended** and **Dealer Recommended** (the dealership's own configured default for that role, set via Manager's Edit view — same as myKaarma's until a manager customizes it), each with a schematic thumbnail preview of the layout, and **Start from Scratch** de-emphasized to a plain text link below.
+- **Start from scratch** — an AI-prompt box ("tell mkOS what you want to do") suggests apps from a mocked keyword match, plus the app marketplace to browse and pick manually. "Create Your Own App" is intentionally excluded here — building apps isn't part of initial setup.
 
 ### Edit Home Screen
-Always-editable app tile grid (no separate "customize mode") — remove apps with the ✕, add more from the marketplace below. **Done** advances to the Dashboard.
+Always-editable app tile grid (no separate "customize mode") — remove apps with the ✕, add more from the marketplace below. **Done** advances to the Dashboard. A one-time dismissible banner appears here if a manager has just locked this role's default view.
 
 ### Dashboard
 The real landing screen once setup is done:
 - **Global search** — find a customer (name/phone/email), a repair order (RO number), or jump to an app, all from one box.
 - **Notification bell** — a unified feed across vehicle updates, customer messages awaiting response, and internal peer communication. Filterable by type; the badge counts action-required items only; resolving one clears it.
 - **Tab strip** — Chrome-style. Opening a customer or RO always adds a tab (or focuses it if already open, never duplicates). Pin a tab to keep it across reloads (persisted via `localStorage`); unpinned tabs reset every session.
-- **Overview tab** — the app widget grid, each widget resizable between a compact **Small** stat and a fuller **Large** card/table. Sizes persist across reloads independent of anything a manager has locked at the content level.
-- **Customer / RO tabs** — intentionally minimal functional placeholders (contact info + open ROs for a customer; status + vehicle for an RO) so the tab and cross-linking mechanics can be demoed. The real content design for these is still being worked out.
+- **Overview tab** — the app widget grid. Each widget is resizable (**Small** stat / **Large** card or table) and **drag-to-reorder**; both size and order persist across reloads via `localStorage`, independent of anything a manager has locked at the content level.
+- **Customer / RO tabs** — built on the same generalized widget system as Overview: Vehicles, Open Repair Orders, Appointment History, Multipoint Inspections, and Payments & Invoices (Customer), or RO Details and Customer (RO) all render as draggable, resizable, removable widgets. Every open tab has its own independent widget list and sizes — two different customers' tabs can look completely different. An **Add Widget** button (hidden by default, with a **Close** to collapse it again) reveals the same app marketplace used everywhere else, letting you add page-info widgets *or* any app as an embedded widget on that record — minus "Create Your Own App," which doesn't apply inside a tab's picker.
 
 ### App Marketplace
-Replaces the old "pick from a list" catalog everywhere apps are added (Edit Home Screen, the scratch builder, and Manager's Edit view):
-- Search and filter by **Category**, **Pricing** (Free / Add to Plan), **Created By** (myKaarma / Partner / You), and **Label** (Best Seller / Spotlight).
-- **Add** (free apps, instant) vs. **Add to Plan** (sends a mocked request to sales, button becomes "Requested").
-- **Create Your Own App** — a lightweight form (name, category, and a checklist of mocked API endpoints/data sources) that adds a custom app tagged "Created by: You".
+One shared component reused everywhere apps get added — Edit Home Screen, the scratch builder, Manager's Edit view, and each Customer/RO tab's Add Widget picker:
+- Search and filter by **Category**, **Pricing** (Free / Paid), **Created By** (myKaarma / Partner / You), and **Label** (Best Seller / Spotlight).
+- **Add Widget** (free apps, instant) vs. **Request Widget** (sends a mocked request to sales, button becomes "Requested").
+- **Create Your Own App** — a lightweight form (name, category, and a checklist of mocked API endpoints/data sources) that adds a custom app tagged "Created by: You". Hidden during onboarding and inside tab widget pickers, where creating a new app isn't contextually relevant.
 
 ### Manager / IT View
-Reachable from the Dashboard (manager-admin role only). Set a default app view per role dealership-wide, and choose per-role whether that's an **editable default** individual users can adjust, or **locked**.
+Reachable from the Dashboard (manager-admin role only). Set a default app view per role dealership-wide, and choose per-role whether that's an **editable default** individual users can adjust, or **locked**. Newly locking a role triggers the one-time banner on that role's Edit Home Screen.
 
 ## Design System
 
@@ -61,4 +61,4 @@ mk-OS/
 
 ## Mock Data
 
-Everything — apps, roles, recommended sets, customers, repair orders, notifications, widget content — is hardcoded in `app.js` for demo purposes. `localStorage` is used for two things only: pinned dashboard tabs and per-widget size preference, so those two specifically survive a page reload; everything else resets.
+Everything — apps, roles, recommended sets, customers, vehicles, repair orders, appointments, inspections, invoices, notifications, widget content — is hardcoded in `app.js` for demo purposes. `localStorage` persists three things across a reload: pinned dashboard tabs, Overview widget sizes, and Overview widget order; everything else (including a Customer/RO tab's own widget arrangement) resets on reload unless that tab is pinned.

@@ -498,20 +498,42 @@
 #shell.light .path-card-title { font-weight: 600; font-size: 15px; }
 #shell.light .path-card-sub { margin: 0; }
 
-#shell.light .path-card-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-top: var(--space-2);
+/* Schematic layout preview — a mini grid of icon "blocks" standing in for a real
+   layout mockup, per Animesh's feedback (closer-to-real-thing is a future pass). */
+#shell.light .path-card-thumb {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: var(--space-2);
+  background: var(--chip-bg);
+  border-radius: var(--radius-md);
 }
 
-#shell.light .path-card-preview .chip {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 12px;
-  background: var(--chip-bg);
-  color: var(--text-secondary);
+#shell.light .path-thumb-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--brand-light);
+  border-radius: 4px;
+  color: var(--brand);
+  font-size: 16px;
 }
+
+#shell.light .path-scratch-link {
+  display: block;
+  margin: var(--space-4) auto 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#shell.light .path-scratch-link:hover { color: var(--text-secondary); }
 
 @container frame (max-width: 640px) {
   #shell.light .path-choice-grid { grid-template-columns: 1fr; }
@@ -761,6 +783,22 @@
   gap: var(--space-2);
 }
 
+#shell.light .lock-notice-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) var(--space-5) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid #FEC84B;
+  border-radius: var(--radius-md);
+  background: #FFFAEB;
+  color: #B54708;
+  font-size: 13px;
+}
+
+#shell.light .lock-notice-banner .material-icons { font-size: 18px; }
+#shell.light .lock-notice-banner span:not(.material-icons) { flex: 1; }
+
 #shell.light .home-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -823,6 +861,14 @@
 #shell.light .home-add-catalog .myk-subtitle1 {
   margin-bottom: var(--space-3);
 }
+
+#shell.light .tab-widget-add-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#shell.light .tab-widget-add-header .myk-subtitle1 { margin-bottom: 0; }
 
 /* ============================================================
    DASHBOARD — placeholder (real widget design TBD)
@@ -1310,7 +1356,14 @@
   border-radius: var(--radius-lg);
   background: var(--bg-surface);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow .2s;
+  transition: box-shadow .2s, opacity .15s;
+}
+
+#shell.light .dash-widget.dragging { opacity: .4; }
+
+#shell.light .dash-widget.drag-over {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand-light);
 }
 
 #shell.light .dash-widget--large { grid-column: span 2; grid-row: span 2; }
@@ -1322,6 +1375,13 @@
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
+}
+
+#shell.light .dash-widget-drag-handle {
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: grab;
+  flex-shrink: 0;
 }
 
 #shell.light .dash-widget-icon {
@@ -1382,9 +1442,50 @@
 /* ============================================================
    DASHBOARD — Customer / RO tab content (functional placeholder)
    ============================================================ */
-#shell.light .tab-content-stub { padding: var(--space-5); max-width: 640px; }
+#shell.light .tab-widget-page { padding: var(--space-5); }
 
-#shell.light .tab-stub-section-label { margin: var(--space-5) 0 var(--space-3); }
+#shell.light .tab-widget-header { margin-bottom: var(--space-5); }
+
+#shell.light .tab-widget-toggle-btn { margin-top: var(--space-2); }
+
+#shell.light .dash-widget-remove-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+#shell.light .dash-widget-remove-btn:hover { background: #FEF3F2; color: #B42318; }
+#shell.light .dash-widget-remove-btn .material-icons { font-size: 16px; }
+
+#shell.light .cust-subsection-label {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+#shell.light .cust-subsection-label:first-child { margin-top: 0; }
+
+#shell.light .cust-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+#shell.light .cust-list-row:last-child { border-bottom: none; }
+#shell.light .cust-list-row .material-icons { color: var(--text-muted); font-size: 18px; flex-shrink: 0; }
+#shell.light .cust-list-main { flex: 1; }
+#shell.light .cust-list-meta { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
 
 #shell.light .tab-ro-list {
   display: flex;
@@ -1427,11 +1528,3 @@
 }
 
 #shell.light .tab-customer-link:hover { border-color: var(--brand); }
-
-#shell.light .tab-stub-note {
-  margin-top: var(--space-6);
-  padding-top: var(--space-3);
-  border-top: 1px dashed var(--border);
-  color: var(--text-muted);
-  font-style: italic;
-}
