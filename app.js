@@ -1,7 +1,7 @@
 /* ============================================================
    DATA — app catalog, roles, per-role recommendations
    ============================================================ */
-// pricing: 'free' | 'plan' ("Add to Plan" sends a request to sales instead of adding instantly)
+// pricing: 'free' | 'plan' ("Request Widget" sends a request to sales instead of adding instantly)
 // createdBy: 'myKaarma' | 'Partner' | 'You' (custom apps built via "Create Your Own App")
 // label: null | 'bestseller' | 'spotlight' — a mix of install-driven ranking and myKaarma team curation
 const APPS = [
@@ -38,6 +38,7 @@ const ROLES = [
   { id: 'service-advisor', name: 'Service Advisor',                    icon: 'support_agent' },
   { id: 'manager-admin',  name: 'Service Manager or Dealership Admin', icon: 'admin_panel_settings' },
   { id: 'technician',     name: 'Technician',                          icon: 'build_circle' },
+  { id: 'loaner-manager', name: 'Loaner Manager',                      icon: 'car_rental' },
 ];
 
 const RECOMMENDED = {
@@ -46,6 +47,7 @@ const RECOMMENDED = {
   'service-advisor':  ['communication', 'scheduler', 'check-in', 'payments', 'follow-up', 'mpi', 'video-walkaround', 'transportation'],
   'manager-admin':    ['reporting', 'team-schedule', 'follow-up', 'communication', 'scheduler'],
   'technician':       ['mpi', 'tech-video', 'video-walkaround', 'repair-orders', 'parts-lookup'],
+  'loaner-manager':   ['transportation', 'mobile-service', 'customer-directory', 'communication', 'reporting'],
 };
 
 // Rough keyword → app mapping for the "start from scratch" AI prompt (mocked, no real model).
@@ -152,10 +154,10 @@ const WIDGET_DETAIL = {
    MOCK DATA — customers, ROs, notifications (for tabs + the bell)
    ============================================================ */
 const MOCK_CUSTOMERS = [
-  { id: 'cust-1', name: 'Jane Smith', phone: '(555) 123-4567', email: 'jane.smith@example.com' },
-  { id: 'cust-2', name: 'Mike Johnson', phone: '(555) 234-5678', email: 'mike.johnson@example.com' },
-  { id: 'cust-3', name: 'Aisha Patel', phone: '(555) 345-6789', email: 'aisha.patel@example.com' },
-  { id: 'cust-4', name: 'Carlos Rivera', phone: '(555) 456-7890', email: 'carlos.rivera@example.com' },
+  { id: 'cust-1', name: 'Jane Smith', phone: '(555) 123-4567', email: 'jane.smith@example.com', vehicles: ['2021 Honda Accord', '2019 Toyota RAV4'] },
+  { id: 'cust-2', name: 'Mike Johnson', phone: '(555) 234-5678', email: 'mike.johnson@example.com', vehicles: ['2020 Ford F-150'] },
+  { id: 'cust-3', name: 'Aisha Patel', phone: '(555) 345-6789', email: 'aisha.patel@example.com', vehicles: ['2022 Subaru Outback'] },
+  { id: 'cust-4', name: 'Carlos Rivera', phone: '(555) 456-7890', email: 'carlos.rivera@example.com', vehicles: ['2018 Chevrolet Malibu', '2023 Kia Sportage'] },
 ];
 
 const MOCK_ROS = [
@@ -165,6 +167,44 @@ const MOCK_ROS = [
   { id: 'ro-10267', number: 'RO-10267', customerId: 'cust-3', vehicle: '2022 Subaru Outback', status: 'Inspection' },
   { id: 'ro-10212', number: 'RO-10212', customerId: 'cust-4', vehicle: '2018 Chevrolet Malibu', status: 'Awaiting Approval' },
 ];
+
+const MOCK_APPOINTMENTS = [
+  { id: 'appt-1', customerId: 'cust-1', vehicle: '2021 Honda Accord', service: 'Oil Change', date: '2026-08-20', upcoming: true },
+  { id: 'appt-2', customerId: 'cust-1', vehicle: '2019 Toyota RAV4', service: 'Tire Rotation', date: '2026-06-10', upcoming: false },
+  { id: 'appt-3', customerId: 'cust-2', vehicle: '2020 Ford F-150', service: 'Brake Inspection', date: '2026-08-22', upcoming: true },
+  { id: 'appt-4', customerId: 'cust-3', vehicle: '2022 Subaru Outback', service: '30k Service', date: '2026-07-01', upcoming: false },
+  { id: 'appt-5', customerId: 'cust-4', vehicle: '2023 Kia Sportage', service: 'First Service', date: '2026-08-25', upcoming: true },
+  { id: 'appt-6', customerId: 'cust-4', vehicle: '2018 Chevrolet Malibu', service: 'Battery Replacement', date: '2026-05-14', upcoming: false },
+];
+
+const MOCK_INSPECTIONS = [
+  { id: 'mpi-1', customerId: 'cust-1', vehicle: '2021 Honda Accord', date: '2026-08-10', status: 'Passed, no issues' },
+  { id: 'mpi-2', customerId: 'cust-3', vehicle: '2022 Subaru Outback', date: '2026-08-12', status: 'Brakes flagged — needs approval' },
+  { id: 'mpi-3', customerId: 'cust-2', vehicle: '2020 Ford F-150', date: '2026-07-28', status: 'Passed, no issues' },
+];
+
+const MOCK_INVOICES = [
+  { id: 'inv-1', customerId: 'cust-1', roNumber: 'RO-10231', date: '2026-08-05', amount: 1204.00, status: 'Paid' },
+  { id: 'inv-2', customerId: 'cust-2', roNumber: 'RO-10198', date: '2026-08-01', amount: 412.50, status: 'Paid' },
+  { id: 'inv-3', customerId: 'cust-4', roNumber: 'RO-10212', date: '2026-08-13', amount: 89.00, status: 'Pending' },
+];
+
+// Available content widgets per tab type — what a Customer or RO tab can be built
+// from. Every open tab gets its own independent widgets list + sizes, so two
+// different customers' tabs can look completely different.
+const TAB_WIDGET_CATALOG = {
+  customer: [
+    { id: 'vehicles', name: 'Vehicles', icon: 'directions_car' },
+    { id: 'open-ros', name: 'Open Repair Orders', icon: 'assignment' },
+    { id: 'appointments', name: 'Appointment History', icon: 'event' },
+    { id: 'inspections', name: 'Multipoint Inspections', icon: 'fact_check' },
+    { id: 'payments', name: 'Payments & Invoices', icon: 'receipt_long' },
+  ],
+  ro: [
+    { id: 'ro-details', name: 'RO Details', icon: 'directions_car' },
+    { id: 'ro-customer', name: 'Customer', icon: 'person' },
+  ],
+};
 
 const NOTIF_TYPE_ICON = { vehicle: 'directions_car', customer: 'chat', internal: 'groups' };
 const NOTIF_TYPE_LABELS = { vehicle: 'Vehicle Updates', customer: 'Customer Messages', internal: 'Internal' };
@@ -254,16 +294,32 @@ function selectRole(roleId) {
   state.role = roleId;
   const role = getRole(roleId);
   document.getElementById('path-role-label').textContent = role.name;
-  const preview = RECOMMENDED[roleId].map(id => `<span class="chip">${getApp(id).name}</span>`).join('');
-  document.getElementById('path-recommended-preview').innerHTML = preview;
+  ensureManagerConfig();
+  document.getElementById('path-myk-recommended-thumb').innerHTML = schematicThumbHTML(RECOMMENDED[roleId]);
+  document.getElementById('path-dealer-recommended-thumb').innerHTML = schematicThumbHTML(state.managerConfig[roleId].appIds);
   showScreen('onboarding-path');
+}
+
+// Simple schematic (icons in a mini grid) standing in for a real layout preview —
+// good enough for early review, not meant as a final-fidelity mockup.
+function schematicThumbHTML(appIds) {
+  return appIds.slice(0, 6).map(id => `<span class="path-thumb-block material-icons">${getApp(id).icon}</span>`).join('');
 }
 
 /* ============================================================
    ONBOARDING — PATH CHOICE
    ============================================================ */
-function choosePathRecommended() {
+function choosePathMykRecommended() {
   state.homeApps = [...RECOMMENDED[state.role]];
+  applySavedWidgetOrder();
+  renderHome();
+  showScreen('home');
+}
+
+function choosePathDealerRecommended() {
+  ensureManagerConfig();
+  state.homeApps = [...state.managerConfig[state.role].appIds];
+  applySavedWidgetOrder();
   renderHome();
   showScreen('home');
 }
@@ -307,33 +363,46 @@ const marketState = { search: '', category: '', pricing: '', createdBy: '', labe
 const marketRequestedPlan = new Set(); // appIds already requested-to-plan this session
 let marketCreateContext = null;        // which context "Create Your Own App" was opened from
 
-// A "context" is one of the three screens that let a user add apps — each owns its own
-// selection of app ids, so the marketplace just needs to know which one it's serving.
+// A "context" is any screen that lets a user add apps — each owns its own selection
+// of app ids, so the marketplace just needs to know which one it's serving. Tab
+// contexts are identified as "tab:<tabId>" and resolve to that tab's own widgets list,
+// so every open Customer/RO tab gets the exact same marketplace experience as Edit
+// Home Screen, just scoped to its own widget set instead of state.homeApps.
+function resolveTabContext(context) {
+  return context.startsWith('tab:') ? state.tabs.find(t => t.id === context.slice(4)) : null;
+}
+
 function getContextSelection(context) {
   if (context === 'home') return state.homeApps;
   if (context === 'scratch') return [...state.scratchSelected];
   if (context === 'manager-edit') return [...state.managerEditSelected];
-  return [];
+  const tab = resolveTabContext(context);
+  return tab ? tab.widgets : [];
 }
 
 function addToContext(context, appId) {
-  if (context === 'home' && !state.homeApps.includes(appId)) state.homeApps.push(appId);
-  if (context === 'scratch') state.scratchSelected.add(appId);
-  if (context === 'manager-edit') state.managerEditSelected.add(appId);
+  if (context === 'home') { if (!state.homeApps.includes(appId)) state.homeApps.push(appId); return; }
+  if (context === 'scratch') { state.scratchSelected.add(appId); return; }
+  if (context === 'manager-edit') { state.managerEditSelected.add(appId); return; }
+  const tab = resolveTabContext(context);
+  if (tab && !tab.widgets.includes(appId)) tab.widgets.push(appId);
 }
 
 function removeFromContext(context, appId) {
-  if (context === 'home') state.homeApps = state.homeApps.filter(id => id !== appId);
-  if (context === 'scratch') state.scratchSelected.delete(appId);
-  if (context === 'manager-edit') state.managerEditSelected.delete(appId);
+  if (context === 'home') { state.homeApps = state.homeApps.filter(id => id !== appId); return; }
+  if (context === 'scratch') { state.scratchSelected.delete(appId); return; }
+  if (context === 'manager-edit') { state.managerEditSelected.delete(appId); return; }
+  const tab = resolveTabContext(context);
+  if (tab) tab.widgets = tab.widgets.filter(id => id !== appId);
 }
 
-// Re-renders both the "your apps" tile row and the marketplace for whichever
-// screen owns this context — kept in one place since every add/remove touches both.
+// Re-renders whichever screen owns this context — kept in one place since every
+// add/remove touches both the "your apps" list and the marketplace below it.
 function refreshContext(context) {
-  if (context === 'home') renderHome();
-  if (context === 'scratch') renderScratchSection();
-  if (context === 'manager-edit') renderManagerEditSection();
+  if (context === 'home') { renderHome(); return; }
+  if (context === 'scratch') { renderScratchSection(); return; }
+  if (context === 'manager-edit') { renderManagerEditSection(); return; }
+  if (resolveTabContext(context)) renderDashboardTabContent();
 }
 
 function selectedTilesHTML(context) {
@@ -372,9 +441,9 @@ function marketActionHTML(context, app) {
     if (marketRequestedPlan.has(app.id)) {
       return `<button class="mk-button functional-mk-button market-action-btn" disabled><span class="material-icons">schedule</span> Requested</button>`;
     }
-    return `<button class="mk-button secondary-mk-button market-action-btn market-plan-btn" data-app-id="${app.id}">Add to Plan</button>`;
+    return `<button class="mk-button secondary-mk-button market-action-btn market-plan-btn" data-app-id="${app.id}">Request Widget</button>`;
   }
-  return `<button class="mk-button primary-mk-button market-action-btn market-add-btn" data-app-id="${app.id}">Add</button>`;
+  return `<button class="mk-button primary-mk-button market-action-btn market-add-btn" data-app-id="${app.id}">Add Widget</button>`;
 }
 
 function marketCardHTML(context, app) {
@@ -393,9 +462,9 @@ function marketCardHTML(context, app) {
   `;
 }
 
-function filteredMarketApps() {
+function filteredMarketApps(extraApps = []) {
   const q = marketState.search.toLowerCase().trim();
-  return APPS.filter(app => {
+  return [...extraApps, ...APPS].filter(app => {
     if (q && !app.name.toLowerCase().includes(q)) return false;
     if (marketState.category && app.cat !== marketState.category) return false;
     if (marketState.pricing && app.pricing !== marketState.pricing) return false;
@@ -420,7 +489,7 @@ function marketToolbarHTML() {
       <select class="market-filter-select" data-filter="pricing">
         <option value="">All Pricing</option>
         <option value="free"${marketState.pricing === 'free' ? ' selected' : ''}>Free</option>
-        <option value="plan"${marketState.pricing === 'plan' ? ' selected' : ''}>Add to Plan</option>
+        <option value="plan"${marketState.pricing === 'plan' ? ' selected' : ''}>Paid</option>
       </select>
       <select class="market-filter-select" data-filter="createdBy">
         <option value="">Created By: All</option>
@@ -435,18 +504,26 @@ function marketToolbarHTML() {
   `;
 }
 
-function renderMarketplace(mountId, context) {
+// "Create Your Own App" isn't relevant during initial onboarding (building apps isn't
+// part of getting set up) or inside a Customer/RO tab's widget picker, so it's hidden
+// for the scratch-builder and tab contexts.
+// extraApps lets a caller merge in additional catalog-shaped entries (e.g. a tab's
+// page-info widgets) so they browse/search/filter identically to real apps.
+function renderMarketplace(mountId, context, extraApps = []) {
   const mount = document.getElementById(mountId);
-  const apps = filteredMarketApps();
+  const apps = filteredMarketApps(extraApps);
+  const showCreateCard = context !== 'scratch' && !context.startsWith('tab:');
   mount.innerHTML = `
     ${marketToolbarHTML()}
     <div class="market-count myk-body2">Showing ${apps.length} app${apps.length === 1 ? '' : 's'}</div>
     <div class="market-grid">
-      <button class="market-card market-card--create" id="market-create-card">
-        <span class="material-icons">add_circle</span>
-        <div class="market-card-name">Create Your Own App</div>
-        <p class="market-card-desc">Build a custom app using myKaarma's APIs and data.</p>
-      </button>
+      ${showCreateCard ? `
+        <button class="market-card market-card--create" id="market-create-card">
+          <span class="material-icons">add_circle</span>
+          <div class="market-card-name">Create Your Own App</div>
+          <p class="market-card-desc">Build a custom app using myKaarma's APIs and data.</p>
+        </button>
+      ` : ''}
       ${apps.map(app => marketCardHTML(context, app)).join('')}
     </div>
   `;
@@ -480,7 +557,9 @@ function renderMarketplace(mountId, context) {
       showToast(`Request sent to our sales team for "${getApp(btn.dataset.appId).name}".`);
     });
   });
-  mount.querySelector('#market-create-card').addEventListener('click', () => openCreateAppModal(context));
+  if (showCreateCard) {
+    mount.querySelector('#market-create-card').addEventListener('click', () => openCreateAppModal(context));
+  }
 }
 
 /* ============================================================
@@ -559,6 +638,7 @@ function finishScratch() {
   state.homeApps = state.scratchSelected.size > 0
     ? [...state.scratchSelected]
     : [...RECOMMENDED[state.role]];
+  applySavedWidgetOrder();
   renderHome();
   renderDashboard();
   showScreen('dashboard');
@@ -567,11 +647,33 @@ function finishScratch() {
 /* ============================================================
    HOME SCREEN
    ============================================================ */
+// One-time banner shown when a manager has newly locked this role's default view —
+// clears itself once shown so it doesn't reappear until locked again.
+function renderLockNotice() {
+  ensureManagerConfig();
+  const banner = document.getElementById('lock-notice-banner');
+  const cfg = state.managerConfig[state.role];
+  if (cfg && cfg.lockNoticePending) {
+    document.getElementById('lock-notice-text').textContent =
+      `Your dealership admin has set a new default view for the ${getRole(state.role).name} role.`;
+    banner.hidden = false;
+  } else {
+    banner.hidden = true;
+  }
+}
+
+function dismissLockNotice() {
+  const cfg = state.managerConfig[state.role];
+  if (cfg) cfg.lockNoticePending = false;
+  document.getElementById('lock-notice-banner').hidden = true;
+}
+
 // Edit Home Screen — always editable, no separate customize mode/toggle.
 function renderHome() {
   const role = getRole(state.role);
   document.getElementById('home-role-icon').textContent = role.icon;
   document.getElementById('home-role-name').textContent = role.name;
+  renderLockNotice();
 
   const grid = document.getElementById('home-grid');
   grid.innerHTML = state.homeApps.map(id => {
@@ -631,7 +733,12 @@ function openTab(type, targetId, label) {
   if (existing) {
     state.activeTabId = existing.id;
   } else {
-    const tab = { id: `${type}-${targetId}`, type, targetId, label, pinned: false };
+    const catalog = TAB_WIDGET_CATALOG[type] || [];
+    const tab = {
+      id: `${type}-${targetId}`, type, targetId, label, pinned: false,
+      widgets: catalog.map(w => w.id),
+      widgetSizes: {},
+    };
     state.tabs.push(tab);
     state.activeTabId = tab.id;
   }
@@ -701,8 +808,12 @@ function renderDashboardTabContent() {
   const container = document.getElementById('dashboard-tab-content');
   const tab = state.tabs.find(t => t.id === state.activeTabId) || state.tabs[0];
 
-  if (tab.type === 'customer') { container.innerHTML = customerTabContentHTML(tab.targetId); bindTabContentLinks(container); return; }
-  if (tab.type === 'ro') { container.innerHTML = roTabContentHTML(tab.targetId); bindTabContentLinks(container); return; }
+  if (tab.type === 'customer' || tab.type === 'ro') {
+    container.innerHTML = tabWidgetGridHTML(tab);
+    bindTabWidgetGrid(container, tab);
+    renderMarketplace('tab-widget-marketplace', `tab:${tab.id}`, pageInfoPseudoApps(tab.type));
+    return;
+  }
 
   container.innerHTML = overviewHTML();
   bindOverviewEvents(container);
@@ -712,33 +823,44 @@ function loadWidgetSizes() {
   try { state.widgetSizes = JSON.parse(localStorage.getItem('mkos-widget-sizes') || '{}'); } catch (e) { state.widgetSizes = {}; }
 }
 
+function persistWidgetOrder() {
+  localStorage.setItem('mkos-widget-order', JSON.stringify(state.homeApps));
+}
+
+// Applies any previously-saved widget order to the current homeApps, keeping only
+// apps that are actually present and appending anything new to the end.
+function applySavedWidgetOrder() {
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem('mkos-widget-order') || '[]'); } catch (e) { saved = []; }
+  if (saved.length === 0) return;
+  const present = new Set(state.homeApps);
+  const ordered = saved.filter(id => present.has(id));
+  const rest = state.homeApps.filter(id => !ordered.includes(id));
+  state.homeApps = [...ordered, ...rest];
+}
+
 function setWidgetSize(appId, size) {
   state.widgetSizes[appId] = size;
   localStorage.setItem('mkos-widget-sizes', JSON.stringify(state.widgetSizes));
   renderDashboardTabContent();
 }
 
+// Shared by Overview's app widgets and any app added as a widget to a Customer/RO tab.
+function appWidgetBodyHTML(app, size) {
+  const detail = WIDGET_DETAIL[app.id];
+  if (size === 'large' && detail) {
+    return `<div class="dash-widget-table">${detail.map(row => `
+      <div class="dash-widget-row"><span>${escHtml(row.label)}</span><span>${escHtml(row.value)}</span></div>
+    `).join('')}</div>`;
+  }
+  return `<div class="dash-widget-stat">${escHtml(WIDGET_PREVIEW[app.id] || `Open ${app.name}`)}</div>`;
+}
+
 function widgetCardHTML(app) {
   const size = state.widgetSizes[app.id] || 'small';
-  const detail = WIDGET_DETAIL[app.id];
-  const body = (size === 'large' && detail)
-    ? `<div class="dash-widget-table">${detail.map(row => `
-        <div class="dash-widget-row"><span>${escHtml(row.label)}</span><span>${escHtml(row.value)}</span></div>
-      `).join('')}</div>`
-    : `<div class="dash-widget-stat">${escHtml(WIDGET_PREVIEW[app.id] || `Open ${app.name}`)}</div>`;
-
-  return `
-    <div class="dash-widget dash-widget--${size}" data-app-id="${app.id}">
-      <div class="dash-widget-header">
-        <div class="dash-widget-icon material-icons">${app.icon}</div>
-        <div class="dash-widget-name">${escHtml(app.name)}</div>
-        <button class="dash-widget-size-btn" data-app-id="${app.id}" title="${size === 'large' ? 'Shrink' : 'Expand'} widget">
-          <span class="material-icons">${size === 'large' ? 'close_fullscreen' : 'open_in_full'}</span>
-        </button>
-      </div>
-      ${body}
-    </div>
-  `;
+  return dashWidgetShellHTML({
+    id: app.id, icon: app.icon, name: app.name, size, body: appWidgetBodyHTML(app, size), removable: false,
+  });
 }
 
 function overviewHTML() {
@@ -753,64 +875,256 @@ function overviewHTML() {
 }
 
 function bindOverviewEvents(container) {
+  bindWidgetGrid(container, {
+    getList: () => state.homeApps,
+    setList: list => { state.homeApps = list; persistWidgetOrder(); },
+    getSize: id => state.widgetSizes[id] || 'small',
+    setSize: (id, size) => { state.widgetSizes[id] = size; localStorage.setItem('mkos-widget-sizes', JSON.stringify(state.widgetSizes)); },
+    onChange: renderDashboardTabContent,
+  });
+}
+
+/* ---- Shared widget-card shell + generic drag/resize/remove wiring ----
+   Reused by Overview (app widgets) and Customer/RO tabs (content widgets):
+   each tab instance carries its own `widgets` list + `widgetSizes`, so two
+   different customers' tabs can have completely different arrangements. */
+function dashWidgetShellHTML({ id, icon, name, size, body, removable }) {
+  return `
+    <div class="dash-widget dash-widget--${size}" data-app-id="${id}" draggable="true">
+      <div class="dash-widget-header">
+        <span class="material-icons dash-widget-drag-handle" title="Drag to reorder">drag_indicator</span>
+        <div class="dash-widget-icon material-icons">${icon}</div>
+        <div class="dash-widget-name">${escHtml(name)}</div>
+        <button class="dash-widget-size-btn" data-app-id="${id}" title="${size === 'large' ? 'Shrink' : 'Expand'} widget">
+          <span class="material-icons">${size === 'large' ? 'close_fullscreen' : 'open_in_full'}</span>
+        </button>
+        ${removable ? `
+          <button class="dash-widget-remove-btn" data-app-id="${id}" title="Remove widget">
+            <span class="material-icons">close</span>
+          </button>
+        ` : ''}
+      </div>
+      ${body}
+    </div>
+  `;
+}
+
+function bindWidgetGrid(container, { getList, setList, getSize, setSize, onRemove, onChange }) {
   container.querySelectorAll('.dash-widget-size-btn').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      const appId = btn.dataset.appId;
-      const current = state.widgetSizes[appId] || 'small';
-      setWidgetSize(appId, current === 'large' ? 'small' : 'large');
+      const id = btn.dataset.appId;
+      setSize(id, (getSize(id) || 'small') === 'large' ? 'small' : 'large');
+      onChange();
+    });
+  });
+
+  if (onRemove) {
+    container.querySelectorAll('.dash-widget-remove-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        onRemove(btn.dataset.appId);
+        onChange();
+      });
+    });
+  }
+
+  let draggedId = null;
+  container.querySelectorAll('.dash-widget').forEach(el => {
+    el.addEventListener('dragstart', () => {
+      draggedId = el.dataset.appId;
+      el.classList.add('dragging');
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      draggedId = null;
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (el.dataset.appId !== draggedId) el.classList.add('drag-over');
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      const targetId = el.dataset.appId;
+      if (!draggedId || draggedId === targetId) return;
+      const list = getList();
+      const from = list.indexOf(draggedId);
+      const to = list.indexOf(targetId);
+      if (from === -1 || to === -1) return;
+      list.splice(from, 1);
+      list.splice(to, 0, draggedId);
+      setList(list);
+      onChange();
     });
   });
 }
 
-function customerTabContentHTML(custId) {
-  const cust = MOCK_CUSTOMERS.find(c => c.id === custId);
-  if (!cust) return `<p class="myk-body2">Customer not found.</p>`;
-  const ros = MOCK_ROS.filter(r => r.customerId === custId);
+/* ---- Customer / RO tabs — content widgets (Vehicles, Appointments, etc.) ---- */
+function listRowHTML(icon, main, meta) {
   return `
-    <div class="tab-content-stub">
-      <h2 class="myk-h6">${escHtml(cust.name)}</h2>
-      <p class="myk-body2">${escHtml(cust.phone)} · ${escHtml(cust.email)}</p>
-      <div class="myk-subtitle1 tab-stub-section-label">Vehicles &amp; ROs</div>
-      <div class="tab-ro-list">
-        ${ros.length > 0 ? ros.map(r => `
-          <button class="tab-ro-row" data-ro-id="${r.id}">
-            <span class="material-icons">directions_car</span>
-            <span class="tab-ro-row-label">${escHtml(r.vehicle)} — ${escHtml(r.number)}</span>
-            <span class="tab-ro-status">${escHtml(r.status)}</span>
-          </button>
-        `).join('') : `<p class="myk-body2">No open ROs.</p>`}
-      </div>
-      <p class="tab-stub-note myk-body2">Full customer view design is TBD — this is a functional placeholder so tabs and cross-linking can be demoed.</p>
+    <div class="cust-list-row">
+      <span class="material-icons">${icon}</span>
+      <span class="cust-list-main">${main}</span>
+      <span class="cust-list-meta">${meta || ''}</span>
     </div>
   `;
 }
 
-function roTabContentHTML(roId) {
-  const ro = MOCK_ROS.find(r => r.id === roId);
+function emptyRowHTML(text) {
+  return `<p class="myk-body2">${text}</p>`;
+}
+
+function apptRowHTML(a) {
+  return listRowHTML('event', `${escHtml(a.service)} — ${escHtml(a.vehicle)}`, escHtml(a.date));
+}
+
+function contentWidgetBodyHTML(tab, widgetId, size) {
+  if (tab.type === 'customer') {
+    const custId = tab.targetId;
+    const cap = size === 'large' ? Infinity : 2;
+
+    if (widgetId === 'vehicles') {
+      const cust = MOCK_CUSTOMERS.find(c => c.id === custId);
+      return cust.vehicles.slice(0, cap).map(v => listRowHTML('directions_car', escHtml(v), '')).join('') || emptyRowHTML('No vehicles on file.');
+    }
+    if (widgetId === 'open-ros') {
+      const ros = MOCK_ROS.filter(r => r.customerId === custId);
+      if (ros.length === 0) return emptyRowHTML('No open ROs.');
+      return `<div class="tab-ro-list">${ros.slice(0, cap).map(r => `
+        <button class="tab-ro-row" data-ro-id="${r.id}">
+          <span class="material-icons">directions_car</span>
+          <span class="tab-ro-row-label">${escHtml(r.vehicle)} — ${escHtml(r.number)}</span>
+          <span class="tab-ro-status">${escHtml(r.status)}</span>
+        </button>
+      `).join('')}</div>`;
+    }
+    if (widgetId === 'appointments') {
+      const appts = MOCK_APPOINTMENTS.filter(a => a.customerId === custId);
+      const upcoming = appts.filter(a => a.upcoming);
+      const past = appts.filter(a => !a.upcoming);
+      if (size !== 'large') {
+        return upcoming[0] ? apptRowHTML(upcoming[0]) : emptyRowHTML('No upcoming appointments.');
+      }
+      return `
+        <div class="cust-subsection-label myk-body2">Upcoming</div>
+        ${upcoming.length > 0 ? upcoming.map(apptRowHTML).join('') : emptyRowHTML('No upcoming appointments.')}
+        <div class="cust-subsection-label myk-body2">Past</div>
+        ${past.length > 0 ? past.map(apptRowHTML).join('') : emptyRowHTML('No past appointments.')}
+      `;
+    }
+    if (widgetId === 'inspections') {
+      const list = MOCK_INSPECTIONS.filter(i => i.customerId === custId);
+      return list.slice(0, cap).map(i => listRowHTML('fact_check', `${escHtml(i.vehicle)} — ${escHtml(i.status)}`, escHtml(i.date))).join('') || emptyRowHTML('No inspections on file.');
+    }
+    if (widgetId === 'payments') {
+      const list = MOCK_INVOICES.filter(i => i.customerId === custId);
+      return list.slice(0, cap).map(i => listRowHTML('receipt_long', `${escHtml(i.roNumber)} — $${i.amount.toFixed(2)}`, escHtml(i.status))).join('') || emptyRowHTML('No payment history.');
+    }
+  }
+
+  if (tab.type === 'ro') {
+    const ro = MOCK_ROS.find(r => r.id === tab.targetId);
+    if (widgetId === 'ro-details') {
+      return listRowHTML('directions_car', escHtml(ro.vehicle), '') + listRowHTML('info', escHtml(ro.status), '');
+    }
+    if (widgetId === 'ro-customer') {
+      const cust = MOCK_CUSTOMERS.find(c => c.id === ro.customerId);
+      return `<button class="tab-customer-link" data-customer-id="${cust.id}"><span class="material-icons">person</span> ${escHtml(cust.name)}</button>`;
+    }
+  }
+
+  return '';
+}
+
+// A tab widget is either a page-info type (Vehicles, Appointments, ...) from
+// TAB_WIDGET_CATALOG, or any app from the full catalog added alongside them.
+function contentWidgetCardHTML(tab, widgetId) {
+  const catalogMeta = (TAB_WIDGET_CATALOG[tab.type] || []).find(w => w.id === widgetId);
+  const app = catalogMeta ? null : getApp(widgetId);
+  if (!catalogMeta && !app) return '';
+  const size = tab.widgetSizes[widgetId] || 'small';
+  const meta = catalogMeta || app;
+  const body = catalogMeta ? contentWidgetBodyHTML(tab, widgetId, size) : appWidgetBodyHTML(app, size);
+  return dashWidgetShellHTML({
+    id: widgetId, icon: meta.icon, name: meta.name, size, body, removable: true,
+  });
+}
+
+function tabHeaderHTML(tab) {
+  if (tab.type === 'customer') {
+    const cust = MOCK_CUSTOMERS.find(c => c.id === tab.targetId);
+    if (!cust) return `<p class="myk-body2">Customer not found.</p>`;
+    return `<div class="tab-widget-header"><h2 class="myk-h6">${escHtml(cust.name)}</h2><p class="myk-body2">${escHtml(cust.phone)} · ${escHtml(cust.email)}</p></div>`;
+  }
+  const ro = MOCK_ROS.find(r => r.id === tab.targetId);
   if (!ro) return `<p class="myk-body2">RO not found.</p>`;
-  const cust = MOCK_CUSTOMERS.find(c => c.id === ro.customerId);
+  return `<div class="tab-widget-header"><h2 class="myk-h6">${escHtml(ro.number)} — ${escHtml(ro.vehicle)}</h2><p class="myk-body2">Status: ${escHtml(ro.status)}</p></div>`;
+}
+
+// Lets a tab's page-info types (Vehicles, Appointments, ...) browse/search/filter
+// in the marketplace exactly like real apps, by shaping them the same way.
+function pageInfoPseudoApps(tabType) {
+  return (TAB_WIDGET_CATALOG[tabType] || []).map(w => ({
+    id: w.id, name: w.name, icon: w.icon, cat: 'Page Info',
+    pricing: 'free', createdBy: 'myKaarma', label: null,
+    desc: `Shows this record's ${w.name.toLowerCase()}.`,
+  }));
+}
+
+function tabWidgetGridHTML(tab) {
   return `
-    <div class="tab-content-stub">
-      <h2 class="myk-h6">${escHtml(ro.number)} — ${escHtml(ro.vehicle)}</h2>
-      <p class="myk-body2">Status: ${escHtml(ro.status)}</p>
-      <button class="tab-customer-link" data-customer-id="${cust.id}">
-        <span class="material-icons">person</span> ${escHtml(cust.name)}
-      </button>
-      <p class="tab-stub-note myk-body2">Full RO detail view design is TBD — this is a functional placeholder so tabs and cross-linking can be demoed.</p>
+    <div class="tab-widget-page">
+    ${tabHeaderHTML(tab)}
+    <div class="dash-widget-grid tab-widget-grid">${tab.widgets.map(wid => contentWidgetCardHTML(tab, wid)).join('')}</div>
+
+    <button class="mk-button functional-mk-button tab-widget-toggle-btn" ${tab._showMarketplace ? 'hidden' : ''}>
+      <span class="material-icons">add</span> Add Widget
+    </button>
+
+    <div class="home-add-catalog" ${tab._showMarketplace ? '' : 'hidden'}>
+      <div class="tab-widget-add-header">
+        <div class="myk-subtitle1">Add a Widget</div>
+        <button class="mk-button tertiary-mk-button tab-widget-close-btn">
+          <span class="material-icons">close</span> Close
+        </button>
+      </div>
+      <div id="tab-widget-marketplace"></div>
+    </div>
     </div>
   `;
 }
 
-function bindTabContentLinks(container) {
+function bindTabWidgetGrid(container, tab) {
+  container.querySelector('.tab-widget-toggle-btn').addEventListener('click', () => {
+    tab._showMarketplace = true;
+    renderDashboardTabContent();
+  });
+  container.querySelector('.tab-widget-close-btn').addEventListener('click', () => {
+    tab._showMarketplace = false;
+    renderDashboardTabContent();
+  });
+
+  bindWidgetGrid(container, {
+    getList: () => tab.widgets,
+    setList: list => { tab.widgets = list; },
+    getSize: id => tab.widgetSizes[id] || 'small',
+    setSize: (id, size) => { tab.widgetSizes[id] = size; },
+    onRemove: id => { tab.widgets = tab.widgets.filter(w => w !== id); },
+    onChange: renderDashboardTabContent,
+  });
+
   container.querySelectorAll('.tab-ro-row').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
       const ro = MOCK_ROS.find(r => r.id === btn.dataset.roId);
       openTab('ro', ro.id, `${ro.number} · ${ro.vehicle}`);
     });
   });
   container.querySelectorAll('.tab-customer-link').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
       const cust = MOCK_CUSTOMERS.find(c => c.id === btn.dataset.customerId);
       openTab('customer', cust.id, cust.name);
     });
@@ -1021,7 +1335,11 @@ function renderManagerRoleList() {
   list.querySelectorAll('.manager-mode-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const roleId = btn.closest('.manager-mode-toggle').dataset.roleId;
-      state.managerConfig[roleId].mode = btn.dataset.mode;
+      const cfg = state.managerConfig[roleId];
+      const wasLocked = cfg.mode === 'locked';
+      cfg.mode = btn.dataset.mode;
+      // Only newly-locking a previously-editable view needs to notify that role's users.
+      if (!wasLocked && cfg.mode === 'locked') cfg.lockNoticePending = true;
       renderManagerRoleList();
     });
   });
@@ -1071,7 +1389,8 @@ function init() {
     btn.addEventListener('click', () => showScreen(btn.dataset.backTo));
   });
 
-  document.getElementById('path-recommended-card').addEventListener('click', choosePathRecommended);
+  document.getElementById('path-myk-recommended-card').addEventListener('click', choosePathMykRecommended);
+  document.getElementById('path-dealer-recommended-card').addEventListener('click', choosePathDealerRecommended);
   document.getElementById('path-scratch-card').addEventListener('click', choosePathScratch);
 
   document.getElementById('ai-prompt-btn').addEventListener('click', runAIPrompt);
@@ -1084,6 +1403,7 @@ function init() {
     renderDashboard();
     showScreen('dashboard');
   });
+  document.getElementById('lock-notice-dismiss-btn').addEventListener('click', dismissLockNotice);
   document.getElementById('dashboard-edit-home-btn').addEventListener('click', () => {
     renderHome();
     showScreen('home');
@@ -1117,6 +1437,7 @@ function init() {
     if ((target === 'home' || target === 'dashboard') && state.homeApps.length === 0) {
       state.role = 'service-advisor';
       state.homeApps = [...RECOMMENDED['service-advisor']];
+      applySavedWidgetOrder();
     }
     if (target === 'home') renderHome();
     if (target === 'dashboard') renderDashboard();
