@@ -815,10 +815,72 @@ function renderDashboard() {
   document.getElementById('dashboard-role-icon').textContent = role.icon;
   document.getElementById('dashboard-role-name').textContent = role.name;
   document.getElementById('dashboard-manage-views-btn').hidden = state.role !== 'manager-admin';
+  renderNavRail();
   renderTabStrip();
   renderNotifBell();
   renderNotifPanel();
   renderDashboardTabContent();
+}
+
+/* ---- Left product nav rail (collapsed / expanded / hover modes) ---- */
+const NAV_MODES = ['collapsed', 'expanded', 'hover'];
+
+function loadNavMode() {
+  const saved = localStorage.getItem('mkos-nav-mode');
+  if (NAV_MODES.includes(saved)) state.navMode = saved;
+}
+
+function setNavMode(mode) {
+  state.navMode = mode;
+  localStorage.setItem('mkos-nav-mode', mode);
+  renderNavRail();
+}
+
+function selectProduct(appId) {
+  state.selectedProduct = appId;
+  state.activeTabId = null;
+  renderNavRail();
+  renderDashboardTabContent();
+}
+
+function renderNavRail() {
+  const rail = document.getElementById('dash-nav-rail');
+  rail.dataset.mode = state.navMode;
+
+  // Fall back to the first available product if the current selection was
+  // removed from the nav (e.g. a manager re-locked the role's app list).
+  if (!state.navProducts.includes(state.selectedProduct)) {
+    state.selectedProduct = state.navProducts[0] || null;
+  }
+
+  document.getElementById('dash-nav-rail-list').innerHTML = state.navProducts.map(id => {
+    const app = getApp(id);
+    const active = id === state.selectedProduct && state.activeTabId === null;
+    return `
+      <button class="dash-nav-rail-item${active ? ' active' : ''}" data-app-id="${app.id}" title="${escHtml(app.name)}">
+        <span class="material-icons">${app.icon}</span>
+        <span class="dash-nav-rail-item-label">${escHtml(app.name)}</span>
+      </button>
+    `;
+  }).join('');
+
+  document.getElementById('dash-nav-rail-list').querySelectorAll('.dash-nav-rail-item').forEach(btn => {
+    btn.addEventListener('click', () => selectProduct(btn.dataset.appId));
+  });
+
+  document.querySelectorAll('.dash-nav-mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === state.navMode);
+  });
+}
+
+function bindNavRailHover() {
+  const rail = document.getElementById('dash-nav-rail');
+  rail.addEventListener('mouseenter', () => {
+    if (state.navMode === 'hover') rail.classList.add('dash-nav-rail--hover-expanded');
+  });
+  rail.addEventListener('mouseleave', () => {
+    rail.classList.remove('dash-nav-rail--hover-expanded');
+  });
 }
 
 /* ---- Tabs (Chrome-style: Overview + Customer/RO tabs, pin to persist) ---- */
@@ -862,7 +924,7 @@ function closeTab(tabId) {
   const tab = state.tabs.find(t => t.id === tabId);
   if (!tab || tab.type === 'overview') return;
   state.tabs = state.tabs.filter(t => t.id !== tabId);
-  if (state.activeTabId === tabId) state.activeTabId = 'overview';
+  if (state.activeTabId === tabId) state.activeTabId = null;
   persistPinnedTabs();
   renderDashboard();
 }
@@ -880,7 +942,7 @@ function renderTabStrip() {
   const overview = state.tabs.find(t => t.type === 'overview');
   const pinned = state.tabs.filter(t => t.type !== 'overview' && t.pinned);
   const unpinned = state.tabs.filter(t => t.type !== 'overview' && !t.pinned);
-  const ordered = [overview, ...pinned, ...unpinned];
+  const ordered = [overview, ...pinned, ...unpinned].filter(Boolean);
 
   strip.innerHTML = ordered.map(tab => {
     const active = tab.id === state.activeTabId;
@@ -916,7 +978,7 @@ function renderDashboardTabContent() {
   const container = document.getElementById('dashboard-tab-content');
   const tab = state.tabs.find(t => t.id === state.activeTabId) || state.tabs[0];
 
-  if (tab.type === 'customer' || tab.type === 'ro') {
+  if (tab && (tab.type === 'customer' || tab.type === 'ro')) {
     container.innerHTML = tabWidgetGridHTML(tab);
     bindTabWidgetGrid(container, tab);
     renderMarketplace('tab-widget-marketplace', `tab:${tab.id}`, pageInfoPseudoApps(tab.type));
@@ -1493,6 +1555,16 @@ function init() {
     showScreen('manager');
   });
 
+  document.querySelectorAll('.dash-nav-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => setNavMode(btn.dataset.mode));
+  });
+  document.getElementById('dash-nav-rail-edit-btn').addEventListener('click', () => {
+    renderHome();
+    showScreen('home');
+  });
+  bindNavRailHover();
+  loadNavMode();
+
   document.querySelectorAll('[data-back-to]').forEach(btn => {
     btn.addEventListener('click', () => showScreen(btn.dataset.backTo));
   });
@@ -1512,10 +1584,6 @@ function init() {
     showScreen('dashboard');
   });
   document.getElementById('lock-notice-dismiss-btn').addEventListener('click', dismissLockNotice);
-  document.getElementById('dashboard-edit-home-btn').addEventListener('click', () => {
-    renderHome();
-    showScreen('home');
-  });
 
   document.getElementById('manager-edit-save-btn').addEventListener('click', saveManagerEdit);
 

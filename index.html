@@ -172,47 +172,61 @@
 
         <!-- ===================== DASHBOARD (the real landing screen) ===================== -->
         <section class="screen" id="screen-dashboard" data-screen hidden>
-          <div class="home-topbar">
-            <div class="home-topbar-role">
-              <span class="material-icons" id="dashboard-role-icon">support_agent</span>
-              <div>
-                <div class="home-role-name" id="dashboard-role-name">Service Advisor</div>
-                <div class="home-role-sub myk-body2">Your dashboard</div>
-              </div>
-            </div>
-
-            <div class="dash-search">
-              <span class="material-icons">search</span>
-              <input type="text" id="dashboard-search-input" placeholder="Search customers, ROs, or apps…" autocomplete="off" />
-              <div class="dash-search-results" id="dashboard-search-results" hidden></div>
-            </div>
-
-            <div class="home-topbar-actions">
-              <div class="notif-bell-wrap">
-                <button class="notif-bell-btn" id="dashboard-bell-btn" title="Notifications">
-                  <span class="material-icons">notifications</span>
-                  <span class="notif-badge" id="dashboard-bell-badge" hidden>0</span>
+          <div class="dash-shell">
+            <nav class="dash-nav-rail" id="dash-nav-rail" data-mode="expanded">
+              <div class="dash-nav-rail-list" id="dash-nav-rail-list"></div>
+              <div class="dash-nav-rail-footer">
+                <button class="dash-nav-rail-edit-btn" id="dash-nav-rail-edit-btn" title="Edit products">
+                  <span class="material-icons">edit</span><span class="dash-nav-rail-label">Edit</span>
                 </button>
-                <div class="notif-panel" id="dashboard-notif-panel" hidden>
-                  <div class="notif-panel-header">
-                    <div class="myk-subtitle1">Notifications</div>
-                  </div>
-                  <div class="notif-filter-row" id="dashboard-notif-filter"></div>
-                  <div class="notif-list" id="dashboard-notif-list"></div>
+                <div class="dash-nav-mode-toggle" id="dash-nav-mode-toggle" role="group" aria-label="Nav rail mode">
+                  <button class="dash-nav-mode-btn" data-mode="collapsed" title="Keep collapsed"><span class="material-icons">menu_open</span></button>
+                  <button class="dash-nav-mode-btn" data-mode="expanded" title="Keep expanded"><span class="material-icons">view_sidebar</span></button>
+                  <button class="dash-nav-mode-btn" data-mode="hover" title="Expand on hover"><span class="material-icons">swipe</span></button>
                 </div>
               </div>
-              <button class="mk-button tertiary-mk-button" id="dashboard-manage-views-btn" hidden>
-                <span class="material-icons">admin_panel_settings</span> Manage Dealership Views
-              </button>
-              <button class="mk-button functional-mk-button" id="dashboard-edit-home-btn">
-                <span class="material-icons">edit</span> Edit Home Screen
-              </button>
+            </nav>
+
+            <div class="dash-main">
+              <div class="home-topbar">
+                <div class="home-topbar-role">
+                  <span class="material-icons" id="dashboard-role-icon">support_agent</span>
+                  <div>
+                    <div class="home-role-name" id="dashboard-role-name">Service Advisor</div>
+                    <div class="home-role-sub myk-body2">Your dashboard</div>
+                  </div>
+                </div>
+
+                <div class="dash-search">
+                  <span class="material-icons">search</span>
+                  <input type="text" id="dashboard-search-input" placeholder="Search customers, ROs, or apps…" autocomplete="off" />
+                  <div class="dash-search-results" id="dashboard-search-results" hidden></div>
+                </div>
+
+                <div class="home-topbar-actions">
+                  <div class="notif-bell-wrap">
+                    <button class="notif-bell-btn" id="dashboard-bell-btn" title="Notifications">
+                      <span class="material-icons">notifications</span>
+                      <span class="notif-badge" id="dashboard-bell-badge" hidden>0</span>
+                    </button>
+                    <div class="notif-panel" id="dashboard-notif-panel" hidden>
+                      <div class="notif-panel-header">
+                        <div class="myk-subtitle1">Notifications</div>
+                      </div>
+                      <div class="notif-filter-row" id="dashboard-notif-filter"></div>
+                      <div class="notif-list" id="dashboard-notif-list"></div>
+                    </div>
+                  </div>
+                  <button class="mk-button tertiary-mk-button" id="dashboard-manage-views-btn" hidden>
+                    <span class="material-icons">admin_panel_settings</span> Manage Dealership Views
+                  </button>
+                </div>
+              </div>
+
+              <div class="dash-tab-strip" id="dashboard-tab-strip"></div>
+              <div class="dash-tab-content" id="dashboard-tab-content"></div>
             </div>
           </div>
-
-          <div class="dash-tab-strip" id="dashboard-tab-strip"></div>
-
-          <div class="dash-tab-content" id="dashboard-tab-content"></div>
         </section>
 
         <!-- ===================== MANAGER / IT VIEW ===================== -->
