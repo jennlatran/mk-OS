@@ -1652,7 +1652,7 @@
 /* ---- More details drawer ---- */
 #shell.light .details-drawer-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.25);
-  z-index: 50; display: flex; justify-content: flex-end;
+  z-index: 70; display: flex; justify-content: flex-end;
 }
 #shell.light .details-drawer-overlay[hidden] { display: none; }
 #shell.light .details-drawer {

@@ -1366,6 +1366,7 @@ function bindTabWidgetGrid(container, tab) {
   });
 }
 
+// bodyHTML is trusted, pre-escaped HTML (via escHtml on any interpolated values) — not raw user input.
 function openDetailsDrawer(title, bodyHTML) {
   document.getElementById('details-drawer-title').textContent = title;
   document.getElementById('details-drawer-body').innerHTML = bodyHTML;
