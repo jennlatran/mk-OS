@@ -886,7 +886,7 @@ function bindNavRailHover() {
 
 /* ---- Tabs (Chrome-style: Overview + Customer/RO tabs, pin to persist) ---- */
 function persistPinnedTabs() {
-  const pinned = state.tabs.filter(t => t.pinned && t.type !== 'overview');
+  const pinned = state.tabs.filter(t => t.pinned);
   localStorage.setItem('mkos-pinned-tabs', JSON.stringify(pinned));
 }
 
@@ -922,8 +922,6 @@ function setActiveTab(tabId) {
 }
 
 function closeTab(tabId) {
-  const tab = state.tabs.find(t => t.id === tabId);
-  if (!tab || tab.type === 'overview') return;
   state.tabs = state.tabs.filter(t => t.id !== tabId);
   if (state.activeTabId === tabId) state.activeTabId = null;
   persistPinnedTabs();
@@ -932,7 +930,7 @@ function closeTab(tabId) {
 
 function togglePinTab(tabId) {
   const tab = state.tabs.find(t => t.id === tabId);
-  if (!tab || tab.type === 'overview') return;
+  if (!tab) return;
   tab.pinned = !tab.pinned;
   persistPinnedTabs();
   renderDashboard();
@@ -940,18 +938,12 @@ function togglePinTab(tabId) {
 
 function renderTabStrip() {
   const strip = document.getElementById('dashboard-tab-strip');
-  const overview = state.tabs.find(t => t.type === 'overview');
-  const pinned = state.tabs.filter(t => t.type !== 'overview' && t.pinned);
-  const unpinned = state.tabs.filter(t => t.type !== 'overview' && !t.pinned);
-  const ordered = [overview, ...pinned, ...unpinned].filter(Boolean);
+  const pinned = state.tabs.filter(t => t.pinned);
+  const unpinned = state.tabs.filter(t => !t.pinned);
+  const ordered = [...pinned, ...unpinned];
 
-  strip.innerHTML = ordered.map(tab => {
+  const tabsHTML = ordered.map(tab => {
     const active = tab.id === state.activeTabId;
-    if (tab.type === 'overview') {
-      return `<button class="dash-tab dash-tab--overview${active ? ' active' : ''}" data-tab-id="overview">
-        <span class="material-icons">home</span> Overview
-      </button>`;
-    }
     const typeIcon = tab.type === 'customer' ? 'person' : 'directions_car';
     return `<div class="dash-tab${active ? ' active' : ''}${tab.pinned ? ' pinned' : ''}" data-tab-id="${tab.id}">
       <span class="material-icons dash-tab-type-icon">${typeIcon}</span>
@@ -963,7 +955,18 @@ function renderTabStrip() {
     </div>`;
   }).join('');
 
-  strip.querySelectorAll('.dash-tab, .dash-tab--overview').forEach(el => {
+  strip.innerHTML = `
+    ${tabsHTML}
+    <div class="dash-tab-add-wrap">
+      <button class="dash-tab-add-btn" id="dash-tab-add-btn" title="Add tab"><span class="material-icons">add</span></button>
+      <div class="dash-tab-add-search" id="dash-tab-add-search" hidden>
+        <input type="text" id="dash-tab-add-input" placeholder="Search customer or RO…" autocomplete="off" />
+        <div class="dash-tab-add-results" id="dash-tab-add-results"></div>
+      </div>
+    </div>
+  `;
+
+  strip.querySelectorAll('.dash-tab').forEach(el => {
     el.addEventListener('click', () => setActiveTab(el.dataset.tabId));
   });
   strip.querySelectorAll('.dash-tab-pin-btn').forEach(btn => {
@@ -971,6 +974,43 @@ function renderTabStrip() {
   });
   strip.querySelectorAll('.dash-tab-close-btn').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); closeTab(btn.dataset.tabId); });
+  });
+  bindTabAddSearch(strip);
+}
+
+function bindTabAddSearch(strip) {
+  const btn = strip.querySelector('#dash-tab-add-btn');
+  const box = strip.querySelector('#dash-tab-add-search');
+  const input = strip.querySelector('#dash-tab-add-input');
+  const results = strip.querySelector('#dash-tab-add-results');
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    box.hidden = !box.hidden;
+    if (!box.hidden) input.focus();
+  });
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { results.innerHTML = ''; return; }
+    const customers = MOCK_CUSTOMERS.filter(c => c.name.toLowerCase().includes(q) || c.phone.includes(input.value.trim())).slice(0, 5);
+    const ros = MOCK_ROS.filter(r => r.number.toLowerCase().includes(q)).slice(0, 5);
+    results.innerHTML = customers.map(c => `<button class="dash-search-result" data-kind="customer" data-id="${c.id}"><span class="material-icons">person</span>${escHtml(c.name)}</button>`).join('')
+      + ros.map(r => `<button class="dash-search-result" data-kind="ro" data-id="${r.id}"><span class="material-icons">directions_car</span>${escHtml(r.number)}</button>`).join('');
+    results.querySelectorAll('.dash-search-result').forEach(rbtn => {
+      rbtn.addEventListener('click', () => {
+        if (rbtn.dataset.kind === 'customer') {
+          const c = MOCK_CUSTOMERS.find(x => x.id === rbtn.dataset.id);
+          openTab('customer', c.id, c.name);
+        } else {
+          const r = MOCK_ROS.find(x => x.id === rbtn.dataset.id);
+          openTab('ro', r.id, `${r.number} · ${r.vehicle}`);
+        }
+        input.value = '';
+        results.innerHTML = '';
+        box.hidden = true;
+      });
+    });
   });
 }
 
@@ -1456,24 +1496,18 @@ function handleSearchResultClick(kind, id) {
     const r = MOCK_ROS.find(x => x.id === id);
     openTab('ro', r.id, `${r.number} · ${r.vehicle}`);
   } else if (kind === 'app') {
-    focusOverviewWidget(id);
+    focusNavProduct(id);
   }
   document.getElementById('dashboard-search-input').value = '';
   document.getElementById('dashboard-search-results').hidden = true;
 }
 
-function focusOverviewWidget(appId) {
-  setActiveTab('overview');
-  setTimeout(() => {
-    const el = document.querySelector(`.dash-widget[data-app-id="${appId}"]`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('flash');
-      setTimeout(() => el.classList.remove('flash'), 1200);
-    } else {
-      showToast(`Add "${getApp(appId).name}" to your home screen to see it here.`);
-    }
-  }, 50);
+function focusNavProduct(appId) {
+  if (state.navProducts.includes(appId)) {
+    selectProduct(appId);
+  } else {
+    showToast(`Add "${getApp(appId).name}" to your nav to see it here.`);
+  }
 }
 
 /* ============================================================
@@ -1617,6 +1651,10 @@ function init() {
     if (!e.target.closest('.notif-bell-wrap')) toggleNotifPanel(false);
     if (!e.target.closest('.dash-search')) {
       document.getElementById('dashboard-search-results').hidden = true;
+    }
+    if (!e.target.closest('.dash-tab-add-wrap')) {
+      const box = document.getElementById('dash-tab-add-search');
+      if (box) box.hidden = true;
     }
   });
 

@@ -1263,23 +1263,6 @@
   background: var(--bg-page);
 }
 
-#shell.light .dash-tab--overview {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border: none;
-  background: none;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-#shell.light .dash-tab--overview .material-icons { font-size: 18px; }
-
 #shell.light .dash-tab {
   display: flex;
   align-items: center;
@@ -1295,7 +1278,6 @@
 
 #shell.light .dash-tab.pinned { max-width: none; padding: var(--space-2); }
 
-#shell.light .dash-tab--overview.active,
 #shell.light .dash-tab.active {
   background: var(--bg-surface);
   color: var(--brand);
@@ -1334,6 +1316,24 @@
 #shell.light .dash-tab-pin-btn { opacity: .4; }
 #shell.light .dash-tab-pin-btn.pinned { opacity: 1; color: var(--brand); }
 #shell.light .dash-tab:not(.pinned):hover .dash-tab-pin-btn { opacity: 1; }
+
+#shell.light .dash-tab-add-wrap { position: relative; display: flex; align-items: center; }
+#shell.light .dash-tab-add-btn {
+  border: none; background: none; color: var(--text-muted); cursor: pointer;
+  padding: var(--space-1); border-radius: var(--radius-sm);
+}
+#shell.light .dash-tab-add-btn:hover { background: var(--row-hover); color: var(--text-primary); }
+#shell.light .dash-tab-add-search {
+  position: absolute; top: 100%; left: 0; z-index: 10;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
+  padding: var(--space-2); width: 260px;
+}
+#shell.light .dash-tab-add-search input {
+  width: 100%; padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+#shell.light .dash-tab-add-results { display: flex; flex-direction: column; margin-top: var(--space-1); }
 
 /* ============================================================
    DASHBOARD — Overview widget grid (resizable: small / large)
