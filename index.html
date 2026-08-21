@@ -38,6 +38,12 @@
 
     <div class="app-frame-wrap">
       <div class="app-frame" id="app-frame" data-device="desktop">
+       <!-- Global header, shown on every post-onboarding screen. Several element ids below
+            (dashboard-search-input, dashboard-tab-strip, dashboard-bell-*, dashboard-notif-*)
+            intentionally keep their "dashboard-" prefix from the old per-screen topbar this
+            replaces — reused as-is so app.js's existing render functions need no id changes.
+            They are NOT scoped to the Dashboard screen; they're global. See
+            docs/plans/2026-08-21-global-header-implementation.md, Task 1. -->
        <header class="app-header" id="app-header" hidden>
          <div class="app-header-logo">
            <span class="material-icons">apps</span>
