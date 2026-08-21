@@ -38,6 +38,56 @@
 
     <div class="app-frame-wrap">
       <div class="app-frame" id="app-frame" data-device="desktop">
+       <header class="app-header" id="app-header" hidden>
+         <div class="app-header-logo">
+           <span class="material-icons">apps</span>
+           <span class="app-header-logo-text">myKaarma</span>
+         </div>
+
+         <div class="app-header-search dash-search">
+           <span class="material-icons">search</span>
+           <input type="text" id="dashboard-search-input" placeholder="Search customers, ROs, or apps…" autocomplete="off" />
+           <div class="dash-search-results" id="dashboard-search-results" hidden></div>
+         </div>
+
+         <div class="app-header-tabs dash-tab-strip" id="dashboard-tab-strip"></div>
+
+         <div class="app-header-actions">
+           <div class="notif-bell-wrap">
+             <button class="notif-bell-btn" id="dashboard-bell-btn" title="Notifications">
+               <span class="material-icons">notifications</span>
+               <span class="notif-badge" id="dashboard-bell-badge" hidden>0</span>
+             </button>
+             <div class="notif-panel" id="dashboard-notif-panel" hidden>
+               <div class="notif-panel-header"><div class="myk-subtitle1">Notifications</div></div>
+               <div class="notif-filter-row" id="dashboard-notif-filter"></div>
+               <div class="notif-list" id="dashboard-notif-list"></div>
+             </div>
+           </div>
+
+           <button class="app-header-help-btn" id="app-header-help-btn" title="Help">
+             <span class="material-icons">help_outline</span>
+           </button>
+
+           <div class="app-header-avatar-wrap">
+             <button class="app-header-avatar-btn" id="app-header-avatar-btn" title="Account">
+               <span id="app-header-avatar-initials">JD</span>
+             </button>
+             <div class="app-header-avatar-menu" id="app-header-avatar-menu" hidden>
+               <div class="app-header-avatar-role" id="app-header-avatar-role"></div>
+               <button class="app-header-avatar-item" id="app-header-manage-views-item" hidden>
+                 <span class="material-icons">admin_panel_settings</span> Manage Dealership Views
+               </button>
+               <button class="app-header-avatar-item" id="app-header-reset-password-item">
+                 <span class="material-icons">lock_reset</span> Reset password
+               </button>
+               <button class="app-header-avatar-item" id="app-header-edit-profile-item">
+                 <span class="material-icons">person</span> Edit profile
+               </button>
+             </div>
+           </div>
+         </div>
+       </header>
        <div class="onboarding-layout">
 
         <!-- Persistent branded sidebar — shown only while an onboarding screen is active -->
@@ -141,19 +191,11 @@
 
         <!-- ===================== EDIT HOME SCREEN (always editable) ===================== -->
         <section class="screen" id="screen-home" data-screen hidden>
-          <div class="home-topbar">
-            <div class="home-topbar-role">
-              <span class="material-icons" id="home-role-icon">support_agent</span>
-              <div>
-                <div class="home-role-name" id="home-role-name">Service Advisor</div>
-                <div class="home-role-sub myk-body2">Edit your products — remove with the ✕, or add more below.</div>
-              </div>
-            </div>
-            <div class="home-topbar-actions">
-              <button class="mk-button primary-mk-button" id="home-to-dashboard-btn">
-                <span class="material-icons">check</span> Done
-              </button>
-            </div>
+          <div class="home-content-header">
+            <div class="home-role-sub myk-body2">Edit your products — remove with the ✕, or add more below.</div>
+            <button class="mk-button primary-mk-button" id="home-to-dashboard-btn">
+              <span class="material-icons">check</span> Done
+            </button>
           </div>
 
           <div class="lock-notice-banner" id="lock-notice-banner" hidden>
@@ -188,42 +230,6 @@
             </nav>
 
             <div class="dash-main">
-              <div class="home-topbar">
-                <div class="home-topbar-role">
-                  <span class="material-icons" id="dashboard-role-icon">support_agent</span>
-                  <div>
-                    <div class="home-role-name" id="dashboard-role-name">Service Advisor</div>
-                    <div class="home-role-sub myk-body2">Your dashboard</div>
-                  </div>
-                </div>
-
-                <div class="dash-search">
-                  <span class="material-icons">search</span>
-                  <input type="text" id="dashboard-search-input" placeholder="Search customers, ROs, or apps…" autocomplete="off" />
-                  <div class="dash-search-results" id="dashboard-search-results" hidden></div>
-                </div>
-
-                <div class="home-topbar-actions">
-                  <div class="notif-bell-wrap">
-                    <button class="notif-bell-btn" id="dashboard-bell-btn" title="Notifications">
-                      <span class="material-icons">notifications</span>
-                      <span class="notif-badge" id="dashboard-bell-badge" hidden>0</span>
-                    </button>
-                    <div class="notif-panel" id="dashboard-notif-panel" hidden>
-                      <div class="notif-panel-header">
-                        <div class="myk-subtitle1">Notifications</div>
-                      </div>
-                      <div class="notif-filter-row" id="dashboard-notif-filter"></div>
-                      <div class="notif-list" id="dashboard-notif-list"></div>
-                    </div>
-                  </div>
-                  <button class="mk-button tertiary-mk-button" id="dashboard-manage-views-btn" hidden>
-                    <span class="material-icons">admin_panel_settings</span> Manage Dealership Views
-                  </button>
-                </div>
-              </div>
-
-              <div class="dash-tab-strip" id="dashboard-tab-strip"></div>
               <div class="dash-tab-content" id="dashboard-tab-content"></div>
             </div>
           </div>
