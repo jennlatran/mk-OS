@@ -1343,7 +1343,7 @@
 #shell.light .dash-tab-add-results { display: flex; flex-direction: column; margin-top: var(--space-1); max-height: 240px; overflow-y: auto; }
 
 /* ============================================================
-   DASHBOARD — Overview widget grid (resizable: small / large)
+   DASHBOARD — widget grid (resizable: small / large), shared by tab content and the base surface
    ============================================================ */
 #shell.light .dash-tab-content { flex: 1; overflow-y: auto; }
 
@@ -1487,8 +1487,6 @@
 }
 
 #shell.light .dash-widget--large { grid-column: span 2; grid-row: span 2; }
-
-#shell.light .dash-widget.flash { box-shadow: 0 0 0 3px var(--brand); }
 
 #shell.light .dash-widget-header {
   display: flex;

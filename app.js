@@ -342,7 +342,6 @@ const state = {
   selectedProduct: null, // appId shown on the base surface; not persisted, resets on reload
   tabs: [],               // record-detail tabs only — no seeded "overview" tab
   activeTabId: null,      // null = show selectedProduct's table; else a tab id
-  widgetSizes: {},   // { [appId]: 'small' | 'large' }
   notifFilter: '',   // '' | 'vehicle' | 'customer' | 'internal'
 };
 
@@ -419,7 +418,6 @@ function schematicThumbHTML(appIds) {
    ============================================================ */
 function choosePathMykRecommended() {
   state.navProducts = [...RECOMMENDED[state.role]];
-  applySavedWidgetOrder();
   renderHome();
   showScreen('home');
 }
@@ -427,7 +425,6 @@ function choosePathMykRecommended() {
 function choosePathDealerRecommended() {
   ensureManagerConfig();
   state.navProducts = [...state.managerConfig[state.role].appIds];
-  applySavedWidgetOrder();
   renderHome();
   showScreen('home');
 }
@@ -746,7 +743,6 @@ function finishScratch() {
   state.navProducts = state.scratchSelected.size > 0
     ? [...state.scratchSelected]
     : [...RECOMMENDED[state.role]];
-  applySavedWidgetOrder();
   renderHome();
   renderDashboard();
   showScreen('dashboard');
@@ -884,7 +880,7 @@ function bindNavRailHover() {
   });
 }
 
-/* ---- Tabs (Chrome-style: Overview + Customer/RO tabs, pin to persist) ---- */
+/* ---- Tabs (Chrome-style: Customer/RO tabs, pin to persist) ---- */
 function persistPinnedTabs() {
   const pinned = state.tabs.filter(t => t.pinned);
   localStorage.setItem('mkos-pinned-tabs', JSON.stringify(pinned));
@@ -1077,22 +1073,6 @@ function bindProductTable(container, appId) {
       }
     });
   });
-}
-
-function loadWidgetSizes() {
-  try { state.widgetSizes = JSON.parse(localStorage.getItem('mkos-widget-sizes') || '{}'); } catch (e) { state.widgetSizes = {}; }
-}
-
-// Applies any previously-saved widget order to the current navProducts, keeping only
-// apps that are actually present and appending anything new to the end.
-function applySavedWidgetOrder() {
-  let saved = [];
-  try { saved = JSON.parse(localStorage.getItem('mkos-widget-order') || '[]'); } catch (e) { saved = []; }
-  if (saved.length === 0) return;
-  const present = new Set(state.navProducts);
-  const ordered = saved.filter(id => present.has(id));
-  const rest = state.navProducts.filter(id => !ordered.includes(id));
-  state.navProducts = [...ordered, ...rest];
 }
 
 // Used by Customer/RO tab content widgets (via contentWidgetCardHTML) to render
@@ -1627,7 +1607,6 @@ function init() {
   renderRoleGrid();
   ensureManagerConfig();
   loadPinnedTabs();
-  loadWidgetSizes();
 
   document.getElementById('role-next-btn').addEventListener('click', confirmRoleSelection);
 
@@ -1703,7 +1682,6 @@ function init() {
     if ((target === 'home' || target === 'dashboard') && state.navProducts.length === 0) {
       state.role = 'service-advisor';
       state.navProducts = [...RECOMMENDED['service-advisor']];
-      applySavedWidgetOrder();
     }
     if (target === 'home') renderHome();
     if (target === 'dashboard') renderDashboard();
