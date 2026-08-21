@@ -329,16 +329,18 @@ const MOCK_NOTIFICATIONS = [
 const state = {
   role: null,
   pendingRole: null,
-  homeApps: [],
+  navProducts: [],   // was homeApps — same marketplace/manager-lock mechanism, now a nav list
   scratchSelected: new Set(),
   device: 'desktop',
   managerConfig: {},        // { [roleId]: { appIds: [...], mode: 'default' | 'locked' } }
   managerEditingRoleId: null,
   managerEditSelected: new Set(),
 
-  // Dashboard — tabs, widget sizes, and notification filter
-  tabs: [{ id: 'overview', type: 'overview', label: 'Overview', pinned: true }],
-  activeTabId: 'overview',
+  // Dashboard — nav rail, tabs, widget sizes, and notification filter
+  navMode: 'expanded',   // 'collapsed' | 'expanded' | 'hover'
+  selectedProduct: null, // appId shown on the base surface; not persisted, resets on reload
+  tabs: [],               // record-detail tabs only — no seeded "overview" tab
+  activeTabId: null,      // null = show selectedProduct's table; else a tab id
   widgetSizes: {},   // { [appId]: 'small' | 'large' }
   notifFilter: '',   // '' | 'vehicle' | 'customer' | 'internal'
 };
@@ -415,7 +417,7 @@ function schematicThumbHTML(appIds) {
    ONBOARDING — PATH CHOICE
    ============================================================ */
 function choosePathMykRecommended() {
-  state.homeApps = [...RECOMMENDED[state.role]];
+  state.navProducts = [...RECOMMENDED[state.role]];
   applySavedWidgetOrder();
   renderHome();
   showScreen('home');
@@ -423,7 +425,7 @@ function choosePathMykRecommended() {
 
 function choosePathDealerRecommended() {
   ensureManagerConfig();
-  state.homeApps = [...state.managerConfig[state.role].appIds];
+  state.navProducts = [...state.managerConfig[state.role].appIds];
   applySavedWidgetOrder();
   renderHome();
   showScreen('home');
@@ -472,13 +474,13 @@ let marketCreateContext = null;        // which context "Create Your Own App" wa
 // of app ids, so the marketplace just needs to know which one it's serving. Tab
 // contexts are identified as "tab:<tabId>" and resolve to that tab's own widgets list,
 // so every open Customer/RO tab gets the exact same marketplace experience as Edit
-// Home Screen, just scoped to its own widget set instead of state.homeApps.
+// Home Screen, just scoped to its own widget set instead of state.navProducts.
 function resolveTabContext(context) {
   return context.startsWith('tab:') ? state.tabs.find(t => t.id === context.slice(4)) : null;
 }
 
 function getContextSelection(context) {
-  if (context === 'home') return state.homeApps;
+  if (context === 'home') return state.navProducts;
   if (context === 'scratch') return [...state.scratchSelected];
   if (context === 'manager-edit') return [...state.managerEditSelected];
   const tab = resolveTabContext(context);
@@ -486,7 +488,7 @@ function getContextSelection(context) {
 }
 
 function addToContext(context, appId) {
-  if (context === 'home') { if (!state.homeApps.includes(appId)) state.homeApps.push(appId); return; }
+  if (context === 'home') { if (!state.navProducts.includes(appId)) state.navProducts.push(appId); return; }
   if (context === 'scratch') { state.scratchSelected.add(appId); return; }
   if (context === 'manager-edit') { state.managerEditSelected.add(appId); return; }
   const tab = resolveTabContext(context);
@@ -494,7 +496,7 @@ function addToContext(context, appId) {
 }
 
 function removeFromContext(context, appId) {
-  if (context === 'home') { state.homeApps = state.homeApps.filter(id => id !== appId); return; }
+  if (context === 'home') { state.navProducts = state.navProducts.filter(id => id !== appId); return; }
   if (context === 'scratch') { state.scratchSelected.delete(appId); return; }
   if (context === 'manager-edit') { state.managerEditSelected.delete(appId); return; }
   const tab = resolveTabContext(context);
@@ -740,7 +742,7 @@ function runAIPrompt() {
 }
 
 function finishScratch() {
-  state.homeApps = state.scratchSelected.size > 0
+  state.navProducts = state.scratchSelected.size > 0
     ? [...state.scratchSelected]
     : [...RECOMMENDED[state.role]];
   applySavedWidgetOrder();
@@ -781,7 +783,7 @@ function renderHome() {
   renderLockNotice();
 
   const grid = document.getElementById('home-grid');
-  grid.innerHTML = state.homeApps.map(id => {
+  grid.innerHTML = state.navProducts.map(id => {
     const app = getApp(id);
     return `
       <div class="app-tile" data-app-id="${app.id}">
@@ -796,7 +798,7 @@ function renderHome() {
   grid.querySelectorAll('.app-tile-remove').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      state.homeApps = state.homeApps.filter(id => id !== btn.dataset.removeId);
+      state.navProducts = state.navProducts.filter(id => id !== btn.dataset.removeId);
       renderHome();
     });
   });
@@ -929,19 +931,19 @@ function loadWidgetSizes() {
 }
 
 function persistWidgetOrder() {
-  localStorage.setItem('mkos-widget-order', JSON.stringify(state.homeApps));
+  localStorage.setItem('mkos-widget-order', JSON.stringify(state.navProducts));
 }
 
-// Applies any previously-saved widget order to the current homeApps, keeping only
+// Applies any previously-saved widget order to the current navProducts, keeping only
 // apps that are actually present and appending anything new to the end.
 function applySavedWidgetOrder() {
   let saved = [];
   try { saved = JSON.parse(localStorage.getItem('mkos-widget-order') || '[]'); } catch (e) { saved = []; }
   if (saved.length === 0) return;
-  const present = new Set(state.homeApps);
+  const present = new Set(state.navProducts);
   const ordered = saved.filter(id => present.has(id));
-  const rest = state.homeApps.filter(id => !ordered.includes(id));
-  state.homeApps = [...ordered, ...rest];
+  const rest = state.navProducts.filter(id => !ordered.includes(id));
+  state.navProducts = [...ordered, ...rest];
 }
 
 function setWidgetSize(appId, size) {
@@ -969,20 +971,20 @@ function widgetCardHTML(app) {
 }
 
 function overviewHTML() {
-  if (state.homeApps.length === 0) {
+  if (state.navProducts.length === 0) {
     return `<div class="dashboard-placeholder">
       <span class="material-icons">dashboard</span>
       <div class="dashboard-placeholder-title">No apps yet</div>
       <p class="myk-body2">Add apps from Edit Home Screen to see them here.</p>
     </div>`;
   }
-  return `<div class="dash-widget-grid">${state.homeApps.map(id => widgetCardHTML(getApp(id))).join('')}</div>`;
+  return `<div class="dash-widget-grid">${state.navProducts.map(id => widgetCardHTML(getApp(id))).join('')}</div>`;
 }
 
 function bindOverviewEvents(container) {
   bindWidgetGrid(container, {
-    getList: () => state.homeApps,
-    setList: list => { state.homeApps = list; persistWidgetOrder(); },
+    getList: () => state.navProducts,
+    setList: list => { state.navProducts = list; persistWidgetOrder(); },
     getSize: id => state.widgetSizes[id] || 'small',
     setSize: (id, size) => { state.widgetSizes[id] = size; localStorage.setItem('mkos-widget-sizes', JSON.stringify(state.widgetSizes)); },
     onChange: renderDashboardTabContent,
@@ -1539,9 +1541,9 @@ function init() {
   /* Prototype toolbar */
   document.getElementById('proto-jump-select').addEventListener('change', e => {
     const target = e.target.value;
-    if ((target === 'home' || target === 'dashboard') && state.homeApps.length === 0) {
+    if ((target === 'home' || target === 'dashboard') && state.navProducts.length === 0) {
       state.role = 'service-advisor';
-      state.homeApps = [...RECOMMENDED['service-advisor']];
+      state.navProducts = [...RECOMMENDED['service-advisor']];
       applySavedWidgetOrder();
     }
     if (target === 'home') renderHome();
