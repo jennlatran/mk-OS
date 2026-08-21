@@ -956,7 +956,7 @@ function renderTabStrip() {
   }).join('');
 
   strip.innerHTML = `
-    ${tabsHTML}
+    <div class="dash-tab-list">${tabsHTML}</div>
     <div class="dash-tab-add-wrap">
       <button class="dash-tab-add-btn" id="dash-tab-add-btn" title="Add tab"><span class="material-icons">add</span></button>
       <div class="dash-tab-add-search" id="dash-tab-add-search" hidden>
@@ -993,8 +993,8 @@ function bindTabAddSearch(strip) {
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
     if (!q) { results.innerHTML = ''; return; }
-    const customers = MOCK_CUSTOMERS.filter(c => c.name.toLowerCase().includes(q) || c.phone.includes(input.value.trim())).slice(0, 5);
-    const ros = MOCK_ROS.filter(r => r.number.toLowerCase().includes(q)).slice(0, 5);
+    const customers = matchCustomers(input.value);
+    const ros = matchROs(input.value);
     results.innerHTML = customers.map(c => `<button class="dash-search-result" data-kind="customer" data-id="${c.id}"><span class="material-icons">person</span>${escHtml(c.name)}</button>`).join('')
       + ros.map(r => `<button class="dash-search-result" data-kind="ro" data-id="${r.id}"><span class="material-icons">directions_car</span>${escHtml(r.number)}</button>`).join('');
     results.querySelectorAll('.dash-search-result').forEach(rbtn => {
@@ -1444,14 +1444,24 @@ function toggleNotifPanel(show) {
 }
 
 /* ---- Global search (customers / ROs / apps) ---- */
+function matchCustomers(query, limit = 5) {
+  const q = query.trim().toLowerCase();
+  return MOCK_CUSTOMERS.filter(c =>
+    c.name.toLowerCase().includes(q) || c.phone.includes(query.trim()) || c.email.toLowerCase().includes(q)
+  ).slice(0, limit);
+}
+function matchROs(query, limit = 5) {
+  const q = query.trim().toLowerCase();
+  return MOCK_ROS.filter(r => r.number.toLowerCase().includes(q)).slice(0, limit);
+}
+
 function renderSearchResults(query) {
   const results = document.getElementById('dashboard-search-results');
   const q = query.trim().toLowerCase();
   if (!q) { results.hidden = true; results.innerHTML = ''; return; }
 
-  const customers = MOCK_CUSTOMERS.filter(c =>
-    c.name.toLowerCase().includes(q) || c.phone.includes(query.trim()) || c.email.toLowerCase().includes(q)).slice(0, 5);
-  const ros = MOCK_ROS.filter(r => r.number.toLowerCase().includes(q)).slice(0, 5);
+  const customers = matchCustomers(query);
+  const ros = matchROs(query);
   const apps = APPS.filter(a => a.name.toLowerCase().includes(q)).slice(0, 5);
 
   if (customers.length === 0 && ros.length === 0 && apps.length === 0) {
