@@ -1340,7 +1340,7 @@
   width: 100%; padding: var(--space-1) var(--space-2);
   border: 1px solid var(--border); border-radius: var(--radius-sm);
 }
-#shell.light .dash-tab-add-results { display: flex; flex-direction: column; margin-top: var(--space-1); }
+#shell.light .dash-tab-add-results { display: flex; flex-direction: column; margin-top: var(--space-1); max-height: 240px; overflow-y: auto; }
 
 /* ============================================================
    DASHBOARD — Overview widget grid (resizable: small / large)

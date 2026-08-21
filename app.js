@@ -1466,6 +1466,7 @@ function toggleNotifPanel(show) {
 }
 
 /* ---- Global search (customers / ROs / apps) ---- */
+// Shared by the global dashboard search and the tab-add popover search.
 function matchCustomers(query, limit = 5) {
   const q = query.trim().toLowerCase();
   return MOCK_CUSTOMERS.filter(c =>
