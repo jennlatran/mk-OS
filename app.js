@@ -1010,8 +1010,8 @@ function productTableHTML(appId) {
         <table class="product-table">
           <thead><tr>${table.columns.map(c => `<th>${escHtml(c)}</th>`).join('')}</tr></thead>
           <tbody>
-            ${rows.map((row, i) => `
-              <tr class="${row.linkType ? 'clickable' : ''}" data-row-index="${i}">
+            ${rows.map(row => `
+              <tr class="${row.linkType ? 'clickable' : ''}"${row.linkType ? ` data-link-type="${row.linkType}" data-link-id="${row.linkId}"` : ''}>
                 ${row.cells.map(cell => `<td>${escHtml(cell)}</td>`).join('')}
               </tr>
             `).join('')}
@@ -1024,15 +1024,15 @@ function productTableHTML(appId) {
 
 function bindProductTable(container, appId) {
   if (!appId) return;
-  const rows = productTableFor(appId).rows();
   container.querySelectorAll('tr.clickable').forEach(tr => {
     tr.addEventListener('click', () => {
-      const row = rows[Number(tr.dataset.rowIndex)];
-      if (row.linkType === 'customer') {
-        const cust = MOCK_CUSTOMERS.find(c => c.id === row.linkId);
+      const linkType = tr.dataset.linkType;
+      const linkId = tr.dataset.linkId;
+      if (linkType === 'customer') {
+        const cust = MOCK_CUSTOMERS.find(c => c.id === linkId);
         openTab('customer', cust.id, cust.name);
-      } else if (row.linkType === 'ro') {
-        const ro = MOCK_ROS.find(r => r.id === row.linkId);
+      } else if (linkType === 'ro') {
+        const ro = MOCK_ROS.find(r => r.id === linkId);
         openTab('ro', ro.id, `${ro.number} · ${ro.vehicle}`);
       }
     });
@@ -1041,10 +1041,6 @@ function bindProductTable(container, appId) {
 
 function loadWidgetSizes() {
   try { state.widgetSizes = JSON.parse(localStorage.getItem('mkos-widget-sizes') || '{}'); } catch (e) { state.widgetSizes = {}; }
-}
-
-function persistWidgetOrder() {
-  localStorage.setItem('mkos-widget-order', JSON.stringify(state.navProducts));
 }
 
 // Applies any previously-saved widget order to the current navProducts, keeping only
@@ -1059,7 +1055,8 @@ function applySavedWidgetOrder() {
   state.navProducts = [...ordered, ...rest];
 }
 
-// Shared by Overview's app widgets and any app added as a widget to a Customer/RO tab.
+// Used by Customer/RO tab content widgets (via contentWidgetCardHTML) to render
+// each widget's body content for a given app.
 function appWidgetBodyHTML(app, size) {
   const detail = WIDGET_DETAIL[app.id];
   if (size === 'large' && detail) {
@@ -1070,15 +1067,8 @@ function appWidgetBodyHTML(app, size) {
   return `<div class="dash-widget-stat">${escHtml(WIDGET_PREVIEW[app.id] || `Open ${app.name}`)}</div>`;
 }
 
-function widgetCardHTML(app) {
-  const size = state.widgetSizes[app.id] || 'small';
-  return dashWidgetShellHTML({
-    id: app.id, icon: app.icon, name: app.name, size, body: appWidgetBodyHTML(app, size), removable: false,
-  });
-}
-
 /* ---- Shared widget-card shell + generic drag/resize/remove wiring ----
-   Reused by Overview (app widgets) and Customer/RO tabs (content widgets):
+   Used by Customer/RO tab content widgets (via contentWidgetCardHTML):
    each tab instance carries its own `widgets` list + `widgetSizes`, so two
    different customers' tabs can have completely different arrangements. */
 function dashWidgetShellHTML({ id, icon, name, size, body, removable }) {
