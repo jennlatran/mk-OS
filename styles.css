@@ -1316,7 +1316,11 @@
 #shell.light .dash-tab-content { flex: 1; overflow-y: auto; }
 
 /* ============================================================
-   GLOBAL APP HEADER — 40px, shown on every post-onboarding screen
+   GLOBAL APP HEADER — 40px, shown on every post-onboarding screen.
+   Placed here (after the reused .dash-search/.notif-bell-btn/.dash-tab-strip
+   rules above) so equal-specificity flex overrides resolve correctly —
+   moving this block earlier reintroduces a cascade bug. See
+   docs/plans/2026-08-21-global-header-implementation.md, Task 2.
    ============================================================ */
 #shell.light .app-header {
   display: flex;
@@ -1343,7 +1347,7 @@
 
 #shell.light .app-header-search { flex: 0 0 240px; margin: 0; }
 
-#shell.light .app-header-tabs { flex: 1; min-width: 0; padding: 0; border-bottom: none; background: none; }
+#shell.light .app-header-tabs { flex: 1; min-width: 0; padding: 0; }
 
 #shell.light .app-header-actions {
   display: flex;
