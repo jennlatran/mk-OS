@@ -53,6 +53,114 @@
 }
 
 /* ============================================================
+   GLOBAL APP HEADER — 40px, shown on every post-onboarding screen
+   ============================================================ */
+#shell.light .app-header {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  flex-shrink: 0;
+  width: 100%;
+  padding: 0 var(--space-3);
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+#shell.light .app-header[hidden] { display: none; }
+
+#shell.light .app-header-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  color: var(--text-primary);
+}
+#shell.light .app-header-logo .material-icons { font-size: 20px; color: var(--brand); }
+#shell.light .app-header-logo-text { font-size: 14px; font-weight: 700; }
+
+#shell.light .app-header-search { flex: 0 0 240px; margin: 0; }
+
+#shell.light .app-header-tabs { flex: 1; min-width: 0; padding: 0; border-bottom: none; background: none; }
+
+#shell.light .app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+#shell.light .app-header-help-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+#shell.light .app-header-help-btn:hover { background: var(--row-hover); }
+#shell.light .app-header-help-btn .material-icons { font-size: 18px; }
+
+#shell.light .app-header-avatar-wrap { position: relative; }
+#shell.light .app-header-avatar-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: var(--brand-light);
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#shell.light .app-header-avatar-btn:hover { background: var(--chip-active-bg); }
+
+#shell.light .app-header-avatar-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 60;
+  padding: var(--space-2);
+}
+#shell.light .app-header-avatar-role {
+  padding: var(--space-2) var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-1);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+#shell.light .app-header-avatar-item {
+  display: flex; align-items: center; gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: inherit;
+}
+#shell.light .app-header-avatar-item:hover { background: var(--row-hover); }
+#shell.light .app-header-avatar-item .material-icons { font-size: 16px; color: var(--text-muted); }
+
+#shell.light .home-content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ============================================================
    TYPOGRAPHY
    ============================================================ */
 #shell.light .myk-h6 { font-size: 16px; font-weight: 600; line-height: 1.4; }
@@ -752,36 +860,7 @@
   min-height: 100%;
 }
 
-#shell.light .home-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--border);
-}
-
-#shell.light .home-topbar-role {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-#shell.light .home-topbar-role > .material-icons {
-  width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%;
-  background: var(--brand-light);
-  color: var(--brand);
-  font-size: 22px;
-}
-
-#shell.light .home-role-name { font-weight: 700; font-size: 16px; }
 #shell.light .home-role-sub { margin: 0; }
-
-#shell.light .home-topbar-actions {
-  display: flex;
-  gap: var(--space-2);
-}
 
 #shell.light .lock-notice-banner {
   display: flex;
@@ -1085,26 +1164,24 @@
 #shell.light .dash-search {
   position: relative;
   flex: 1;
-  max-width: 420px;
-  margin: 0 var(--space-4);
 }
 
 #shell.light .dash-search > .material-icons {
   position: absolute;
-  left: var(--space-3);
+  left: var(--space-2);
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 14px;
 }
 
 #shell.light .dash-search input {
   width: 100%;
-  height: 38px;
+  height: 26px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 0 var(--space-3) 0 40px;
-  font-size: 14px;
+  padding: 0 var(--space-2) 0 28px;
+  font-size: 12px;
   font-family: inherit;
 }
 
@@ -1158,7 +1235,7 @@
 
 #shell.light .notif-bell-btn {
   position: relative;
-  width: 38px; height: 38px;
+  width: 28px; height: 28px;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid #dadada;
   border-radius: 50%;
@@ -1168,6 +1245,7 @@
 }
 
 #shell.light .notif-bell-btn:hover { background: var(--row-hover); }
+#shell.light .notif-bell-btn .material-icons { font-size: 18px; }
 
 #shell.light .notif-badge {
   position: absolute;
@@ -1257,9 +1335,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3) 0;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-page);
+  padding: 0;
 }
 
 #shell.light .dash-tab-list {
@@ -1274,9 +1350,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-2);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
   cursor: pointer;
   flex-shrink: 0;
@@ -1294,7 +1370,7 @@
 
 #shell.light .dash-tab:hover:not(.active) { background: var(--row-hover); }
 
-#shell.light .dash-tab-type-icon { font-size: 16px; flex-shrink: 0; }
+#shell.light .dash-tab-type-icon { font-size: 14px; flex-shrink: 0; }
 
 #shell.light .dash-tab-label {
   overflow: hidden;
@@ -1305,7 +1381,7 @@
 #shell.light .dash-tab-pin-btn,
 #shell.light .dash-tab-close-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px;
+  width: 16px; height: 16px;
   border: none;
   background: none;
   border-radius: 50%;
@@ -1318,7 +1394,7 @@
 #shell.light .dash-tab-close-btn:hover { background: var(--chip-bg); color: var(--text-primary); }
 
 #shell.light .dash-tab-pin-btn .material-icons,
-#shell.light .dash-tab-close-btn .material-icons { font-size: 14px; }
+#shell.light .dash-tab-close-btn .material-icons { font-size: 12px; }
 
 #shell.light .dash-tab-pin-btn { opacity: .4; }
 #shell.light .dash-tab-pin-btn.pinned { opacity: 1; color: var(--brand); }
