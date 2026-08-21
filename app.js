@@ -155,6 +155,13 @@ const WIDGET_DETAIL = {
 // has no backing customer/RO record, so it isn't clickable.
 function custName(id) { return MOCK_CUSTOMERS.find(c => c.id === id).name; }
 
+// rows() helpers shared by the WIDGET_DETAIL-backed tables below.
+const plainRows = key => WIDGET_DETAIL[key].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null }));
+const customerLinkedRows = key => WIDGET_DETAIL[key].map(row => {
+  const cust = MOCK_CUSTOMERS.find(c => c.name === row.label);
+  return { cells: [row.label, row.value], linkType: cust ? 'customer' : null, linkId: cust ? cust.id : null };
+});
+
 const PRODUCT_TABLES = {
   scheduler: {
     columns: ['Customer', 'Vehicle', 'Service', 'Date', 'Status'],
@@ -207,41 +214,35 @@ const PRODUCT_TABLES = {
   },
   communication: {
     columns: ['Customer', 'Last Message'],
-    rows: () => WIDGET_DETAIL.communication.map(row => {
-      const cust = MOCK_CUSTOMERS.find(c => c.name === row.label);
-      return { cells: [row.label, row.value], linkType: cust ? 'customer' : null, linkId: cust ? cust.id : null };
-    }),
+    rows: () => customerLinkedRows('communication'),
   },
   'follow-up': {
     columns: ['Campaign', 'Detail'],
-    rows: () => WIDGET_DETAIL['follow-up'].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+    rows: () => plainRows('follow-up'),
   },
   transportation: {
     columns: ['Type', 'Detail'],
-    rows: () => WIDGET_DETAIL.transportation.map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+    rows: () => plainRows('transportation'),
   },
   'mobile-service': {
     columns: ['Customer', 'Detail'],
-    rows: () => WIDGET_DETAIL['mobile-service'].map(row => {
-      const cust = MOCK_CUSTOMERS.find(c => c.name === row.label);
-      return { cells: [row.label, row.value], linkType: cust ? 'customer' : null, linkId: cust ? cust.id : null };
-    }),
+    rows: () => customerLinkedRows('mobile-service'),
   },
   'parts-lookup': {
     columns: ['Part', 'Availability'],
-    rows: () => WIDGET_DETAIL['parts-lookup'].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+    rows: () => plainRows('parts-lookup'),
   },
   'parts-ordering': {
     columns: ['Order', 'Status'],
-    rows: () => WIDGET_DETAIL['parts-ordering'].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+    rows: () => plainRows('parts-ordering'),
   },
   reporting: {
     columns: ['Metric', 'Value'],
-    rows: () => WIDGET_DETAIL.reporting.map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+    rows: () => plainRows('reporting'),
   },
   'team-schedule': {
     columns: ['Metric', 'Value'],
-    rows: () => WIDGET_DETAIL['team-schedule'].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+    rows: () => plainRows('team-schedule'),
   },
   'customer-directory': {
     columns: ['Customer', 'Phone', 'Email'],
