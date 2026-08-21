@@ -974,20 +974,69 @@ function renderTabStrip() {
   });
 }
 
-/* ---- Tab content: Overview (widget grid), Customer, RO ---- */
+/* ---- Tab content: product table (base surface), Customer, RO ---- */
 function renderDashboardTabContent() {
   const container = document.getElementById('dashboard-tab-content');
-  const tab = state.tabs.find(t => t.id === state.activeTabId) || state.tabs[0];
 
-  if (tab && (tab.type === 'customer' || tab.type === 'ro')) {
-    container.innerHTML = tabWidgetGridHTML(tab);
-    bindTabWidgetGrid(container, tab);
-    renderMarketplace('tab-widget-marketplace', `tab:${tab.id}`, pageInfoPseudoApps(tab.type));
+  if (state.activeTabId === null) {
+    container.innerHTML = productTableHTML(state.selectedProduct);
+    bindProductTable(container, state.selectedProduct);
     return;
   }
 
-  container.innerHTML = overviewHTML();
-  bindOverviewEvents(container);
+  const tab = state.tabs.find(t => t.id === state.activeTabId);
+  if (!tab) { state.activeTabId = null; renderDashboardTabContent(); return; }
+
+  container.innerHTML = tabWidgetGridHTML(tab);
+  bindTabWidgetGrid(container, tab);
+  renderMarketplace('tab-widget-marketplace', `tab:${tab.id}`, pageInfoPseudoApps(tab.type));
+}
+
+function productTableHTML(appId) {
+  if (!appId) {
+    return `<div class="dashboard-placeholder">
+      <span class="material-icons">dashboard</span>
+      <div class="dashboard-placeholder-title">No products yet</div>
+      <p class="myk-body2">Add products from the rail's Edit button to see them here.</p>
+    </div>`;
+  }
+  const app = getApp(appId);
+  const table = productTableFor(appId);
+  const rows = table.rows();
+  return `
+    <div class="product-table-wrap">
+      <h2 class="myk-h6">${escHtml(app.name)}</h2>
+      ${rows.length === 0 ? `<p class="myk-body2">No records yet.</p>` : `
+        <table class="product-table">
+          <thead><tr>${table.columns.map(c => `<th>${escHtml(c)}</th>`).join('')}</tr></thead>
+          <tbody>
+            ${rows.map((row, i) => `
+              <tr class="${row.linkType ? 'clickable' : ''}" data-row-index="${i}">
+                ${row.cells.map(cell => `<td>${escHtml(cell)}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `}
+    </div>
+  `;
+}
+
+function bindProductTable(container, appId) {
+  if (!appId) return;
+  const rows = productTableFor(appId).rows();
+  container.querySelectorAll('tr.clickable').forEach(tr => {
+    tr.addEventListener('click', () => {
+      const row = rows[Number(tr.dataset.rowIndex)];
+      if (row.linkType === 'customer') {
+        const cust = MOCK_CUSTOMERS.find(c => c.id === row.linkId);
+        openTab('customer', cust.id, cust.name);
+      } else if (row.linkType === 'ro') {
+        const ro = MOCK_ROS.find(r => r.id === row.linkId);
+        openTab('ro', ro.id, `${ro.number} · ${ro.vehicle}`);
+      }
+    });
+  });
 }
 
 function loadWidgetSizes() {
@@ -1010,12 +1059,6 @@ function applySavedWidgetOrder() {
   state.navProducts = [...ordered, ...rest];
 }
 
-function setWidgetSize(appId, size) {
-  state.widgetSizes[appId] = size;
-  localStorage.setItem('mkos-widget-sizes', JSON.stringify(state.widgetSizes));
-  renderDashboardTabContent();
-}
-
 // Shared by Overview's app widgets and any app added as a widget to a Customer/RO tab.
 function appWidgetBodyHTML(app, size) {
   const detail = WIDGET_DETAIL[app.id];
@@ -1031,27 +1074,6 @@ function widgetCardHTML(app) {
   const size = state.widgetSizes[app.id] || 'small';
   return dashWidgetShellHTML({
     id: app.id, icon: app.icon, name: app.name, size, body: appWidgetBodyHTML(app, size), removable: false,
-  });
-}
-
-function overviewHTML() {
-  if (state.navProducts.length === 0) {
-    return `<div class="dashboard-placeholder">
-      <span class="material-icons">dashboard</span>
-      <div class="dashboard-placeholder-title">No apps yet</div>
-      <p class="myk-body2">Add apps from Edit Home Screen to see them here.</p>
-    </div>`;
-  }
-  return `<div class="dash-widget-grid">${state.navProducts.map(id => widgetCardHTML(getApp(id))).join('')}</div>`;
-}
-
-function bindOverviewEvents(container) {
-  bindWidgetGrid(container, {
-    getList: () => state.navProducts,
-    setList: list => { state.navProducts = list; persistWidgetOrder(); },
-    getSize: id => state.widgetSizes[id] || 'small',
-    setSize: (id, size) => { state.widgetSizes[id] = size; localStorage.setItem('mkos-widget-sizes', JSON.stringify(state.widgetSizes)); },
-    onChange: renderDashboardTabContent,
   });
 }
 
