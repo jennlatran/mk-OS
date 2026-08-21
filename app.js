@@ -150,6 +150,111 @@ const WIDGET_DETAIL = {
   ],
 };
 
+// Per-product table shown on the base surface (left-nav selection) when no tab is
+// focused. rows() returns { cells, linkType, linkId } — linkType null means the row
+// has no backing customer/RO record, so it isn't clickable.
+function custName(id) { return MOCK_CUSTOMERS.find(c => c.id === id).name; }
+
+const PRODUCT_TABLES = {
+  scheduler: {
+    columns: ['Customer', 'Vehicle', 'Service', 'Date', 'Status'],
+    rows: () => MOCK_APPOINTMENTS.map(a => ({
+      cells: [custName(a.customerId), a.vehicle, a.service, a.date, a.upcoming ? 'Upcoming' : 'Completed'],
+      linkType: 'customer', linkId: a.customerId,
+    })),
+  },
+  'check-in': {
+    columns: ['Customer', 'Vehicle', 'Checked In'],
+    rows: () => MOCK_APPOINTMENTS.filter(a => a.upcoming).map(a => ({
+      cells: [custName(a.customerId), a.vehicle, a.date],
+      linkType: 'customer', linkId: a.customerId,
+    })),
+  },
+  mpi: {
+    columns: ['RO', 'Customer', 'Vehicle', 'Date', 'Status'],
+    rows: () => MOCK_INSPECTIONS.map(i => {
+      const ro = MOCK_ROS.find(r => r.customerId === i.customerId);
+      return { cells: [ro ? ro.number : '—', custName(i.customerId), i.vehicle, i.date, i.status], linkType: 'customer', linkId: i.customerId };
+    }),
+  },
+  'tech-video': {
+    columns: ['Customer', 'Vehicle', 'Status'],
+    rows: () => MOCK_INSPECTIONS.map(i => ({
+      cells: [custName(i.customerId), i.vehicle, i.status.includes('flagged') ? 'Needs grading' : 'Graded'],
+      linkType: 'customer', linkId: i.customerId,
+    })),
+  },
+  'video-walkaround': {
+    columns: ['Customer', 'Vehicle', 'Sent'],
+    rows: () => MOCK_INSPECTIONS.map(i => ({
+      cells: [custName(i.customerId), i.vehicle, i.date],
+      linkType: 'customer', linkId: i.customerId,
+    })),
+  },
+  payments: {
+    columns: ['Invoice', 'Customer', 'RO', 'Amount', 'Status'],
+    rows: () => MOCK_INVOICES.map(inv => ({
+      cells: [inv.id.toUpperCase(), custName(inv.customerId), inv.roNumber, `$${inv.amount.toFixed(2)}`, inv.status],
+      linkType: 'customer', linkId: inv.customerId,
+    })),
+  },
+  'repair-orders': {
+    columns: ['RO', 'Customer', 'Vehicle', 'Status'],
+    rows: () => MOCK_ROS.map(r => ({
+      cells: [r.number, custName(r.customerId), r.vehicle, r.status],
+      linkType: 'ro', linkId: r.id,
+    })),
+  },
+  communication: {
+    columns: ['Customer', 'Last Message'],
+    rows: () => WIDGET_DETAIL.communication.map(row => {
+      const cust = MOCK_CUSTOMERS.find(c => c.name === row.label);
+      return { cells: [row.label, row.value], linkType: cust ? 'customer' : null, linkId: cust ? cust.id : null };
+    }),
+  },
+  'follow-up': {
+    columns: ['Campaign', 'Detail'],
+    rows: () => WIDGET_DETAIL['follow-up'].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+  },
+  transportation: {
+    columns: ['Type', 'Detail'],
+    rows: () => WIDGET_DETAIL.transportation.map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+  },
+  'mobile-service': {
+    columns: ['Customer', 'Detail'],
+    rows: () => WIDGET_DETAIL['mobile-service'].map(row => {
+      const cust = MOCK_CUSTOMERS.find(c => c.name === row.label);
+      return { cells: [row.label, row.value], linkType: cust ? 'customer' : null, linkId: cust ? cust.id : null };
+    }),
+  },
+  'parts-lookup': {
+    columns: ['Part', 'Availability'],
+    rows: () => WIDGET_DETAIL['parts-lookup'].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+  },
+  'parts-ordering': {
+    columns: ['Order', 'Status'],
+    rows: () => WIDGET_DETAIL['parts-ordering'].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+  },
+  reporting: {
+    columns: ['Metric', 'Value'],
+    rows: () => WIDGET_DETAIL.reporting.map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+  },
+  'team-schedule': {
+    columns: ['Metric', 'Value'],
+    rows: () => WIDGET_DETAIL['team-schedule'].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null })),
+  },
+  'customer-directory': {
+    columns: ['Customer', 'Phone', 'Email'],
+    rows: () => MOCK_CUSTOMERS.map(c => ({ cells: [c.name, c.phone, c.email], linkType: 'customer', linkId: c.id })),
+  },
+};
+
+// Fallback for any app without a PRODUCT_TABLES entry (e.g. a custom app created
+// via "Create Your Own App") — an empty-state table rather than a missing render.
+function productTableFor(appId) {
+  return PRODUCT_TABLES[appId] || { columns: ['Detail'], rows: () => [] };
+}
+
 /* ============================================================
    MOCK DATA — customers, ROs, notifications (for tabs + the bell)
    ============================================================ */
