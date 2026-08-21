@@ -368,6 +368,9 @@ function showScreen(id) {
     dot.classList.toggle('active', Number(dot.dataset.step) === step);
   });
 
+  document.getElementById('app-header').hidden = ONBOARDING_STEPS.includes(id);
+  renderAppHeader();
+
   document.getElementById('app-frame').scrollTop = 0;
   window.scrollTo(0, 0);
 }
@@ -774,9 +777,6 @@ function dismissLockNotice() {
 
 // Edit Home Screen — always editable, no separate customize mode/toggle.
 function renderHome() {
-  const role = getRole(state.role);
-  document.getElementById('home-role-icon').textContent = role.icon;
-  document.getElementById('home-role-name').textContent = role.name;
   renderLockNotice();
 
   const grid = document.getElementById('home-grid');
@@ -807,15 +807,24 @@ function renderHome() {
    DASHBOARD — the actual landing screen
    ============================================================ */
 function renderDashboard() {
-  const role = getRole(state.role);
-  document.getElementById('dashboard-role-icon').textContent = role.icon;
-  document.getElementById('dashboard-role-name').textContent = role.name;
-  document.getElementById('dashboard-manage-views-btn').hidden = state.role !== 'manager-admin';
   renderNavRail();
   renderTabStrip();
   renderNotifBell();
   renderNotifPanel();
   renderDashboardTabContent();
+}
+
+// Runs on every screen transition. Keeps the header's role display, manage-views
+// visibility, tab strip, and notification state current regardless of which
+// screen is active — the header persists across screens, unlike renderDashboard().
+function renderAppHeader() {
+  if (!state.role) return; // nothing to show before a role is picked
+  const role = getRole(state.role);
+  document.getElementById('app-header-avatar-role').textContent = `Signed in as: ${role.name}`;
+  document.getElementById('app-header-manage-views-item').hidden = state.role !== 'manager-admin';
+  renderTabStrip();
+  renderNotifBell();
+  renderNotifPanel();
 }
 
 /* ---- Left product nav rail (collapsed / expanded / hover modes) ---- */
@@ -1446,6 +1455,13 @@ function toggleNotifPanel(show) {
   panel.hidden = show === undefined ? !panel.hidden : !show;
 }
 
+// Temporary — Task 6 replaces this with a version that also closes other
+// open popovers (mutual exclusivity).
+function toggleAvatarMenu(show) {
+  const menu = document.getElementById('app-header-avatar-menu');
+  menu.hidden = show === undefined ? !menu.hidden : !show;
+}
+
 /* ---- Global search (customers / ROs / apps) ---- */
 // Shared by the global dashboard search and the tab-add popover search.
 function matchCustomers(query, limit = 5) {
@@ -1610,9 +1626,27 @@ function init() {
 
   document.getElementById('role-next-btn').addEventListener('click', confirmRoleSelection);
 
-  document.getElementById('dashboard-manage-views-btn').addEventListener('click', () => {
+  document.getElementById('app-header-manage-views-item').addEventListener('click', () => {
+    toggleAvatarMenu(false);
     renderManagerRoleList();
     showScreen('manager');
+  });
+
+  document.getElementById('app-header-reset-password-item').addEventListener('click', () => {
+    toggleAvatarMenu(false);
+    showToast('Password reset isn\'t available in this prototype yet.');
+  });
+  document.getElementById('app-header-edit-profile-item').addEventListener('click', () => {
+    toggleAvatarMenu(false);
+    showToast('Profile editing isn\'t available in this prototype yet.');
+  });
+  document.getElementById('app-header-avatar-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    toggleAvatarMenu();
+  });
+
+  document.getElementById('app-header-help-btn').addEventListener('click', () => {
+    showToast('Help isn\'t available in this prototype yet.');
   });
 
   document.querySelectorAll('.dash-nav-mode-btn').forEach(btn => {
