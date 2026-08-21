@@ -1250,7 +1250,9 @@ function contentWidgetBodyHTML(tab, widgetId, size) {
   if (tab.type === 'ro') {
     const ro = MOCK_ROS.find(r => r.id === tab.targetId);
     if (widgetId === 'ro-details') {
-      return listRowHTML('directions_car', escHtml(ro.vehicle), '') + listRowHTML('info', escHtml(ro.status), '');
+      return listRowHTML('directions_car', escHtml(ro.vehicle), '')
+        + listRowHTML('info', escHtml(ro.status), '')
+        + `<button class="tab-more-details-btn" data-ro-id="${ro.id}"><span class="material-icons">open_in_new</span> More details</button>`;
     }
     if (widgetId === 'ro-customer') {
       const cust = MOCK_CUSTOMERS.find(c => c.id === ro.customerId);
@@ -1352,6 +1354,26 @@ function bindTabWidgetGrid(container, tab) {
       openTab('customer', cust.id, cust.name);
     });
   });
+  container.querySelectorAll('.tab-more-details-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const ro = MOCK_ROS.find(r => r.id === btn.dataset.roId);
+      openDetailsDrawer(`${ro.number} — ${ro.vehicle}`, `
+        <p class="myk-body2"><strong>Status:</strong> ${escHtml(ro.status)}</p>
+        <p class="myk-body2"><strong>Vehicle:</strong> ${escHtml(ro.vehicle)}</p>
+      `);
+    });
+  });
+}
+
+function openDetailsDrawer(title, bodyHTML) {
+  document.getElementById('details-drawer-title').textContent = title;
+  document.getElementById('details-drawer-body').innerHTML = bodyHTML;
+  document.getElementById('details-drawer-overlay').hidden = false;
+}
+
+function closeDetailsDrawer() {
+  document.getElementById('details-drawer-overlay').hidden = true;
 }
 
 /* ---- Notification bell ---- */
@@ -1648,6 +1670,11 @@ function init() {
   document.getElementById('create-app-submit-btn').addEventListener('click', submitCreateApp);
   document.getElementById('create-app-overlay').addEventListener('click', e => {
     if (e.target === document.getElementById('create-app-overlay')) closeCreateAppModal();
+  });
+
+  document.getElementById('details-drawer-close-btn').addEventListener('click', closeDetailsDrawer);
+  document.getElementById('details-drawer-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('details-drawer-overlay')) closeDetailsDrawer();
   });
 
   document.getElementById('dashboard-bell-btn').addEventListener('click', e => {

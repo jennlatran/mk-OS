@@ -1648,3 +1648,32 @@
 }
 
 #shell.light .tab-customer-link:hover { border-color: var(--brand); }
+
+/* ---- More details drawer ---- */
+#shell.light .details-drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.25);
+  z-index: 50; display: flex; justify-content: flex-end;
+}
+#shell.light .details-drawer-overlay[hidden] { display: none; }
+#shell.light .details-drawer {
+  width: 360px; max-width: 90vw; height: 100%;
+  background: var(--bg-surface); box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column;
+  animation: details-drawer-in 0.15s ease-out;
+}
+@keyframes details-drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+#shell.light .details-drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-3); border-bottom: 1px solid var(--border);
+}
+#shell.light .details-drawer-close-btn { border: none; background: none; cursor: pointer; color: var(--text-muted); }
+#shell.light .details-drawer-body { padding: var(--space-3); overflow-y: auto; }
+#shell.light .tab-more-details-btn {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  border: none; background: none; color: var(--brand); cursor: pointer;
+  padding: var(--space-1) 0; margin-top: var(--space-1);
+}
+#shell.light .tab-more-details-btn .material-icons { font-size: 16px; }
