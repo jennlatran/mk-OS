@@ -840,6 +840,7 @@ function selectProduct(appId) {
   state.selectedProduct = appId;
   state.activeTabId = null;
   renderNavRail();
+  renderTabStrip();
   renderDashboardTabContent();
 }
 
