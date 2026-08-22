@@ -1493,6 +1493,19 @@
   cursor: pointer;
   border-radius: var(--radius-sm);
 }
+/* Three buttons side-by-side don't fit the 64px collapsed rail's interior width
+   (icon + padding alone exceeds it) — without this, the third button overflows
+   past the rail's right edge and paints over the main content. Stack them
+   vertically instead whenever the rail isn't actually showing its expanded width. */
+#shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-mode-toggle,
+#shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-mode-toggle {
+  flex-direction: column;
+}
+#shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-mode-btn,
+#shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-mode-btn {
+  flex: none;
+  width: 100%;
+}
 #shell.light .dash-nav-mode-btn.active { background: var(--chip-bg); color: var(--brand); }
 #shell.light .dash-nav-mode-btn .material-icons { font-size: 18px; }
 
