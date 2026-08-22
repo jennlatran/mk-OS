@@ -375,6 +375,16 @@ function showScreen(id) {
   window.scrollTo(0, 0);
 }
 
+// Brings the Dashboard screen into view if it isn't already showing — used
+// whenever focusing a tab needs to guarantee its content is actually visible,
+// since tabs (in the header) and their content (on the Dashboard screen) can
+// now be interacted with from any screen.
+function ensureDashboardScreen() {
+  if (document.getElementById('screen-dashboard').hasAttribute('hidden')) {
+    showScreen('dashboard');
+  }
+}
+
 /* ============================================================
    ONBOARDING — ROLE SELECT
    ============================================================ */
@@ -918,11 +928,13 @@ function openTab(type, targetId, label) {
     state.tabs.push(tab);
     state.activeTabId = tab.id;
   }
+  ensureDashboardScreen();
   renderDashboard();
 }
 
 function setActiveTab(tabId) {
   state.activeTabId = tabId;
+  ensureDashboardScreen();
   renderDashboard();
 }
 
