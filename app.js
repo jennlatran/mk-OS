@@ -961,7 +961,10 @@ function renderTabStrip() {
 
   const tabsHTML = ordered.map(tab => {
     const active = tab.id === state.activeTabId;
-    const typeIcon = tab.type === 'customer' ? 'person' : 'directions_car';
+    // 'customer'/'ro' tabs (opened via the header search) show a person/car icon;
+    // any other tab.type is a product id (opened via a product-table row click),
+    // so show that product's own icon instead.
+    const typeIcon = tab.type === 'customer' ? 'person' : tab.type === 'ro' ? 'directions_car' : (getApp(tab.type) || {}).icon || 'widgets';
     return `<div class="dash-tab${active ? ' active' : ''}${tab.pinned ? ' pinned' : ''}" data-tab-id="${tab.id}">
       <span class="material-icons dash-tab-type-icon">${typeIcon}</span>
       ${tab.pinned ? '' : `<span class="dash-tab-label">${escHtml(tab.label)}</span>`}
@@ -998,9 +1001,27 @@ function renderDashboardTabContent() {
   const tab = state.tabs.find(t => t.id === state.activeTabId);
   if (!tab) { state.activeTabId = null; renderDashboardTabContent(); return; }
 
-  container.innerHTML = tabWidgetGridHTML(tab);
-  bindTabWidgetGrid(container, tab);
-  renderMarketplace('tab-widget-marketplace', `tab:${tab.id}`, pageInfoPseudoApps(tab.type));
+  if (tab.type === 'customer' || tab.type === 'ro') {
+    container.innerHTML = tabWidgetGridHTML(tab);
+    bindTabWidgetGrid(container, tab);
+    renderMarketplace('tab-widget-marketplace', `tab:${tab.id}`, pageInfoPseudoApps(tab.type));
+    return;
+  }
+
+  // A product-table row's tab (tab.type is a product id, not 'customer'/'ro') —
+  // no real per-row detail view exists yet, so this is a filler until it does.
+  container.innerHTML = productTabFillerHTML(tab);
+}
+
+function productTabFillerHTML(tab) {
+  const app = getApp(tab.type);
+  return `
+    <div class="dashboard-placeholder">
+      <span class="material-icons">${app.icon}</span>
+      <div class="dashboard-placeholder-title">${escHtml(app.name)}</div>
+      <p class="myk-body2">Detail view for this record is coming soon.</p>
+    </div>
+  `;
 }
 
 function productTableHTML(appId) {
@@ -1022,7 +1043,7 @@ function productTableHTML(appId) {
           <thead><tr>${table.columns.map(c => `<th>${escHtml(c)}</th>`).join('')}</tr></thead>
           <tbody>
             ${rows.map(row => `
-              <tr class="${row.linkType ? 'clickable' : ''}"${row.linkType ? ` data-link-type="${row.linkType}" data-link-id="${row.linkId}"` : ''}>
+              <tr class="${row.linkType ? 'clickable' : ''}"${row.linkType ? ` data-link-id="${row.linkId}"` : ''}>
                 ${row.cells.map(cell => `<td>${escHtml(cell)}</td>`).join('')}
               </tr>
             `).join('')}
@@ -1033,19 +1054,15 @@ function productTableHTML(appId) {
   `;
 }
 
+// Opens a tab identified by this product (icon + name), not by the row's
+// underlying customer/RO — tabs still dedupe per row (type=appId + targetId=linkId),
+// they just don't show the customer/RO's own detail view. See productTabFillerHTML.
 function bindProductTable(container, appId) {
   if (!appId) return;
+  const app = getApp(appId);
   container.querySelectorAll('tr.clickable').forEach(tr => {
     tr.addEventListener('click', () => {
-      const linkType = tr.dataset.linkType;
-      const linkId = tr.dataset.linkId;
-      if (linkType === 'customer') {
-        const cust = MOCK_CUSTOMERS.find(c => c.id === linkId);
-        openTab('customer', cust.id, cust.name);
-      } else if (linkType === 'ro') {
-        const ro = MOCK_ROS.find(r => r.id === linkId);
-        openTab('ro', ro.id, `${ro.number} · ${ro.vehicle}`);
-      }
+      openTab(appId, tr.dataset.linkId, app.name);
     });
   });
 }
