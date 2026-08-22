@@ -155,11 +155,13 @@ const WIDGET_DETAIL = {
 // has no backing customer/RO record, so it isn't clickable.
 function custName(id) { return MOCK_CUSTOMERS.find(c => c.id === id).name; }
 
-// rows() helpers shared by the WIDGET_DETAIL-backed tables below.
-const plainRows = key => WIDGET_DETAIL[key].map(row => ({ cells: [row.label, row.value], linkType: null, linkId: null }));
-const customerLinkedRows = key => WIDGET_DETAIL[key].map(row => {
+// rows() helpers shared by the WIDGET_DETAIL-backed tables below. Every row must be
+// clickable (opens a tab), so rows with no real backing customer get a synthetic,
+// stable-per-row id instead of leaving linkId null.
+const plainRows = key => WIDGET_DETAIL[key].map((row, i) => ({ cells: [row.label, row.value], linkType: 'row', linkId: `${key}-${i}` }));
+const customerLinkedRows = key => WIDGET_DETAIL[key].map((row, i) => {
   const cust = MOCK_CUSTOMERS.find(c => c.name === row.label);
-  return { cells: [row.label, row.value], linkType: cust ? 'customer' : null, linkId: cust ? cust.id : null };
+  return { cells: [row.label, row.value], linkType: cust ? 'customer' : 'row', linkId: cust ? cust.id : `${key}-${i}` };
 });
 
 const PRODUCT_TABLES = {
@@ -1043,7 +1045,7 @@ function productTableHTML(appId) {
           <thead><tr>${table.columns.map(c => `<th>${escHtml(c)}</th>`).join('')}</tr></thead>
           <tbody>
             ${rows.map(row => `
-              <tr class="${row.linkType ? 'clickable' : ''}"${row.linkType ? ` data-link-id="${row.linkId}"` : ''}>
+              <tr class="${row.linkId ? 'clickable' : ''}"${row.linkId ? ` data-link-id="${row.linkId}"` : ''}>
                 ${row.cells.map(cell => `<td>${escHtml(cell)}</td>`).join('')}
               </tr>
             `).join('')}
