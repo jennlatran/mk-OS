@@ -150,6 +150,114 @@ const WIDGET_DETAIL = {
   ],
 };
 
+// Per-product table shown on the base surface (left-nav selection) when no tab is
+// focused. rows() returns { cells, linkType, linkId } — linkType null means the row
+// has no backing customer/RO record, so it isn't clickable.
+function custName(id) { return MOCK_CUSTOMERS.find(c => c.id === id).name; }
+
+// rows() helpers shared by the WIDGET_DETAIL-backed tables below. Every row must be
+// clickable (opens a tab), so rows with no real backing customer get a synthetic,
+// stable-per-row id instead of leaving linkId null.
+const plainRows = key => WIDGET_DETAIL[key].map((row, i) => ({ cells: [row.label, row.value], linkType: 'row', linkId: `${key}-${i}` }));
+const customerLinkedRows = key => WIDGET_DETAIL[key].map((row, i) => {
+  const cust = MOCK_CUSTOMERS.find(c => c.name === row.label);
+  return { cells: [row.label, row.value], linkType: cust ? 'customer' : 'row', linkId: cust ? cust.id : `${key}-${i}` };
+});
+
+const PRODUCT_TABLES = {
+  scheduler: {
+    columns: ['Customer', 'Vehicle', 'Service', 'Date', 'Status'],
+    rows: () => MOCK_APPOINTMENTS.map(a => ({
+      cells: [custName(a.customerId), a.vehicle, a.service, a.date, a.upcoming ? 'Upcoming' : 'Completed'],
+      linkType: 'customer', linkId: a.customerId,
+    })),
+  },
+  'check-in': {
+    columns: ['Customer', 'Vehicle', 'Checked In'],
+    rows: () => MOCK_APPOINTMENTS.filter(a => a.upcoming).map(a => ({
+      cells: [custName(a.customerId), a.vehicle, a.date],
+      linkType: 'customer', linkId: a.customerId,
+    })),
+  },
+  mpi: {
+    columns: ['RO', 'Customer', 'Vehicle', 'Date', 'Status'],
+    rows: () => MOCK_INSPECTIONS.map(i => {
+      const ro = MOCK_ROS.find(r => r.customerId === i.customerId);
+      return { cells: [ro ? ro.number : '—', custName(i.customerId), i.vehicle, i.date, i.status], linkType: 'customer', linkId: i.customerId };
+    }),
+  },
+  'tech-video': {
+    columns: ['Customer', 'Vehicle', 'Status'],
+    rows: () => MOCK_INSPECTIONS.map(i => ({
+      cells: [custName(i.customerId), i.vehicle, i.status.includes('flagged') ? 'Needs grading' : 'Graded'],
+      linkType: 'customer', linkId: i.customerId,
+    })),
+  },
+  'video-walkaround': {
+    columns: ['Customer', 'Vehicle', 'Sent'],
+    rows: () => MOCK_INSPECTIONS.map(i => ({
+      cells: [custName(i.customerId), i.vehicle, i.date],
+      linkType: 'customer', linkId: i.customerId,
+    })),
+  },
+  payments: {
+    columns: ['Invoice', 'Customer', 'RO', 'Amount', 'Status'],
+    rows: () => MOCK_INVOICES.map(inv => ({
+      cells: [inv.id.toUpperCase(), custName(inv.customerId), inv.roNumber, `$${inv.amount.toFixed(2)}`, inv.status],
+      linkType: 'customer', linkId: inv.customerId,
+    })),
+  },
+  'repair-orders': {
+    columns: ['RO', 'Customer', 'Vehicle', 'Status'],
+    rows: () => MOCK_ROS.map(r => ({
+      cells: [r.number, custName(r.customerId), r.vehicle, r.status],
+      linkType: 'ro', linkId: r.id,
+    })),
+  },
+  communication: {
+    columns: ['Customer', 'Last Message'],
+    rows: () => customerLinkedRows('communication'),
+  },
+  'follow-up': {
+    columns: ['Campaign', 'Detail'],
+    rows: () => plainRows('follow-up'),
+  },
+  transportation: {
+    columns: ['Type', 'Detail'],
+    rows: () => plainRows('transportation'),
+  },
+  'mobile-service': {
+    columns: ['Customer', 'Detail'],
+    rows: () => customerLinkedRows('mobile-service'),
+  },
+  'parts-lookup': {
+    columns: ['Part', 'Availability'],
+    rows: () => plainRows('parts-lookup'),
+  },
+  'parts-ordering': {
+    columns: ['Order', 'Status'],
+    rows: () => plainRows('parts-ordering'),
+  },
+  reporting: {
+    columns: ['Metric', 'Value'],
+    rows: () => plainRows('reporting'),
+  },
+  'team-schedule': {
+    columns: ['Metric', 'Value'],
+    rows: () => plainRows('team-schedule'),
+  },
+  'customer-directory': {
+    columns: ['Customer', 'Phone', 'Email'],
+    rows: () => MOCK_CUSTOMERS.map(c => ({ cells: [c.name, c.phone, c.email], linkType: 'customer', linkId: c.id })),
+  },
+};
+
+// Fallback for any app without a PRODUCT_TABLES entry (e.g. a custom app created
+// via "Create Your Own App") — an empty-state table rather than a missing render.
+function productTableFor(appId) {
+  return PRODUCT_TABLES[appId] || { columns: ['Detail'], rows: () => [] };
+}
+
 /* ============================================================
    MOCK DATA — customers, ROs, notifications (for tabs + the bell)
    ============================================================ */
@@ -224,17 +332,18 @@ const MOCK_NOTIFICATIONS = [
 const state = {
   role: null,
   pendingRole: null,
-  homeApps: [],
+  navProducts: [],   // was homeApps — same marketplace/manager-lock mechanism, now a nav list
   scratchSelected: new Set(),
   device: 'desktop',
   managerConfig: {},        // { [roleId]: { appIds: [...], mode: 'default' | 'locked' } }
   managerEditingRoleId: null,
   managerEditSelected: new Set(),
 
-  // Dashboard — tabs, widget sizes, and notification filter
-  tabs: [{ id: 'overview', type: 'overview', label: 'Overview', pinned: true }],
-  activeTabId: 'overview',
-  widgetSizes: {},   // { [appId]: 'small' | 'large' }
+  // Dashboard — nav rail, tabs, widget sizes, and notification filter
+  navMode: 'expanded',   // 'collapsed' | 'expanded' | 'hover'
+  selectedProduct: null, // appId shown on the base surface; not persisted, resets on reload
+  tabs: [],               // record-detail tabs only — no seeded "overview" tab
+  activeTabId: null,      // null = show selectedProduct's table; else a tab id
   notifFilter: '',   // '' | 'vehicle' | 'customer' | 'internal'
 };
 
@@ -261,8 +370,21 @@ function showScreen(id) {
     dot.classList.toggle('active', Number(dot.dataset.step) === step);
   });
 
+  document.getElementById('app-header').hidden = ONBOARDING_STEPS.includes(id);
+  renderAppHeader();
+
   document.getElementById('app-frame').scrollTop = 0;
   window.scrollTo(0, 0);
+}
+
+// Brings the Dashboard screen into view if it isn't already showing — used
+// whenever focusing a tab needs to guarantee its content is actually visible,
+// since tabs (in the header) and their content (on the Dashboard screen) can
+// now be interacted with from any screen.
+function ensureDashboardScreen() {
+  if (document.getElementById('screen-dashboard').hasAttribute('hidden')) {
+    showScreen('dashboard');
+  }
 }
 
 /* ============================================================
@@ -310,16 +432,14 @@ function schematicThumbHTML(appIds) {
    ONBOARDING — PATH CHOICE
    ============================================================ */
 function choosePathMykRecommended() {
-  state.homeApps = [...RECOMMENDED[state.role]];
-  applySavedWidgetOrder();
+  state.navProducts = [...RECOMMENDED[state.role]];
   renderHome();
   showScreen('home');
 }
 
 function choosePathDealerRecommended() {
   ensureManagerConfig();
-  state.homeApps = [...state.managerConfig[state.role].appIds];
-  applySavedWidgetOrder();
+  state.navProducts = [...state.managerConfig[state.role].appIds];
   renderHome();
   showScreen('home');
 }
@@ -367,13 +487,13 @@ let marketCreateContext = null;        // which context "Create Your Own App" wa
 // of app ids, so the marketplace just needs to know which one it's serving. Tab
 // contexts are identified as "tab:<tabId>" and resolve to that tab's own widgets list,
 // so every open Customer/RO tab gets the exact same marketplace experience as Edit
-// Home Screen, just scoped to its own widget set instead of state.homeApps.
+// Home Screen, just scoped to its own widget set instead of state.navProducts.
 function resolveTabContext(context) {
   return context.startsWith('tab:') ? state.tabs.find(t => t.id === context.slice(4)) : null;
 }
 
 function getContextSelection(context) {
-  if (context === 'home') return state.homeApps;
+  if (context === 'home') return state.navProducts;
   if (context === 'scratch') return [...state.scratchSelected];
   if (context === 'manager-edit') return [...state.managerEditSelected];
   const tab = resolveTabContext(context);
@@ -381,7 +501,7 @@ function getContextSelection(context) {
 }
 
 function addToContext(context, appId) {
-  if (context === 'home') { if (!state.homeApps.includes(appId)) state.homeApps.push(appId); return; }
+  if (context === 'home') { if (!state.navProducts.includes(appId)) state.navProducts.push(appId); return; }
   if (context === 'scratch') { state.scratchSelected.add(appId); return; }
   if (context === 'manager-edit') { state.managerEditSelected.add(appId); return; }
   const tab = resolveTabContext(context);
@@ -389,7 +509,7 @@ function addToContext(context, appId) {
 }
 
 function removeFromContext(context, appId) {
-  if (context === 'home') { state.homeApps = state.homeApps.filter(id => id !== appId); return; }
+  if (context === 'home') { state.navProducts = state.navProducts.filter(id => id !== appId); return; }
   if (context === 'scratch') { state.scratchSelected.delete(appId); return; }
   if (context === 'manager-edit') { state.managerEditSelected.delete(appId); return; }
   const tab = resolveTabContext(context);
@@ -635,10 +755,9 @@ function runAIPrompt() {
 }
 
 function finishScratch() {
-  state.homeApps = state.scratchSelected.size > 0
+  state.navProducts = state.scratchSelected.size > 0
     ? [...state.scratchSelected]
     : [...RECOMMENDED[state.role]];
-  applySavedWidgetOrder();
   renderHome();
   renderDashboard();
   showScreen('dashboard');
@@ -670,13 +789,10 @@ function dismissLockNotice() {
 
 // Edit Home Screen — always editable, no separate customize mode/toggle.
 function renderHome() {
-  const role = getRole(state.role);
-  document.getElementById('home-role-icon').textContent = role.icon;
-  document.getElementById('home-role-name').textContent = role.name;
   renderLockNotice();
 
   const grid = document.getElementById('home-grid');
-  grid.innerHTML = state.homeApps.map(id => {
+  grid.innerHTML = state.navProducts.map(id => {
     const app = getApp(id);
     return `
       <div class="app-tile" data-app-id="${app.id}">
@@ -691,7 +807,7 @@ function renderHome() {
   grid.querySelectorAll('.app-tile-remove').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      state.homeApps = state.homeApps.filter(id => id !== btn.dataset.removeId);
+      state.navProducts = state.navProducts.filter(id => id !== btn.dataset.removeId);
       renderHome();
     });
   });
@@ -703,19 +819,91 @@ function renderHome() {
    DASHBOARD — the actual landing screen
    ============================================================ */
 function renderDashboard() {
-  const role = getRole(state.role);
-  document.getElementById('dashboard-role-icon').textContent = role.icon;
-  document.getElementById('dashboard-role-name').textContent = role.name;
-  document.getElementById('dashboard-manage-views-btn').hidden = state.role !== 'manager-admin';
+  renderNavRail();
   renderTabStrip();
   renderNotifBell();
   renderNotifPanel();
   renderDashboardTabContent();
 }
 
-/* ---- Tabs (Chrome-style: Overview + Customer/RO tabs, pin to persist) ---- */
+// Runs on every screen transition. Keeps the header's role display, manage-views
+// visibility, tab strip, and notification state current regardless of which
+// screen is active — the header persists across screens, unlike renderDashboard().
+function renderAppHeader() {
+  if (!state.role) return; // nothing to show before a role is picked
+  const role = getRole(state.role);
+  document.getElementById('app-header-avatar-role').textContent = `Signed in as: ${role.name}`;
+  document.getElementById('app-header-manage-views-item').hidden = state.role !== 'manager-admin';
+  renderTabStrip();
+  renderNotifBell();
+  renderNotifPanel();
+}
+
+/* ---- Left product nav rail (collapsed / expanded / hover modes) ---- */
+const NAV_MODES = ['collapsed', 'expanded', 'hover'];
+
+function loadNavMode() {
+  const saved = localStorage.getItem('mkos-nav-mode');
+  if (NAV_MODES.includes(saved)) state.navMode = saved;
+}
+
+function setNavMode(mode) {
+  state.navMode = mode;
+  localStorage.setItem('mkos-nav-mode', mode);
+  renderNavRail();
+}
+
+function selectProduct(appId) {
+  state.selectedProduct = appId;
+  state.activeTabId = null;
+  renderNavRail();
+  renderTabStrip();
+  renderDashboardTabContent();
+}
+
+function renderNavRail() {
+  const rail = document.getElementById('dash-nav-rail');
+  rail.dataset.mode = state.navMode;
+
+  // Fall back to the first available product if the current selection was
+  // removed from the nav (e.g. a manager re-locked the role's app list).
+  if (!state.navProducts.includes(state.selectedProduct)) {
+    state.selectedProduct = state.navProducts[0] || null;
+  }
+
+  document.getElementById('dash-nav-rail-list').innerHTML = state.navProducts.map(id => {
+    const app = getApp(id);
+    const active = id === state.selectedProduct && state.activeTabId === null;
+    return `
+      <button class="dash-nav-rail-item${active ? ' active' : ''}" data-app-id="${app.id}" title="${escHtml(app.name)}">
+        <span class="material-icons">${app.icon}</span>
+        <span class="dash-nav-rail-item-label">${escHtml(app.name)}</span>
+      </button>
+    `;
+  }).join('');
+
+  document.getElementById('dash-nav-rail-list').querySelectorAll('.dash-nav-rail-item').forEach(btn => {
+    btn.addEventListener('click', () => selectProduct(btn.dataset.appId));
+  });
+
+  document.querySelectorAll('.dash-nav-mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === state.navMode);
+  });
+}
+
+function bindNavRailHover() {
+  const rail = document.getElementById('dash-nav-rail');
+  rail.addEventListener('mouseenter', () => {
+    if (state.navMode === 'hover') rail.classList.add('dash-nav-rail--hover-expanded');
+  });
+  rail.addEventListener('mouseleave', () => {
+    rail.classList.remove('dash-nav-rail--hover-expanded');
+  });
+}
+
+/* ---- Tabs (Chrome-style: Customer/RO tabs, pin to persist) ---- */
 function persistPinnedTabs() {
-  const pinned = state.tabs.filter(t => t.pinned && t.type !== 'overview');
+  const pinned = state.tabs.filter(t => t.pinned);
   localStorage.setItem('mkos-pinned-tabs', JSON.stringify(pinned));
 }
 
@@ -742,26 +930,26 @@ function openTab(type, targetId, label) {
     state.tabs.push(tab);
     state.activeTabId = tab.id;
   }
+  ensureDashboardScreen();
   renderDashboard();
 }
 
 function setActiveTab(tabId) {
   state.activeTabId = tabId;
+  ensureDashboardScreen();
   renderDashboard();
 }
 
 function closeTab(tabId) {
-  const tab = state.tabs.find(t => t.id === tabId);
-  if (!tab || tab.type === 'overview') return;
   state.tabs = state.tabs.filter(t => t.id !== tabId);
-  if (state.activeTabId === tabId) state.activeTabId = 'overview';
+  if (state.activeTabId === tabId) state.activeTabId = null;
   persistPinnedTabs();
   renderDashboard();
 }
 
 function togglePinTab(tabId) {
   const tab = state.tabs.find(t => t.id === tabId);
-  if (!tab || tab.type === 'overview') return;
+  if (!tab) return;
   tab.pinned = !tab.pinned;
   persistPinnedTabs();
   renderDashboard();
@@ -769,19 +957,16 @@ function togglePinTab(tabId) {
 
 function renderTabStrip() {
   const strip = document.getElementById('dashboard-tab-strip');
-  const overview = state.tabs.find(t => t.type === 'overview');
-  const pinned = state.tabs.filter(t => t.type !== 'overview' && t.pinned);
-  const unpinned = state.tabs.filter(t => t.type !== 'overview' && !t.pinned);
-  const ordered = [overview, ...pinned, ...unpinned];
+  const pinned = state.tabs.filter(t => t.pinned);
+  const unpinned = state.tabs.filter(t => !t.pinned);
+  const ordered = [...pinned, ...unpinned];
 
-  strip.innerHTML = ordered.map(tab => {
+  const tabsHTML = ordered.map(tab => {
     const active = tab.id === state.activeTabId;
-    if (tab.type === 'overview') {
-      return `<button class="dash-tab dash-tab--overview${active ? ' active' : ''}" data-tab-id="overview">
-        <span class="material-icons">home</span> Overview
-      </button>`;
-    }
-    const typeIcon = tab.type === 'customer' ? 'person' : 'directions_car';
+    // 'customer'/'ro' tabs (opened via the header search) show a person/car icon;
+    // any other tab.type is a product id (opened via a product-table row click),
+    // so show that product's own icon instead.
+    const typeIcon = tab.type === 'customer' ? 'person' : tab.type === 'ro' ? 'directions_car' : (getApp(tab.type) || {}).icon || 'widgets';
     return `<div class="dash-tab${active ? ' active' : ''}${tab.pinned ? ' pinned' : ''}" data-tab-id="${tab.id}">
       <span class="material-icons dash-tab-type-icon">${typeIcon}</span>
       ${tab.pinned ? '' : `<span class="dash-tab-label">${escHtml(tab.label)}</span>`}
@@ -792,7 +977,9 @@ function renderTabStrip() {
     </div>`;
   }).join('');
 
-  strip.querySelectorAll('.dash-tab, .dash-tab--overview').forEach(el => {
+  strip.innerHTML = `<div class="dash-tab-list">${tabsHTML}</div>`;
+
+  strip.querySelectorAll('.dash-tab').forEach(el => {
     el.addEventListener('click', () => setActiveTab(el.dataset.tabId));
   });
   strip.querySelectorAll('.dash-tab-pin-btn').forEach(btn => {
@@ -803,10 +990,18 @@ function renderTabStrip() {
   });
 }
 
-/* ---- Tab content: Overview (widget grid), Customer, RO ---- */
+/* ---- Tab content: product table (base surface), Customer, RO ---- */
 function renderDashboardTabContent() {
   const container = document.getElementById('dashboard-tab-content');
-  const tab = state.tabs.find(t => t.id === state.activeTabId) || state.tabs[0];
+
+  if (state.activeTabId === null) {
+    container.innerHTML = productTableHTML(state.selectedProduct);
+    bindProductTable(container, state.selectedProduct);
+    return;
+  }
+
+  const tab = state.tabs.find(t => t.id === state.activeTabId);
+  if (!tab) { state.activeTabId = null; renderDashboardTabContent(); return; }
 
   if (tab.type === 'customer' || tab.type === 'ro') {
     container.innerHTML = tabWidgetGridHTML(tab);
@@ -815,37 +1010,67 @@ function renderDashboardTabContent() {
     return;
   }
 
-  container.innerHTML = overviewHTML();
-  bindOverviewEvents(container);
+  // A product-table row's tab (tab.type is a product id, not 'customer'/'ro') —
+  // no real per-row detail view exists yet, so this is a filler until it does.
+  container.innerHTML = productTabFillerHTML(tab);
 }
 
-function loadWidgetSizes() {
-  try { state.widgetSizes = JSON.parse(localStorage.getItem('mkos-widget-sizes') || '{}'); } catch (e) { state.widgetSizes = {}; }
+function productTabFillerHTML(tab) {
+  const app = getApp(tab.type);
+  return `
+    <div class="dashboard-placeholder">
+      <span class="material-icons">${app.icon}</span>
+      <div class="dashboard-placeholder-title">${escHtml(app.name)}</div>
+      <p class="myk-body2">Detail view for this record is coming soon.</p>
+    </div>
+  `;
 }
 
-function persistWidgetOrder() {
-  localStorage.setItem('mkos-widget-order', JSON.stringify(state.homeApps));
+function productTableHTML(appId) {
+  if (!appId) {
+    return `<div class="dashboard-placeholder">
+      <span class="material-icons">dashboard</span>
+      <div class="dashboard-placeholder-title">No products yet</div>
+      <p class="myk-body2">Add products from the rail's Edit button to see them here.</p>
+    </div>`;
+  }
+  const app = getApp(appId);
+  const table = productTableFor(appId);
+  const rows = table.rows();
+  return `
+    <div class="product-table-wrap">
+      <h2 class="myk-h6">${escHtml(app.name)}</h2>
+      ${rows.length === 0 ? `<p class="myk-body2">No records yet.</p>` : `
+        <table class="product-table">
+          <thead><tr>${table.columns.map(c => `<th>${escHtml(c)}</th>`).join('')}</tr></thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr class="${row.linkId ? 'clickable' : ''}"${row.linkId ? ` data-link-id="${row.linkId}"` : ''}>
+                ${row.cells.map(cell => `<td>${escHtml(cell)}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `}
+    </div>
+  `;
 }
 
-// Applies any previously-saved widget order to the current homeApps, keeping only
-// apps that are actually present and appending anything new to the end.
-function applySavedWidgetOrder() {
-  let saved = [];
-  try { saved = JSON.parse(localStorage.getItem('mkos-widget-order') || '[]'); } catch (e) { saved = []; }
-  if (saved.length === 0) return;
-  const present = new Set(state.homeApps);
-  const ordered = saved.filter(id => present.has(id));
-  const rest = state.homeApps.filter(id => !ordered.includes(id));
-  state.homeApps = [...ordered, ...rest];
+// Opens a tab identified by this product (icon + name), not by the row's
+// underlying customer/RO — tabs still dedupe per row (type=appId + targetId=linkId),
+// they just don't show the customer/RO's own detail view. See productTabFillerHTML.
+function bindProductTable(container, appId) {
+  if (!appId) return;
+  const app = getApp(appId);
+  container.querySelectorAll('tr.clickable').forEach(tr => {
+    tr.addEventListener('click', () => {
+      openTab(appId, tr.dataset.linkId, app.name);
+    });
+  });
 }
 
-function setWidgetSize(appId, size) {
-  state.widgetSizes[appId] = size;
-  localStorage.setItem('mkos-widget-sizes', JSON.stringify(state.widgetSizes));
-  renderDashboardTabContent();
-}
-
-// Shared by Overview's app widgets and any app added as a widget to a Customer/RO tab.
+// Used by Customer/RO tab content widgets (via contentWidgetCardHTML) to render
+// each widget's body content for a given app.
 function appWidgetBodyHTML(app, size) {
   const detail = WIDGET_DETAIL[app.id];
   if (size === 'large' && detail) {
@@ -856,36 +1081,8 @@ function appWidgetBodyHTML(app, size) {
   return `<div class="dash-widget-stat">${escHtml(WIDGET_PREVIEW[app.id] || `Open ${app.name}`)}</div>`;
 }
 
-function widgetCardHTML(app) {
-  const size = state.widgetSizes[app.id] || 'small';
-  return dashWidgetShellHTML({
-    id: app.id, icon: app.icon, name: app.name, size, body: appWidgetBodyHTML(app, size), removable: false,
-  });
-}
-
-function overviewHTML() {
-  if (state.homeApps.length === 0) {
-    return `<div class="dashboard-placeholder">
-      <span class="material-icons">dashboard</span>
-      <div class="dashboard-placeholder-title">No apps yet</div>
-      <p class="myk-body2">Add apps from Edit Home Screen to see them here.</p>
-    </div>`;
-  }
-  return `<div class="dash-widget-grid">${state.homeApps.map(id => widgetCardHTML(getApp(id))).join('')}</div>`;
-}
-
-function bindOverviewEvents(container) {
-  bindWidgetGrid(container, {
-    getList: () => state.homeApps,
-    setList: list => { state.homeApps = list; persistWidgetOrder(); },
-    getSize: id => state.widgetSizes[id] || 'small',
-    setSize: (id, size) => { state.widgetSizes[id] = size; localStorage.setItem('mkos-widget-sizes', JSON.stringify(state.widgetSizes)); },
-    onChange: renderDashboardTabContent,
-  });
-}
-
 /* ---- Shared widget-card shell + generic drag/resize/remove wiring ----
-   Reused by Overview (app widgets) and Customer/RO tabs (content widgets):
+   Used by Customer/RO tab content widgets (via contentWidgetCardHTML):
    each tab instance carries its own `widgets` list + `widgetSizes`, so two
    different customers' tabs can have completely different arrangements. */
 function dashWidgetShellHTML({ id, icon, name, size, body, removable }) {
@@ -1027,7 +1224,9 @@ function contentWidgetBodyHTML(tab, widgetId, size) {
   if (tab.type === 'ro') {
     const ro = MOCK_ROS.find(r => r.id === tab.targetId);
     if (widgetId === 'ro-details') {
-      return listRowHTML('directions_car', escHtml(ro.vehicle), '') + listRowHTML('info', escHtml(ro.status), '');
+      return listRowHTML('directions_car', escHtml(ro.vehicle), '')
+        + listRowHTML('info', escHtml(ro.status), '')
+        + `<button class="tab-more-details-btn" data-ro-id="${ro.id}"><span class="material-icons">open_in_new</span> More details</button>`;
     }
     if (widgetId === 'ro-customer') {
       const cust = MOCK_CUSTOMERS.find(c => c.id === ro.customerId);
@@ -1129,6 +1328,27 @@ function bindTabWidgetGrid(container, tab) {
       openTab('customer', cust.id, cust.name);
     });
   });
+  container.querySelectorAll('.tab-more-details-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const ro = MOCK_ROS.find(r => r.id === btn.dataset.roId);
+      openDetailsDrawer(`${ro.number} — ${ro.vehicle}`, `
+        <p class="myk-body2"><strong>Status:</strong> ${escHtml(ro.status)}</p>
+        <p class="myk-body2"><strong>Vehicle:</strong> ${escHtml(ro.vehicle)}</p>
+      `);
+    });
+  });
+}
+
+// bodyHTML is trusted, pre-escaped HTML (via escHtml on any interpolated values) — not raw user input.
+function openDetailsDrawer(title, bodyHTML) {
+  document.getElementById('details-drawer-title').textContent = title;
+  document.getElementById('details-drawer-body').innerHTML = bodyHTML;
+  document.getElementById('details-drawer-overlay').hidden = false;
+}
+
+function closeDetailsDrawer() {
+  document.getElementById('details-drawer-overlay').hidden = true;
 }
 
 /* ---- Notification bell ---- */
@@ -1215,20 +1435,48 @@ function openNotificationTarget(notifId) {
   toggleNotifPanel(false);
 }
 
+function closeAllHeaderPopovers() {
+  document.getElementById('dashboard-notif-panel').hidden = true;
+  document.getElementById('dashboard-search-results').hidden = true;
+  document.getElementById('app-header-avatar-menu').hidden = true;
+}
+
 function toggleNotifPanel(show) {
   const panel = document.getElementById('dashboard-notif-panel');
-  panel.hidden = show === undefined ? !panel.hidden : !show;
+  const nextOpen = show === undefined ? panel.hidden : show;
+  closeAllHeaderPopovers();
+  panel.hidden = !nextOpen;
+}
+
+function toggleAvatarMenu(show) {
+  const menu = document.getElementById('app-header-avatar-menu');
+  const nextOpen = show === undefined ? menu.hidden : show;
+  closeAllHeaderPopovers();
+  menu.hidden = !nextOpen;
 }
 
 /* ---- Global search (customers / ROs / apps) ---- */
+// Shared by the global dashboard search and the tab-add popover search.
+function matchCustomers(query, limit = 5) {
+  const q = query.trim().toLowerCase();
+  return MOCK_CUSTOMERS.filter(c =>
+    c.name.toLowerCase().includes(q) || c.phone.includes(query.trim()) || c.email.toLowerCase().includes(q)
+  ).slice(0, limit);
+}
+function matchROs(query, limit = 5) {
+  const q = query.trim().toLowerCase();
+  return MOCK_ROS.filter(r => r.number.toLowerCase().includes(q)).slice(0, limit);
+}
+
 function renderSearchResults(query) {
   const results = document.getElementById('dashboard-search-results');
   const q = query.trim().toLowerCase();
   if (!q) { results.hidden = true; results.innerHTML = ''; return; }
 
-  const customers = MOCK_CUSTOMERS.filter(c =>
-    c.name.toLowerCase().includes(q) || c.phone.includes(query.trim()) || c.email.toLowerCase().includes(q)).slice(0, 5);
-  const ros = MOCK_ROS.filter(r => r.number.toLowerCase().includes(q)).slice(0, 5);
+  closeAllHeaderPopovers();
+
+  const customers = matchCustomers(query);
+  const ros = matchROs(query);
   const apps = APPS.filter(a => a.name.toLowerCase().includes(q)).slice(0, 5);
 
   if (customers.length === 0 && ros.length === 0 && apps.length === 0) {
@@ -1273,24 +1521,18 @@ function handleSearchResultClick(kind, id) {
     const r = MOCK_ROS.find(x => x.id === id);
     openTab('ro', r.id, `${r.number} · ${r.vehicle}`);
   } else if (kind === 'app') {
-    focusOverviewWidget(id);
+    focusNavProduct(id);
   }
   document.getElementById('dashboard-search-input').value = '';
   document.getElementById('dashboard-search-results').hidden = true;
 }
 
-function focusOverviewWidget(appId) {
-  setActiveTab('overview');
-  setTimeout(() => {
-    const el = document.querySelector(`.dash-widget[data-app-id="${appId}"]`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('flash');
-      setTimeout(() => el.classList.remove('flash'), 1200);
-    } else {
-      showToast(`Add "${getApp(appId).name}" to your home screen to see it here.`);
-    }
-  }, 50);
+function focusNavProduct(appId) {
+  if (state.navProducts.includes(appId)) {
+    selectProduct(appId);
+  } else {
+    showToast(`Add "${getApp(appId).name}" to your nav to see it here.`);
+  }
 }
 
 /* ============================================================
@@ -1376,14 +1618,41 @@ function init() {
   renderRoleGrid();
   ensureManagerConfig();
   loadPinnedTabs();
-  loadWidgetSizes();
 
   document.getElementById('role-next-btn').addEventListener('click', confirmRoleSelection);
 
-  document.getElementById('dashboard-manage-views-btn').addEventListener('click', () => {
+  document.getElementById('app-header-manage-views-item').addEventListener('click', () => {
+    toggleAvatarMenu(false);
     renderManagerRoleList();
     showScreen('manager');
   });
+
+  document.getElementById('app-header-reset-password-item').addEventListener('click', () => {
+    toggleAvatarMenu(false);
+    showToast('Password reset isn\'t available in this prototype yet.');
+  });
+  document.getElementById('app-header-edit-profile-item').addEventListener('click', () => {
+    toggleAvatarMenu(false);
+    showToast('Profile editing isn\'t available in this prototype yet.');
+  });
+  document.getElementById('app-header-avatar-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    toggleAvatarMenu();
+  });
+
+  document.getElementById('app-header-help-btn').addEventListener('click', () => {
+    showToast('Help isn\'t available in this prototype yet.');
+  });
+
+  document.querySelectorAll('.dash-nav-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => setNavMode(btn.dataset.mode));
+  });
+  document.getElementById('dash-nav-rail-edit-btn').addEventListener('click', () => {
+    renderHome();
+    showScreen('home');
+  });
+  bindNavRailHover();
+  loadNavMode();
 
   document.querySelectorAll('[data-back-to]').forEach(btn => {
     btn.addEventListener('click', () => showScreen(btn.dataset.backTo));
@@ -1404,10 +1673,6 @@ function init() {
     showScreen('dashboard');
   });
   document.getElementById('lock-notice-dismiss-btn').addEventListener('click', dismissLockNotice);
-  document.getElementById('dashboard-edit-home-btn').addEventListener('click', () => {
-    renderHome();
-    showScreen('home');
-  });
 
   document.getElementById('manager-edit-save-btn').addEventListener('click', saveManagerEdit);
 
@@ -1415,6 +1680,11 @@ function init() {
   document.getElementById('create-app-submit-btn').addEventListener('click', submitCreateApp);
   document.getElementById('create-app-overlay').addEventListener('click', e => {
     if (e.target === document.getElementById('create-app-overlay')) closeCreateAppModal();
+  });
+
+  document.getElementById('details-drawer-close-btn').addEventListener('click', closeDetailsDrawer);
+  document.getElementById('details-drawer-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('details-drawer-overlay')) closeDetailsDrawer();
   });
 
   document.getElementById('dashboard-bell-btn').addEventListener('click', e => {
@@ -1425,19 +1695,17 @@ function init() {
     renderSearchResults(e.target.value);
   });
   document.addEventListener('click', e => {
-    if (!e.target.closest('.notif-bell-wrap')) toggleNotifPanel(false);
-    if (!e.target.closest('.dash-search')) {
-      document.getElementById('dashboard-search-results').hidden = true;
-    }
+    if (!e.target.closest('.notif-bell-wrap')) document.getElementById('dashboard-notif-panel').hidden = true;
+    if (!e.target.closest('.dash-search')) document.getElementById('dashboard-search-results').hidden = true;
+    if (!e.target.closest('.app-header-avatar-wrap')) document.getElementById('app-header-avatar-menu').hidden = true;
   });
 
   /* Prototype toolbar */
   document.getElementById('proto-jump-select').addEventListener('change', e => {
     const target = e.target.value;
-    if ((target === 'home' || target === 'dashboard') && state.homeApps.length === 0) {
+    if ((target === 'home' || target === 'dashboard') && state.navProducts.length === 0) {
       state.role = 'service-advisor';
-      state.homeApps = [...RECOMMENDED['service-advisor']];
-      applySavedWidgetOrder();
+      state.navProducts = [...RECOMMENDED['service-advisor']];
     }
     if (target === 'home') renderHome();
     if (target === 'dashboard') renderDashboard();
