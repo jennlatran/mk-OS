@@ -1416,16 +1416,24 @@ function openNotificationTarget(notifId) {
   toggleNotifPanel(false);
 }
 
-function toggleNotifPanel(show) {
-  const panel = document.getElementById('dashboard-notif-panel');
-  panel.hidden = show === undefined ? !panel.hidden : !show;
+function closeAllHeaderPopovers() {
+  document.getElementById('dashboard-notif-panel').hidden = true;
+  document.getElementById('dashboard-search-results').hidden = true;
+  document.getElementById('app-header-avatar-menu').hidden = true;
 }
 
-// Temporary — Task 6 replaces this with a version that also closes other
-// open popovers (mutual exclusivity).
+function toggleNotifPanel(show) {
+  const panel = document.getElementById('dashboard-notif-panel');
+  const nextOpen = show === undefined ? panel.hidden : show;
+  closeAllHeaderPopovers();
+  panel.hidden = !nextOpen;
+}
+
 function toggleAvatarMenu(show) {
   const menu = document.getElementById('app-header-avatar-menu');
-  menu.hidden = show === undefined ? !menu.hidden : !show;
+  const nextOpen = show === undefined ? menu.hidden : show;
+  closeAllHeaderPopovers();
+  menu.hidden = !nextOpen;
 }
 
 /* ---- Global search (customers / ROs / apps) ---- */
@@ -1445,6 +1453,8 @@ function renderSearchResults(query) {
   const results = document.getElementById('dashboard-search-results');
   const q = query.trim().toLowerCase();
   if (!q) { results.hidden = true; results.innerHTML = ''; return; }
+
+  closeAllHeaderPopovers();
 
   const customers = matchCustomers(query);
   const ros = matchROs(query);
@@ -1666,10 +1676,9 @@ function init() {
     renderSearchResults(e.target.value);
   });
   document.addEventListener('click', e => {
-    if (!e.target.closest('.notif-bell-wrap')) toggleNotifPanel(false);
-    if (!e.target.closest('.dash-search')) {
-      document.getElementById('dashboard-search-results').hidden = true;
-    }
+    if (!e.target.closest('.notif-bell-wrap')) document.getElementById('dashboard-notif-panel').hidden = true;
+    if (!e.target.closest('.dash-search')) document.getElementById('dashboard-search-results').hidden = true;
+    if (!e.target.closest('.app-header-avatar-wrap')) document.getElementById('app-header-avatar-menu').hidden = true;
   });
 
   /* Prototype toolbar */
