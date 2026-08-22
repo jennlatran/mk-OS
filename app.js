@@ -960,16 +960,7 @@ function renderTabStrip() {
     </div>`;
   }).join('');
 
-  strip.innerHTML = `
-    <div class="dash-tab-list">${tabsHTML}</div>
-    <div class="dash-tab-add-wrap">
-      <button class="dash-tab-add-btn" id="dash-tab-add-btn" title="Add tab"><span class="material-icons">add</span></button>
-      <div class="dash-tab-add-search" id="dash-tab-add-search" hidden>
-        <input type="text" id="dash-tab-add-input" placeholder="Search customer or RO…" autocomplete="off" />
-        <div class="dash-tab-add-results" id="dash-tab-add-results"></div>
-      </div>
-    </div>
-  `;
+  strip.innerHTML = `<div class="dash-tab-list">${tabsHTML}</div>`;
 
   strip.querySelectorAll('.dash-tab').forEach(el => {
     el.addEventListener('click', () => setActiveTab(el.dataset.tabId));
@@ -979,43 +970,6 @@ function renderTabStrip() {
   });
   strip.querySelectorAll('.dash-tab-close-btn').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); closeTab(btn.dataset.tabId); });
-  });
-  bindTabAddSearch(strip);
-}
-
-function bindTabAddSearch(strip) {
-  const btn = strip.querySelector('#dash-tab-add-btn');
-  const box = strip.querySelector('#dash-tab-add-search');
-  const input = strip.querySelector('#dash-tab-add-input');
-  const results = strip.querySelector('#dash-tab-add-results');
-
-  btn.addEventListener('click', e => {
-    e.stopPropagation();
-    box.hidden = !box.hidden;
-    if (!box.hidden) input.focus();
-  });
-
-  input.addEventListener('input', () => {
-    const q = input.value.trim().toLowerCase();
-    if (!q) { results.innerHTML = ''; return; }
-    const customers = matchCustomers(input.value);
-    const ros = matchROs(input.value);
-    results.innerHTML = customers.map(c => `<button class="dash-search-result" data-kind="customer" data-id="${c.id}"><span class="material-icons">person</span>${escHtml(c.name)}</button>`).join('')
-      + ros.map(r => `<button class="dash-search-result" data-kind="ro" data-id="${r.id}"><span class="material-icons">directions_car</span>${escHtml(r.number)}</button>`).join('');
-    results.querySelectorAll('.dash-search-result').forEach(rbtn => {
-      rbtn.addEventListener('click', () => {
-        if (rbtn.dataset.kind === 'customer') {
-          const c = MOCK_CUSTOMERS.find(x => x.id === rbtn.dataset.id);
-          openTab('customer', c.id, c.name);
-        } else {
-          const r = MOCK_ROS.find(x => x.id === rbtn.dataset.id);
-          openTab('ro', r.id, `${r.number} · ${r.vehicle}`);
-        }
-        input.value = '';
-        results.innerHTML = '';
-        box.hidden = true;
-      });
-    });
   });
 }
 
@@ -1703,10 +1657,6 @@ function init() {
     if (!e.target.closest('.notif-bell-wrap')) toggleNotifPanel(false);
     if (!e.target.closest('.dash-search')) {
       document.getElementById('dashboard-search-results').hidden = true;
-    }
-    if (!e.target.closest('.dash-tab-add-wrap')) {
-      const box = document.getElementById('dash-tab-add-search');
-      if (box) box.hidden = true;
     }
   });
 

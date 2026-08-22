@@ -1292,24 +1292,6 @@
 #shell.light .dash-tab-pin-btn.pinned { opacity: 1; color: var(--brand); }
 #shell.light .dash-tab:not(.pinned):hover .dash-tab-pin-btn { opacity: 1; }
 
-#shell.light .dash-tab-add-wrap { position: relative; display: flex; align-items: center; }
-#shell.light .dash-tab-add-btn {
-  border: none; background: none; color: var(--text-muted); cursor: pointer;
-  padding: var(--space-1); border-radius: var(--radius-sm);
-}
-#shell.light .dash-tab-add-btn:hover { background: var(--row-hover); color: var(--text-primary); }
-#shell.light .dash-tab-add-search {
-  position: absolute; top: 100%; left: 0; z-index: 10;
-  background: var(--bg-surface); border: 1px solid var(--border);
-  border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
-  padding: var(--space-2); width: 260px;
-}
-#shell.light .dash-tab-add-search input {
-  width: 100%; padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-}
-#shell.light .dash-tab-add-results { display: flex; flex-direction: column; margin-top: var(--space-1); max-height: 240px; overflow-y: auto; }
-
 /* ============================================================
    DASHBOARD — widget grid (resizable: small / large), shared by tab content and the base surface
    ============================================================ */
