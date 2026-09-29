@@ -50,7 +50,7 @@
   /* ---- top identity row ---- */
   .top-row {
     display: flex; align-items: center; justify-content: space-between;
-    background: #fff;
+    background: #fff; border-bottom: 1px solid var(--border);
     padding: 10px 20px;
   }
   .dealer-id { display: flex; align-items: center; gap: 10px; cursor: pointer; }
@@ -90,10 +90,15 @@
   .presence a { font-size: 11.5px; color: var(--brand); text-decoration: none; }
   .presence a:hover { text-decoration: underline; }
 
-  /* ---- horizontal tab row ---- */
+  /* ---- horizontal tab row ----
+     Tinted so it reads as its own region between the white header above and
+     the white content below — folder-tab styling on .tab-item then makes
+     the active tab visually "connect" to the content area, and inactive
+     tabs sit back on the tinted strip instead of blending into everything
+     around them. ---- */
   .tab-row {
     display: flex; align-items: center;
-    background: #fff; border-bottom: 1px solid var(--border);
+    background: var(--bg-page); border-bottom: 1px solid var(--border);
     padding: 0 20px;
   }
   .tab-row-scroll {
@@ -111,14 +116,19 @@
   .tab-item {
     display: inline-flex; align-items: center; gap: 6px; overflow: hidden;
     flex: 1 1 0%; min-width: 52px; max-width: 172px;
-    padding: 13px 14px; font-size: 14px; color: var(--ink-secondary, #344054);
+    margin: 6px 2px 0; border-radius: 8px 8px 0 0;
+    padding: 11px 14px; font-size: 14px; color: var(--ink-secondary, #344054);
     cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
   }
   .tab-item.tab-item--fixed { flex: 0 0 auto; min-width: 0; max-width: none; }
   .tab-item .material-icons { flex-shrink: 0; font-size: 18px; }
   .tab-item-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .tab-item:hover { color: var(--ink); }
-  .tab-item.active { color: var(--brand); font-weight: 700; border-bottom-color: var(--brand); }
+  .tab-item:hover { background: rgba(255,255,255,.65); color: var(--ink); }
+  .tab-item.active {
+    background: #fff; color: var(--brand); font-weight: 700;
+    border-bottom-color: var(--brand);
+  }
+  .tab-item.active:hover { background: #fff; }
   /* ---- +App picker (replaces the old "Add-Ons" dropdown) ---- */
   .add-app-wrap { position: relative; }
   .add-app-btn {
