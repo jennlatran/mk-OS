@@ -101,6 +101,16 @@
   .v1-dealer-item.current .v1-dealer-item-name { color: var(--brand); font-weight: 700; }
   .v1-dealer-empty { padding: 16px 18px; font-size: 12.5px; color: var(--text-secondary); }
 
+  /* ---- Make every header action icon match the bordered-circle style
+     that .notif-bell-btn (Updates/Notifications) already has — the shared
+     .app-header-help-btn class (Insights/Store/University/Help/Settings)
+     has no border by default, which made the icon row look inconsistent. */
+  #shell.light .app-header-help-btn {
+    border: 1px solid #dadada;
+    background: var(--bg-surface);
+  }
+  #shell.light .app-header-help-btn:hover { background: var(--row-hover); }
+
   /* ---- "Switch to Old View" button ---- */
   .v1-switch-v0-btn {
     display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
