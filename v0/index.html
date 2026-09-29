@@ -135,6 +135,10 @@
   }
   .add-app-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; }
   .add-app-row:hover { background: var(--bg-page); }
+  .add-app-row.dragging { opacity: .4; }
+  .add-app-row.drag-over { box-shadow: inset 0 2px 0 var(--brand); }
+  .add-app-drag-handle { flex-shrink: 0; font-size: 16px !important; color: #C7CDD6; cursor: grab; }
+  .add-app-row[draggable="true"]:hover .add-app-drag-handle { color: var(--ink-muted); }
   .add-app-tile {
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     width: 32px; height: 32px; border-radius: 8px; background: var(--brand-light); color: var(--brand);
@@ -496,32 +500,47 @@
     var addAppWrap = document.getElementById('add-app-wrap');
     var addAppMenu = document.getElementById('add-app-menu');
 
+    var draggedTabId = null;
+
+    function rowHtml(a, opts) {
+      opts = opts || {};
+      var active = activeTabIds.indexOf(a.id) !== -1;
+      var tileClass = 'add-app-tile' + (a.custom ? ' custom' : '');
+      var toggleHtml = a.locked
+        ? '<span class="add-app-toggle locked">Default</span>'
+        : '<button class="add-app-toggle' + (active ? ' added' : '') + '" data-app-id="' + a.id + '">' + (active ? 'Remove' : 'Add') + '</button>';
+      var handleHtml = opts.draggable ? '<span class="material-icons add-app-drag-handle" title="Drag to reorder">drag_indicator</span>' : '';
+      var draggableAttr = opts.draggable ? ' draggable="true"' : '';
+      return '<div class="add-app-row"' + draggableAttr + ' data-app-id="' + a.id + '">' +
+        handleHtml +
+        '<div class="' + tileClass + '"><span class="material-icons">' + a.icon + '</span></div>' +
+        '<div class="add-app-info"><div class="add-app-name">' + escHtml(a.name) + '</div><div class="add-app-by">by ' + escHtml(a.createdBy) + '</div></div>' +
+        toggleHtml +
+        '</div>';
+    }
+
     function renderAddAppList(filter) {
       var q = (filter || '').trim().toLowerCase();
-      var matches = APP_CATALOG.filter(function (a) { return a.name.toLowerCase().indexOf(q) !== -1; });
       var list = document.getElementById('add-app-list');
-      if (!matches.length) {
-        list.innerHTML = '<div class="add-app-empty">No apps match "' + escHtml(filter) + '"</div>';
-        return;
-      }
-      function rowHtml(a) {
-        var active = activeTabIds.indexOf(a.id) !== -1;
-        var tileClass = 'add-app-tile' + (a.custom ? ' custom' : '');
-        var toggleHtml = a.locked
-          ? '<span class="add-app-toggle locked">Default</span>'
-          : '<button class="add-app-toggle' + (active ? ' added' : '') + '" data-app-id="' + a.id + '">' + (active ? 'Remove' : 'Add') + '</button>';
-        return '<div class="add-app-row">' +
-          '<div class="' + tileClass + '"><span class="material-icons">' + a.icon + '</span></div>' +
-          '<div class="add-app-info"><div class="add-app-name">' + escHtml(a.name) + '</div><div class="add-app-by">by ' + escHtml(a.createdBy) + '</div></div>' +
-          toggleHtml +
-          '</div>';
-      }
-      var defaults = matches.filter(function (a) { return !a.custom; });
-      var customs = matches.filter(function (a) { return a.custom; });
       var html = '';
-      if (defaults.length) html += '<div class="add-app-section-label">Default Apps</div>' + defaults.map(rowHtml).join('');
-      if (customs.length) html += '<div class="add-app-section-label">Custom Apps</div>' + customs.map(rowHtml).join('');
-      list.innerHTML = html;
+
+      if (!q) {
+        // Unfiltered view: show the currently-added tabs first, in their
+        // real order, draggable to reorder (except the locked Customer tab).
+        var addedApps = activeTabIds.map(getApp);
+        html += '<div class="add-app-section-label">Your Tabs</div>' +
+          addedApps.map(function (a) { return rowHtml(a, { draggable: !a.locked }); }).join('');
+      }
+
+      var pool = q ? APP_CATALOG.filter(function (a) { return a.name.toLowerCase().indexOf(q) !== -1; })
+                   : APP_CATALOG.filter(function (a) { return activeTabIds.indexOf(a.id) === -1; });
+      var defaults = pool.filter(function (a) { return !a.custom; });
+      var customs = pool.filter(function (a) { return a.custom; });
+      if (defaults.length) html += '<div class="add-app-section-label">Default Apps</div>' + defaults.map(function (a) { return rowHtml(a); }).join('');
+      if (customs.length) html += '<div class="add-app-section-label">Custom Apps</div>' + customs.map(function (a) { return rowHtml(a); }).join('');
+
+      list.innerHTML = html || '<div class="add-app-empty">No apps match "' + escHtml(filter) + '"</div>';
+
       list.querySelectorAll('.add-app-toggle:not(.locked)').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
           e.stopPropagation();
@@ -533,6 +552,38 @@
             activeTabIds.splice(idx, 1);
             if (activeTabId === id) activeTabId = 'customer';
           }
+          renderTabRow();
+          renderAddAppList(document.getElementById('add-app-search-input').value);
+        });
+      });
+
+      // Drag to reorder the "Your Tabs" section — reorders activeTabIds,
+      // which renderTabRow() reads directly, so the real tab row updates
+      // to match as soon as you drop.
+      list.querySelectorAll('.add-app-row[draggable="true"]').forEach(function (row) {
+        row.addEventListener('dragstart', function () {
+          draggedTabId = row.dataset.appId;
+          row.classList.add('dragging');
+        });
+        row.addEventListener('dragend', function () {
+          row.classList.remove('dragging');
+          draggedTabId = null;
+        });
+        row.addEventListener('dragover', function (e) {
+          e.preventDefault();
+          if (row.dataset.appId !== draggedTabId) row.classList.add('drag-over');
+        });
+        row.addEventListener('dragleave', function () { row.classList.remove('drag-over'); });
+        row.addEventListener('drop', function (e) {
+          e.preventDefault();
+          row.classList.remove('drag-over');
+          var targetId = row.dataset.appId;
+          if (!draggedTabId || draggedTabId === targetId) return;
+          var from = activeTabIds.indexOf(draggedTabId);
+          var to = activeTabIds.indexOf(targetId);
+          if (from === -1 || to === -1) return;
+          activeTabIds.splice(from, 1);
+          activeTabIds.splice(to, 0, draggedTabId);
           renderTabRow();
           renderAddAppList(document.getElementById('add-app-search-input').value);
         });
