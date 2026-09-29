@@ -158,6 +158,67 @@
 
   .panels-row { display: flex; gap: 20px; }
   .panel-placeholder { flex: 1; height: 420px; background: #EDEEF0; border-radius: 6px; }
+
+  .tab-item { display: inline-flex; align-items: center; gap: 6px; }
+  .tab-item .material-icons { font-size: 18px; }
+
+  /* ---- Edit Tab View modal ---- */
+  .etv-overlay {
+    position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center;
+    background: rgba(16, 24, 40, .45);
+  }
+  .etv-overlay[hidden] { display: none; }
+  .etv-dialog {
+    width: min(560px, 92%); max-height: 88vh; overflow-y: auto;
+    background: #fff; border-radius: 10px; box-shadow: 0 12px 32px rgba(16,24,40,.24);
+  }
+  .etv-header {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #4B4F58; color: #fff; padding: 16px 20px; border-radius: 10px 10px 0 0;
+    font-size: 17px; font-weight: 700;
+  }
+  .etv-close {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 999px; border: none; background: none;
+    color: #fff; cursor: pointer;
+  }
+  .etv-close:hover { background: rgba(255,255,255,.15); }
+  .etv-body { padding: 18px 20px 6px; }
+  .etv-desc { margin: 0 0 16px; font-size: 13.5px; color: var(--ink-muted); }
+  .etv-option {
+    display: block; border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 12px; cursor: pointer;
+  }
+  .etv-option:hover { border-color: #C7CDD6; }
+  .etv-option.selected { border: 1.5px solid var(--brand); }
+  .etv-option-row { display: flex; align-items: flex-start; gap: 10px; }
+  .etv-option input[type="radio"] { margin-top: 2px; width: 16px; height: 16px; accent-color: var(--brand); cursor: pointer; flex-shrink: 0; }
+  .etv-option-label { font-size: 14px; color: var(--ink); line-height: 1.4; }
+  .etv-preview {
+    display: flex; align-items: center; gap: 18px; margin: 12px 0 2px 26px; flex-wrap: wrap;
+  }
+  .etv-preview-tab {
+    display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-muted);
+    padding-bottom: 8px; border-bottom: 2px solid transparent; white-space: nowrap;
+  }
+  .etv-preview-tab .material-icons { font-size: 18px; }
+  .etv-preview-tab.active { color: var(--brand); font-weight: 700; border-bottom-color: var(--brand); }
+  .etv-footer {
+    display: flex; justify-content: space-between; padding: 14px 20px 18px;
+  }
+  .etv-cancel {
+    height: 38px; padding: 0 18px; border-radius: 6px; border: 1px solid var(--brand);
+    background: var(--brand-light); color: var(--brand); font-family: inherit; font-size: 13px;
+    font-weight: 700; letter-spacing: .02em; cursor: pointer;
+  }
+  .etv-cancel:hover { background: #DCEEF9; }
+  .etv-save {
+    height: 38px; padding: 0 18px; border-radius: 6px; border: none;
+    background: var(--brand); color: #fff; font-family: inherit; font-size: 13px;
+    font-weight: 700; letter-spacing: .02em; cursor: pointer;
+  }
+  .etv-save:disabled { background: #E4E7EC; color: #A3ABB8; cursor: not-allowed; }
+  .etv-save:not(:disabled):hover { background: #045C87; }
 </style>
 </head>
 <body>
@@ -196,19 +257,77 @@
   </div>
 
   <div class="tab-row">
-    <div class="tab-item active">Customer</div>
-    <div class="tab-item">Messages</div>
-    <div class="tab-item">Payments</div>
-    <div class="tab-item">Inspect</div>
-    <div class="tab-item">Pickup &amp; Delivery</div>
-    <div class="tab-item">Follow Up</div>
-    <div class="tab-item">Insights</div>
-    <div class="tab-item">News</div>
-    <div class="tab-item">Settings</div>
+    <div id="tab-row-items" style="display:contents;"></div>
     <div class="tab-addons">Add-Ons <span class="material-icons" style="font-size:18px">arrow_drop_down</span></div>
-    <div class="tab-edit"><span class="material-icons">edit</span></div>
+    <div class="tab-edit" id="tab-edit-btn" title="Edit Tab View"><span class="material-icons">edit</span></div>
     <div class="tab-spacer"></div>
     <button class="text-btn"><span class="material-icons">chat_bubble_outline</span>TEXT<span class="material-icons">arrow_drop_down</span></button>
+  </div>
+
+  <div class="etv-overlay" id="etv-overlay" hidden>
+    <div class="etv-dialog">
+      <div class="etv-header">
+        <span>Edit Tab View</span>
+        <button class="etv-close" id="etv-close" title="Close"><span class="material-icons">close</span></button>
+      </div>
+      <div class="etv-body">
+        <p class="etv-desc">Change the appearance of the menu bar across all of your workspace.</p>
+
+        <label class="etv-option" data-value="adjusted">
+          <div class="etv-option-row">
+            <input type="radio" name="etv" value="adjusted" />
+            <span class="etv-option-label">Adjusted View (Default) - Menu bar will adjust to icon or text view based on size of screen</span>
+          </div>
+        </label>
+
+        <label class="etv-option" data-value="icon-only">
+          <div class="etv-option-row">
+            <input type="radio" name="etv" value="icon-only" />
+            <span class="etv-option-label">Icon Only View - Menu bar will be truncated to just show the icons</span>
+          </div>
+          <div class="etv-preview">
+            <div class="etv-preview-tab"><span class="material-icons">person</span></div>
+            <div class="etv-preview-tab"><span class="material-icons">chat_bubble_outline</span></div>
+            <div class="etv-preview-tab"><span class="material-icons">event</span></div>
+            <div class="etv-preview-tab active"><span class="material-icons">payment</span></div>
+            <div class="etv-preview-tab"><span class="material-icons">center_focus_strong</span></div>
+            <div class="etv-preview-tab"><span class="material-icons">location_on</span></div>
+            <div class="etv-preview-tab"><span class="material-icons">call</span></div>
+            <div class="etv-preview-tab"><span class="material-icons">bar_chart</span></div>
+          </div>
+        </label>
+
+        <label class="etv-option" data-value="icon-text">
+          <div class="etv-option-row">
+            <input type="radio" name="etv" value="icon-text" />
+            <span class="etv-option-label">Icon with Text View - Menu bar will show icons with the text</span>
+          </div>
+          <div class="etv-preview">
+            <div class="etv-preview-tab"><span class="material-icons">person</span>Customer</div>
+            <div class="etv-preview-tab"><span class="material-icons">chat_bubble_outline</span>Messages</div>
+            <div class="etv-preview-tab"><span class="material-icons">event</span>Appointments</div>
+            <div class="etv-preview-tab active"><span class="material-icons">payment</span>Payments</div>
+          </div>
+        </label>
+
+        <label class="etv-option" data-value="text-only">
+          <div class="etv-option-row">
+            <input type="radio" name="etv" value="text-only" />
+            <span class="etv-option-label">Text Only View - Menu bar will show only text</span>
+          </div>
+          <div class="etv-preview">
+            <div class="etv-preview-tab">Customer</div>
+            <div class="etv-preview-tab">Messages</div>
+            <div class="etv-preview-tab">Appointments</div>
+            <div class="etv-preview-tab active">Payments</div>
+          </div>
+        </label>
+      </div>
+      <div class="etv-footer">
+        <button class="etv-cancel" id="etv-cancel">CANCEL</button>
+        <button class="etv-save" id="etv-save" disabled>SAVE CHANGES</button>
+      </div>
+    </div>
   </div>
 
   <div class="content">
@@ -253,6 +372,85 @@
       vsw.classList.toggle('open');
     });
     document.addEventListener('click', function () { vsw.classList.remove('open'); });
+
+    // ---- Horizontal tab row: data-driven so Edit Tab View can actually
+    // change how it renders (icon-only / icon+text / text-only / adjusted). ----
+    var TABS = [
+      { id: 'customer', icon: 'person', label: 'Customer' },
+      { id: 'messages', icon: 'chat_bubble_outline', label: 'Messages' },
+      { id: 'payments', icon: 'payment', label: 'Payments' },
+      { id: 'inspect', icon: 'fact_check', label: 'Inspect' },
+      { id: 'pickup-delivery', icon: 'local_shipping', label: 'Pickup & Delivery' },
+      { id: 'follow-up', icon: 'campaign', label: 'Follow Up' },
+      { id: 'insights', icon: 'bar_chart', label: 'Insights' },
+      { id: 'news', icon: 'article', label: 'News' },
+      { id: 'settings', icon: 'settings', label: 'Settings' }
+    ];
+    var activeTabId = 'customer';
+    // 'adjusted' has no real breakpoint to demonstrate in a fixed-width
+    // prototype, so it renders the same as icon-with-text here.
+    var tabViewMode = 'text-only';
+
+    function escHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function renderTabRow() {
+      var showIcon = tabViewMode !== 'text-only';
+      var showLabel = tabViewMode !== 'icon-only';
+      var container = document.getElementById('tab-row-items');
+      container.innerHTML = TABS.map(function (t) {
+        var active = t.id === activeTabId;
+        var iconHtml = showIcon ? '<span class="material-icons">' + t.icon + '</span>' : '';
+        var labelHtml = showLabel ? '<span>' + escHtml(t.label) + '</span>' : '';
+        return '<div class="tab-item' + (active ? ' active' : '') + '" data-tab-id="' + t.id + '" title="' + escHtml(t.label) + '">' + iconHtml + labelHtml + '</div>';
+      }).join('');
+      container.querySelectorAll('.tab-item').forEach(function (el) {
+        el.addEventListener('click', function () {
+          activeTabId = el.dataset.tabId;
+          renderTabRow();
+        });
+      });
+    }
+    renderTabRow();
+
+    // ---- Edit Tab View modal ----
+    var etvOverlay = document.getElementById('etv-overlay');
+    var etvSaveBtn = document.getElementById('etv-save');
+    var etvOptions = document.querySelectorAll('.etv-option');
+
+    function etvSelect(value, isInitial) {
+      etvOptions.forEach(function (opt) {
+        var selected = opt.dataset.value === value;
+        opt.classList.toggle('selected', selected);
+        opt.querySelector('input').checked = selected;
+      });
+      etvSaveBtn.disabled = isInitial || value === tabViewMode;
+    }
+
+    function openEtv() {
+      etvSelect(tabViewMode, true);
+      etvOverlay.hidden = false;
+    }
+    function closeEtv() { etvOverlay.hidden = true; }
+
+    document.getElementById('tab-edit-btn').addEventListener('click', openEtv);
+    document.getElementById('etv-close').addEventListener('click', closeEtv);
+    document.getElementById('etv-cancel').addEventListener('click', closeEtv);
+    etvOverlay.addEventListener('click', function (e) { if (e.target === etvOverlay) closeEtv(); });
+
+    etvOptions.forEach(function (opt) {
+      opt.addEventListener('click', function () { etvSelect(opt.dataset.value, false); });
+    });
+
+    etvSaveBtn.addEventListener('click', function () {
+      var chosen = document.querySelector('.etv-option.selected').dataset.value;
+      tabViewMode = chosen === 'adjusted' ? 'icon-text' : chosen;
+      renderTabRow();
+      closeEtv();
+    });
   </script>
 </body>
 </html>
