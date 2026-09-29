@@ -97,7 +97,15 @@
     background: #fff; border-bottom: 1px solid var(--border);
     padding: 0 20px;
   }
+  .tab-row-scroll {
+    display: flex; align-items: center; flex: 0 1 auto; min-width: 0;
+    overflow-x: auto; scrollbar-width: thin;
+  }
+  .tab-row-scroll::-webkit-scrollbar { height: 4px; }
+  .tab-row-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .tab-row-scroll::-webkit-scrollbar-track { background: transparent; }
   .tab-item {
+    flex-shrink: 0;
     padding: 13px 14px; font-size: 14px; color: var(--ink-secondary, #344054);
     cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
   }
@@ -360,7 +368,7 @@
   </div>
 
   <div class="tab-row">
-    <div id="tab-row-items" style="display:contents;"></div>
+    <div id="tab-row-items" class="tab-row-scroll"></div>
     <div class="add-app-wrap" id="add-app-wrap">
       <button class="add-app-btn" id="add-app-btn" title="Add or remove apps">
         <span class="material-icons">add</span>App
@@ -533,13 +541,20 @@
 
     var activeTabIds = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up'];
     var activeTabId = 'customer';
-    // 'adjusted' has no real breakpoint to demonstrate in a fixed-width
-    // prototype, so it renders the same as icon-with-text here.
     var tabViewMode = 'icon-text';
+    // "Adjusted" picks between these two based on measured available width —
+    // it never falls back to text-only, since icons alone are the densest
+    // real option before the row has to scroll.
+    var adjustedMode = 'icon-text';
+
+    function effectiveTabMode() {
+      return tabViewMode === 'adjusted' ? adjustedMode : tabViewMode;
+    }
 
     function renderTabRow() {
-      var showIcon = tabViewMode !== 'text-only';
-      var showLabel = tabViewMode !== 'icon-only';
+      var mode = effectiveTabMode();
+      var showIcon = mode !== 'text-only';
+      var showLabel = mode !== 'icon-only';
       var container = document.getElementById('tab-row-items');
       container.innerHTML = activeTabIds.map(function (id) {
         var app = getApp(id);
@@ -554,8 +569,40 @@
           renderTabRow();
         });
       });
+      if (tabViewMode === 'adjusted') recomputeAdjustedMode();
     }
     renderTabRow();
+
+    // "Adjusted" mode: measure whether the full icon+text row actually fits
+    // in the space available (the tab-row's own scroll container, not the
+    // whole viewport, since +App/Edit/TEXT stay fixed-width beside it), and
+    // drop to icon-only the moment it doesn't — so adding more tabs shrinks
+    // the row's density instead of pushing controls off-screen.
+    var adjustingMode = false;
+    function recomputeAdjustedMode() {
+      if (adjustingMode) return;
+      var container = document.getElementById('tab-row-items');
+      if (adjustedMode !== 'icon-text') {
+        adjustedMode = 'icon-text';
+        adjustingMode = true;
+        renderTabRow();
+        adjustingMode = false;
+      }
+      requestAnimationFrame(function () {
+        if (container.scrollWidth > container.clientWidth + 1 && adjustedMode !== 'icon-only') {
+          adjustedMode = 'icon-only';
+          adjustingMode = true;
+          renderTabRow();
+          adjustingMode = false;
+        }
+      });
+    }
+    var resizeTimer = null;
+    window.addEventListener('resize', function () {
+      if (tabViewMode !== 'adjusted') return;
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(recomputeAdjustedMode, 100);
+    });
 
     // ---- +App picker: search, add, and remove apps without navigating away.
     // Applies design-skills/forms/03-searchable-picker-widget.md: auto-focus
@@ -850,7 +897,7 @@
 
     etvSaveBtn.addEventListener('click', function () {
       var chosen = document.querySelector('.etv-option.selected').dataset.value;
-      tabViewMode = chosen === 'adjusted' ? 'icon-text' : chosen;
+      tabViewMode = chosen;
       renderTabRow();
       closeEtv();
     });
