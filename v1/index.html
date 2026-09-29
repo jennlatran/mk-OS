@@ -10,19 +10,22 @@
 <style>
   /* ---- V0's Customer-tab content, reused verbatim (same UI as V0), just
      namespaced with a v0- prefix so nothing here collides with the real
-     app's own styles.css classes it now sits alongside. ---- */
+     app's own styles.css classes it now sits alongside. Colors are read
+     through the shared theme tokens (not hardcoded hex, unlike V0's own
+     copy) so this content stays readable when dark mode is toggled. ---- */
   .v0-content { padding: 22px 24px; font-family: 'Lato', sans-serif; }
-  .v0-field-label { font-size: 15px; color: #101828; margin-bottom: 10px; }
+  .v0-field-label { font-size: 15px; color: var(--text-primary); margin-bottom: 10px; }
   .v0-search-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
   .v0-search-input-wrap { position: relative; width: 420px; }
   .v0-search-input-wrap input {
-    width: 100%; height: 38px; padding: 0 34px 0 12px; border: 1px solid #E4E7EC;
-    border-radius: 6px; font-family: inherit; font-size: 14px; color: #101828; outline: none;
+    width: 100%; height: 38px; padding: 0 34px 0 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-family: inherit; font-size: 14px; color: var(--text-primary); outline: none;
+    background: var(--bg-surface);
   }
-  .v0-search-input-wrap input:focus { border-color: #0377B3; }
+  .v0-search-input-wrap input:focus { border-color: var(--brand); }
   .v0-search-clear {
     position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    width: 18px; height: 18px; border-radius: 999px; background: #667085; color: #fff;
+    width: 18px; height: 18px; border-radius: 999px; background: var(--text-secondary); color: #fff;
     display: flex; align-items: center; justify-content: center; cursor: pointer;
   }
   .v0-search-clear .material-icons { font-size: 12px; }
@@ -30,23 +33,24 @@
     height: 38px; padding: 0 18px; border-radius: 6px; border: none;
     font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .03em; cursor: pointer;
   }
-  .v0-action-pill.new { background: #EBF4FA; color: #0377B3; }
-  .v0-action-pill.edit { background: #F5F6F8; color: #667085; cursor: not-allowed; }
-  .v0-lookup-link { display: inline-block; margin-bottom: 22px; font-size: 13px; color: #0377B3; text-decoration: underline; }
-  .v0-lookup-link:hover { color: #025d8c; }
+  .v0-action-pill.new { background: var(--brand-light); color: var(--brand); }
+  .v0-action-pill.edit { background: var(--chip-bg); color: var(--text-secondary); cursor: not-allowed; }
+  .v0-lookup-link { display: inline-block; margin-bottom: 22px; font-size: 13px; color: var(--brand); text-decoration: underline; }
+  .v0-lookup-link:hover { color: var(--brand-hover); }
   .v0-contact-row { display: flex; gap: 40px; margin-bottom: 26px; }
   .v0-contact-field { flex: 0 0 340px; }
-  .v0-contact-field-label { display: flex; align-items: center; gap: 8px; font-size: 15px; color: #101828; margin-bottom: 8px; }
-  .v0-contact-field-label .material-icons { font-size: 16px; color: #667085; cursor: pointer; }
+  .v0-contact-field-label { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--text-primary); margin-bottom: 8px; }
+  .v0-contact-field-label .material-icons { font-size: 16px; color: var(--text-secondary); cursor: pointer; }
   .v0-contact-input-wrap { display: flex; align-items: center; gap: 10px; }
   .v0-contact-input-wrap input {
-    flex: 1; height: 38px; padding: 0 12px; border: 1px solid #E4E7EC;
-    border-radius: 6px; font-family: inherit; font-size: 14px; color: #101828; outline: none;
+    flex: 1; height: 38px; padding: 0 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-family: inherit; font-size: 14px; color: var(--text-primary); outline: none;
+    background: var(--bg-surface);
   }
-  .v0-contact-input-wrap input:focus { border-color: #0377B3; }
-  .v0-contact-input-wrap .material-icons { color: #667085; cursor: pointer; flex-shrink: 0; }
+  .v0-contact-input-wrap input:focus { border-color: var(--brand); }
+  .v0-contact-input-wrap .material-icons { color: var(--text-secondary); cursor: pointer; flex-shrink: 0; }
   .v0-panels-row { display: flex; gap: 20px; }
-  .v0-panel-placeholder { flex: 1; height: 420px; background: #EDEEF0; border-radius: 6px; }
+  .v0-panel-placeholder { flex: 1; height: 420px; background: var(--chip-bg); border-radius: 6px; }
 
   /* ---- myKaarma logo + dealer group switcher (replaces the plain
      "myKaarma" wordmark in the header's logo slot) ---- */
@@ -110,6 +114,38 @@
     background: var(--bg-surface);
   }
   #shell.light .app-header-help-btn:hover { background: var(--row-hover); }
+
+  /* ---- Nav rail footer: dark mode toggle + nav-display popup (replaces
+     the old 3-icons-in-a-row layout with 2 controls so the bottom-left
+     corner doesn't get crowded) ---- */
+  .dash-nav-rail-footer-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 32px; border: none; background: none; border-radius: var(--radius-sm);
+    color: var(--text-muted); cursor: pointer;
+  }
+  .dash-nav-rail-footer-btn:hover { background: var(--chip-bg); color: var(--text-primary); }
+  .dash-nav-rail-footer-btn .material-icons { font-size: 18px; }
+
+  .v1-nav-settings { position: relative; width: 100%; }
+  .v1-nav-settings-menu {
+    display: none; position: absolute; bottom: calc(100% + 6px); left: 0; width: 200px;
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg); z-index: 200; overflow: hidden; padding: 6px;
+  }
+  .v1-nav-settings.open .v1-nav-settings-menu { display: block; }
+  .v1-nav-settings-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-muted); padding: 6px 8px 4px;
+  }
+  .v1-nav-settings-item {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    border: none; background: none; border-radius: var(--radius-sm); padding: 8px;
+    font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text-primary); cursor: pointer;
+  }
+  .v1-nav-settings-item .material-icons { font-size: 18px; color: var(--text-muted); }
+  .v1-nav-settings-item:hover { background: var(--row-hover); }
+  .v1-nav-settings-item.active { background: var(--chip-bg); color: var(--brand); font-weight: 700; }
+  .v1-nav-settings-item.active .material-icons { color: var(--brand); }
 
   /* ---- "Ask MK" AI assistant entry point ---- */
   .v1-ask-mk-btn {
@@ -234,11 +270,11 @@
           <div class="app-header-tabs dash-tab-strip" id="dashboard-tab-strip"></div>
 
           <div class="app-header-actions">
-            <button class="v1-ask-mk-btn" id="v1-ask-mk-btn" title="Ask MK — AI assistant">
-              <span class="material-icons">auto_awesome</span> Ask MK
-            </button>
             <button class="v1-switch-v0-btn" id="v1-switch-v0-btn" title="Switch back to the old view">
               <span class="material-icons">undo</span> Switch to Old View
+            </button>
+            <button class="v1-ask-mk-btn" id="v1-ask-mk-btn" title="Ask MK — AI assistant">
+              <span class="material-icons">auto_awesome</span> Ask MK
             </button>
             <button class="app-header-help-btn" id="app-header-insights-btn" title="Insights">
               <span class="material-icons">bar_chart</span>
@@ -314,10 +350,19 @@
                 </button>
               </div>
               <div class="dash-nav-rail-footer">
-                <div class="dash-nav-mode-toggle" id="dash-nav-mode-toggle" role="group" aria-label="Nav rail mode">
-                  <button class="dash-nav-mode-btn" data-mode="collapsed" title="Keep collapsed"><span class="material-icons">menu_open</span></button>
-                  <button class="dash-nav-mode-btn" data-mode="expanded" title="Keep expanded"><span class="material-icons">view_sidebar</span></button>
-                  <button class="dash-nav-mode-btn active" data-mode="hover" title="Expand on hover"><span class="material-icons">swipe</span></button>
+                <button class="dash-nav-rail-footer-btn" id="v1-theme-toggle-btn" title="Switch to dark mode">
+                  <span class="material-icons" id="v1-theme-icon">dark_mode</span>
+                </button>
+                <div class="v1-nav-settings" id="v1-nav-settings">
+                  <button class="dash-nav-rail-footer-btn" id="v1-nav-settings-btn" title="Nav rail display">
+                    <span class="material-icons">tune</span>
+                  </button>
+                  <div class="v1-nav-settings-menu" id="v1-nav-settings-menu">
+                    <div class="v1-nav-settings-label">Nav Rail Display</div>
+                    <button class="v1-nav-settings-item" data-mode="collapsed"><span class="material-icons">menu_open</span>Keep collapsed</button>
+                    <button class="v1-nav-settings-item" data-mode="expanded"><span class="material-icons">view_sidebar</span>Keep expanded</button>
+                    <button class="v1-nav-settings-item active" data-mode="hover"><span class="material-icons">swipe</span>Expand on hover</button>
+                  </div>
                 </div>
               </div>
             </nav>
@@ -403,23 +448,53 @@
         });
       });
 
-      // Nav rail mode toggle (collapsed / expanded / hover-to-expand) — mirrors
-      // the real app's setNavMode()/renderNavRail() behavior in app.js.
+      // Nav rail mode (collapsed / expanded / hover-to-expand) — now chosen from
+      // a popup instead of 3 always-visible icons, to keep the footer uncluttered.
       var navRail = document.getElementById('dash-nav-rail');
-      document.querySelectorAll('.dash-nav-mode-btn').forEach(function (btn) {
+      var navSettings = document.getElementById('v1-nav-settings');
+      document.getElementById('v1-nav-settings-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        navSettings.classList.toggle('open');
+      });
+      navSettings.addEventListener('click', function (e) { e.stopPropagation(); });
+      document.getElementById('v1-nav-settings-menu').addEventListener('click', function (e) { e.stopPropagation(); });
+      document.querySelectorAll('.v1-nav-settings-item').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var mode = btn.dataset.mode;
           navRail.dataset.mode = mode;
-          document.querySelectorAll('.dash-nav-mode-btn').forEach(function (b) {
+          document.querySelectorAll('.v1-nav-settings-item').forEach(function (b) {
             b.classList.toggle('active', b === btn);
           });
+          navSettings.classList.remove('open');
         });
       });
+      document.addEventListener('click', function () { navSettings.classList.remove('open'); });
       navRail.addEventListener('mouseenter', function () {
         if (navRail.dataset.mode === 'hover') navRail.classList.add('dash-nav-rail--hover-expanded');
       });
       navRail.addEventListener('mouseleave', function () {
         navRail.classList.remove('dash-nav-rail--hover-expanded');
+      });
+
+      // Dark mode toggle — mirrors the real app's setTheme()/applyTheme()
+      // in app.js: flips #shell's data-theme attribute, which every color
+      // token in styles.css is already keyed off of.
+      var shellEl = document.getElementById('shell');
+      var themeIcon = document.getElementById('v1-theme-icon');
+      var themeBtn = document.getElementById('v1-theme-toggle-btn');
+      (function loadTheme() {
+        var saved = localStorage.getItem('mkos-theme');
+        var theme = saved === 'dark' ? 'dark' : 'light';
+        shellEl.dataset.theme = theme;
+        themeIcon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+        themeBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+      })();
+      themeBtn.addEventListener('click', function () {
+        var next = shellEl.dataset.theme === 'dark' ? 'light' : 'dark';
+        shellEl.dataset.theme = next;
+        localStorage.setItem('mkos-theme', next);
+        themeIcon.textContent = next === 'dark' ? 'light_mode' : 'dark_mode';
+        themeBtn.title = next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
       });
 
       // Avatar dropdown
