@@ -48,6 +48,89 @@
   .v0-panels-row { display: flex; gap: 20px; }
   .v0-panel-placeholder { flex: 1; height: 420px; background: #EDEEF0; border-radius: 6px; }
 
+  /* ---- myKaarma logo + dealer group switcher (replaces the plain
+     "myKaarma" wordmark in the header's logo slot) ---- */
+  .v1-mk-logo { height: 20px; width: auto; display: block; }
+
+  .v1-dealer-switch { position: relative; flex-shrink: 0; }
+  .v1-dealer-btn {
+    display: flex; align-items: center; gap: 4px; background: none; border: none;
+    cursor: pointer; padding: 2px 4px; border-radius: 6px; font-family: 'Lato', sans-serif;
+  }
+  .v1-dealer-btn:hover { background: var(--bg-hover, #F2F4F7); }
+  .v1-dealer-name { font-size: 14px; font-weight: 700; color: var(--text-primary); white-space: nowrap; }
+  .v1-dealer-btn .material-icons { font-size: 18px; color: var(--text-secondary); }
+  .v1-dealer-menu {
+    position: absolute; top: calc(100% + 6px); left: 0; width: 320px; max-height: 360px;
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg); z-index: 200; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .v1-dealer-menu[hidden] { display: none; }
+  .v1-dealer-search {
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border);
+  }
+  .v1-dealer-search .material-icons { font-size: 18px; color: var(--text-secondary); }
+  .v1-dealer-search input {
+    flex: 1; border: none; outline: none; font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text-primary);
+  }
+  .v1-dealer-list { overflow-y: auto; max-height: 300px; }
+  .v1-dealer-item {
+    display: block; width: 100%; text-align: left; padding: 10px 14px; border: none; background: none;
+    cursor: pointer; border-bottom: 1px solid #F2F4F7;
+  }
+  .v1-dealer-item:last-child { border-bottom: none; }
+  .v1-dealer-item:hover { background: #F7F8F9; }
+  .v1-dealer-item-name { display: block; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .v1-dealer-item-addr { display: block; font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+  .v1-dealer-item.current { background: var(--brand-light, #EBF4FA); }
+  .v1-dealer-item.current .v1-dealer-item-name { color: var(--brand); }
+  .v1-dealer-empty { padding: 16px 14px; font-size: 12.5px; color: var(--text-secondary); }
+
+  /* ---- "Switch to V0" button ---- */
+  .v1-switch-v0-btn {
+    display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+    border: 1px solid var(--border); border-radius: 999px; background: var(--bg-surface);
+    color: var(--text-primary); font-family: 'Lato', sans-serif; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+  }
+  .v1-switch-v0-btn:hover { background: #F7F8F9; }
+  .v1-switch-v0-btn .material-icons { font-size: 16px; }
+
+  /* ---- Switch-back feedback modal ---- */
+  .v1-feedback-overlay {
+    position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center;
+    background: rgba(16, 24, 40, .45);
+  }
+  .v1-feedback-overlay[hidden] { display: none; }
+  .v1-feedback-dialog {
+    width: min(440px, 90%); background: var(--bg-surface); border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg); font-family: 'Lato', sans-serif; overflow: hidden;
+  }
+  .v1-feedback-header { padding: 20px 20px 12px; border-bottom: 1px solid var(--border); }
+  .v1-feedback-title { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+  .v1-feedback-sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; }
+  .v1-feedback-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+  .v1-feedback-label { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .v1-feedback-body textarea {
+    resize: vertical; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+    font-family: inherit; font-size: 13px; color: var(--text-primary); outline: none;
+  }
+  .v1-feedback-body textarea:focus { border-color: var(--brand); }
+  .v1-feedback-footer {
+    display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border);
+  }
+  .v1-feedback-cancel {
+    height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--bg-surface); color: var(--text-primary); font-family: inherit; font-size: 13px;
+    font-weight: 700; cursor: pointer;
+  }
+  .v1-feedback-cancel:hover { background: #F7F8F9; }
+  .v1-feedback-submit {
+    height: 36px; padding: 0 16px; border-radius: 999px; border: none; background: var(--brand);
+    color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .v1-feedback-submit:hover { filter: brightness(0.92); }
+
   /* ---- version switcher (not part of the real product) ---- */
   .vsw { position: fixed; bottom: 16px; right: 16px; z-index: 99999; font-family: 'Lato', sans-serif; }
   .vsw-btn {
@@ -80,8 +163,21 @@
         <!-- Header — copied verbatim from the current repo's real global header -->
         <header class="app-header" id="app-header">
           <div class="app-header-logo">
-            <span class="material-icons">apps</span>
-            <span class="app-header-logo-text">myKaarma</span>
+            <img class="v1-mk-logo" src="https://static.mykaarma.com/res/mkblue/img/mklogo-small.svg" alt="myKaarma" />
+          </div>
+
+          <div class="v1-dealer-switch" id="v1-dealer-switch">
+            <button class="v1-dealer-btn" id="v1-dealer-btn" title="Switch dealership">
+              <span class="v1-dealer-name" id="v1-dealer-name">Mercedes-Benz of Long Beach</span>
+              <span class="material-icons">expand_more</span>
+            </button>
+            <div class="v1-dealer-menu" id="v1-dealer-menu" hidden>
+              <div class="v1-dealer-search">
+                <span class="material-icons">search</span>
+                <input type="text" id="v1-dealer-search-input" placeholder="Search dealerships…" autocomplete="off" />
+              </div>
+              <div class="v1-dealer-list" id="v1-dealer-list"></div>
+            </div>
           </div>
 
           <div class="app-header-search dash-search">
@@ -92,6 +188,9 @@
           <div class="app-header-tabs dash-tab-strip" id="dashboard-tab-strip"></div>
 
           <div class="app-header-actions">
+            <button class="v1-switch-v0-btn" id="v1-switch-v0-btn" title="Switch back to V0">
+              <span class="material-icons">undo</span> Switch to V0
+            </button>
             <button class="app-header-help-btn" id="app-header-insights-btn" title="Insights">
               <span class="material-icons">bar_chart</span>
             </button>
@@ -155,9 +254,6 @@
                 <button class="dash-nav-rail-item" data-app-id="news" title="News">
                   <span class="material-icons">article</span><span class="dash-nav-rail-item-label">News</span>
                 </button>
-                <button class="dash-nav-rail-item" data-app-id="settings-item" title="Settings">
-                  <span class="material-icons">settings</span><span class="dash-nav-rail-item-label">Settings</span>
-                </button>
                 <button class="dash-nav-rail-item" data-app-id="add-ons" title="Add-Ons">
                   <span class="material-icons">extension</span><span class="dash-nav-rail-item-label">Add-Ons</span>
                 </button>
@@ -211,6 +307,23 @@
           </div>
         </section>
 
+      </div>
+    </div>
+  </div>
+
+  <div class="v1-feedback-overlay" id="v1-feedback-overlay" hidden>
+    <div class="v1-feedback-dialog">
+      <div class="v1-feedback-header">
+        <div class="v1-feedback-title">Before you switch back…</div>
+        <div class="v1-feedback-sub">Help us understand what isn't working in this draft yet.</div>
+      </div>
+      <div class="v1-feedback-body">
+        <label class="v1-feedback-label" for="v1-feedback-textarea">Why are you switching back to V0?</label>
+        <textarea id="v1-feedback-textarea" rows="4" placeholder="e.g. the vertical nav feels unfamiliar, I couldn't find X, …"></textarea>
+      </div>
+      <div class="v1-feedback-footer">
+        <button class="v1-feedback-cancel" id="v1-feedback-cancel">Cancel</button>
+        <button class="v1-feedback-submit" id="v1-feedback-submit">Submit &amp; Switch to V0</button>
       </div>
     </div>
   </div>
@@ -270,6 +383,85 @@
         vsw.classList.toggle('open');
       });
       document.addEventListener('click', function () { vsw.classList.remove('open'); });
+
+      // Dealer group switcher — mock dealer list for this Mercedes-Benz group.
+      var DEALERSHIPS = [
+        { name: 'Mercedes-Benz of Long Beach', addr: '1900 Long Beach Blvd, Long Beach, CA' },
+        { name: 'Mercedes-Benz of Beverly Hills', addr: '9250 Wilshire Blvd, Beverly Hills, CA' },
+        { name: 'Mercedes-Benz of Encino', addr: '16850 Ventura Blvd, Encino, CA' },
+        { name: 'Mercedes-Benz of South Bay', addr: '22430 Hawthorne Blvd, Torrance, CA' },
+        { name: 'Mercedes-Benz of Pasadena', addr: '1595 E Colorado Blvd, Pasadena, CA' },
+        { name: 'Mercedes-Benz of Anaheim', addr: '1330 S Auto Center Dr, Anaheim, CA' },
+        { name: 'Mercedes-Benz of Laguna Niguel', addr: '28802 Marguerite Pkwy, Laguna Niguel, CA' }
+      ];
+      var currentDealer = DEALERSHIPS[0].name;
+
+      function escHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function renderDealerList(filter) {
+        var q = (filter || '').trim().toLowerCase();
+        var matches = DEALERSHIPS.filter(function (d) { return d.name.toLowerCase().indexOf(q) !== -1; });
+        var list = document.getElementById('v1-dealer-list');
+        if (!matches.length) {
+          list.innerHTML = '<div class="v1-dealer-empty">No dealerships match "' + escHtml(filter) + '"</div>';
+          return;
+        }
+        list.innerHTML = matches.map(function (d) {
+          var isCurrent = d.name === currentDealer;
+          return '<button class="v1-dealer-item' + (isCurrent ? ' current' : '') + '" data-dealer="' + escHtml(d.name) + '">' +
+            '<span class="v1-dealer-item-name">' + escHtml(d.name) + '</span>' +
+            '<span class="v1-dealer-item-addr">' + escHtml(d.addr) + '</span>' +
+            '</button>';
+        }).join('');
+        list.querySelectorAll('.v1-dealer-item').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            currentDealer = btn.dataset.dealer;
+            document.getElementById('v1-dealer-name').textContent = currentDealer;
+            document.getElementById('v1-dealer-menu').hidden = true;
+            document.getElementById('v1-dealer-search-input').value = '';
+            renderDealerList('');
+          });
+        });
+      }
+      renderDealerList('');
+
+      var dealerBtn = document.getElementById('v1-dealer-btn');
+      var dealerMenu = document.getElementById('v1-dealer-menu');
+      dealerBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dealerMenu.hidden = !dealerMenu.hidden;
+        if (!dealerMenu.hidden) document.getElementById('v1-dealer-search-input').focus();
+      });
+      dealerMenu.addEventListener('click', function (e) { e.stopPropagation(); });
+      document.getElementById('v1-dealer-search-input').addEventListener('input', function (e) {
+        renderDealerList(e.target.value);
+      });
+      document.addEventListener('click', function () { dealerMenu.hidden = true; });
+
+      // Switch-to-V0 button + feedback prompt
+      var feedbackOverlay = document.getElementById('v1-feedback-overlay');
+      var feedbackTextarea = document.getElementById('v1-feedback-textarea');
+      document.getElementById('v1-switch-v0-btn').addEventListener('click', function () {
+        feedbackOverlay.hidden = false;
+        feedbackTextarea.value = '';
+        feedbackTextarea.focus();
+      });
+      document.getElementById('v1-feedback-cancel').addEventListener('click', function () {
+        feedbackOverlay.hidden = true;
+      });
+      document.getElementById('v1-feedback-submit').addEventListener('click', function () {
+        var reason = feedbackTextarea.value.trim();
+        try {
+          var log = JSON.parse(localStorage.getItem('mkos-v1-switch-feedback') || '[]');
+          log.push({ reason: reason, dealer: currentDealer, at: new Date().toISOString() });
+          localStorage.setItem('mkos-v1-switch-feedback', JSON.stringify(log));
+        } catch (e) { /* localStorage unavailable — proceed without persisting */ }
+        window.location.href = '../v0/index.html';
+      });
     })();
   </script>
 </body>
