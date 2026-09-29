@@ -70,6 +70,10 @@
     font-size: 12.5px; font-weight: 700; letter-spacing: .02em; cursor: pointer;
   }
   .top-btn:hover { border-color: var(--brand); color: var(--brand); }
+  .try-new-btn {
+    background: var(--brand); border-color: var(--brand); color: #fff; text-decoration: none;
+  }
+  .try-new-btn:hover { background: #045C87; border-color: #045C87; color: #fff; }
   .icon-btn {
     display: inline-flex; align-items: center; justify-content: center;
     width: 34px; height: 34px; border-radius: 999px; border: none; background: none;
@@ -174,6 +178,9 @@
       <span class="material-icons">expand_more</span>
     </div>
     <div class="top-actions">
+      <a class="top-btn try-new-btn" href="../v1/index.html" title="Try the new vertical navigation draft">
+        <span class="material-icons" style="font-size:17px">auto_awesome</span>TRY NEW VIEW
+      </a>
       <button class="top-btn"><span class="material-icons" style="font-size:17px">storefront</span>MKSTORE</button>
       <button class="top-btn"><span class="material-icons" style="font-size:17px">help_outline</span>HELP</button>
       <button class="icon-btn rewards" title="Insights">
