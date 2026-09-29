@@ -212,12 +212,6 @@
     border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px; line-height: 1.5;
   }
 
-  .tab-edit {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 26px; height: 26px; border-radius: 999px; background: var(--border); color: var(--ink);
-    margin-left: 4px; cursor: pointer;
-  }
-  .tab-edit .material-icons { font-size: 14px; }
   .tab-spacer { flex: 1; }
   .text-btn {
     display: inline-flex; align-items: center; gap: 6px;
@@ -270,63 +264,25 @@
   .tab-item { display: inline-flex; align-items: center; gap: 6px; }
   .tab-item .material-icons { font-size: 18px; }
 
-  /* ---- Edit Tab View modal ---- */
-  .etv-overlay {
-    position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center;
-    background: rgba(16, 24, 40, .45);
+  /* ---- Display control (folded into the +App picker — replaces the old
+     separate "Edit Tab View" modal so appearance and app management live
+     in one surface instead of two entry points) ---- */
+  .add-app-display { border-top: 1px solid var(--border); }
+  .add-app-display-btn {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+    padding: 10px 16px; border: none; background: none; cursor: pointer;
+    font-family: inherit; font-size: 12.5px; color: var(--ink-muted);
   }
-  .etv-overlay[hidden] { display: none; }
-  .etv-dialog {
-    width: min(560px, 92%); max-height: 88vh; overflow-y: auto;
-    background: #fff; border-radius: 10px; box-shadow: 0 12px 32px rgba(16,24,40,.24);
+  .add-app-display-btn strong { color: var(--ink); font-weight: 700; }
+  .add-app-display-btn .material-icons { font-size: 18px; color: var(--ink-muted); transition: transform .12s ease; }
+  .add-app-display.open .add-app-display-btn .material-icons { transform: rotate(180deg); }
+  .add-app-display-options { display: none; padding: 2px 16px 10px; }
+  .add-app-display.open .add-app-display-options { display: block; }
+  .add-app-display-option {
+    display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer;
+    font-size: 13px; color: var(--ink);
   }
-  .etv-header {
-    display: flex; align-items: center; justify-content: space-between;
-    background: #4B4F58; color: #fff; padding: 16px 20px; border-radius: 10px 10px 0 0;
-    font-size: 17px; font-weight: 700;
-  }
-  .etv-close {
-    display: flex; align-items: center; justify-content: center;
-    width: 28px; height: 28px; border-radius: 999px; border: none; background: none;
-    color: #fff; cursor: pointer;
-  }
-  .etv-close:hover { background: rgba(255,255,255,.15); }
-  .etv-body { padding: 18px 20px 6px; }
-  .etv-desc { margin: 0 0 16px; font-size: 13.5px; color: var(--ink-muted); }
-  .etv-option {
-    display: block; border: 1px solid var(--border); border-radius: 8px;
-    padding: 14px 16px; margin-bottom: 12px; cursor: pointer;
-  }
-  .etv-option:hover { border-color: #C7CDD6; }
-  .etv-option.selected { border: 1.5px solid var(--brand); }
-  .etv-option-row { display: flex; align-items: flex-start; gap: 10px; }
-  .etv-option input[type="radio"] { margin-top: 2px; width: 16px; height: 16px; accent-color: var(--brand); cursor: pointer; flex-shrink: 0; }
-  .etv-option-label { font-size: 14px; color: var(--ink); line-height: 1.4; }
-  .etv-preview {
-    display: flex; align-items: center; gap: 18px; margin: 12px 0 2px 26px; flex-wrap: wrap;
-  }
-  .etv-preview-tab {
-    display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-muted);
-    padding-bottom: 8px; border-bottom: 2px solid transparent; white-space: nowrap;
-  }
-  .etv-preview-tab .material-icons { font-size: 18px; }
-  .etv-preview-tab.active { color: var(--brand); font-weight: 700; border-bottom-color: var(--brand); }
-  .etv-footer {
-    display: flex; justify-content: space-between; padding: 14px 20px 18px;
-  }
-  .etv-cancel {
-    height: 38px; padding: 0 18px; border-radius: 6px; border: 1px solid var(--brand);
-    background: var(--brand-light); color: var(--brand); font-family: inherit; font-size: 13px;
-    font-weight: 700; letter-spacing: .02em; cursor: pointer;
-  }
-  .etv-cancel:hover { background: #DCEEF9; }
-  .etv-save {
-    height: 38px; padding: 0 18px; border-radius: 6px; border: none;
-    background: var(--brand); color: #fff; font-family: inherit; font-size: 13px;
-    font-weight: 700; letter-spacing: .02em; cursor: pointer;
-  }
-  .etv-save:disabled { background: #E4E7EC; color: #A3ABB8; cursor: not-allowed; }
-  .etv-save:not(:disabled):hover { background: #045C87; }
+  .add-app-display-option input { accent-color: var(--brand); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -389,6 +345,18 @@
           </div>
         </div>
         <div class="add-app-list" id="add-app-list"></div>
+        <div class="add-app-display" id="add-app-display">
+          <button class="add-app-display-btn" id="add-app-display-btn">
+            <span>Display: <strong id="add-app-display-label">Icon + Text</strong></span>
+            <span class="material-icons">expand_more</span>
+          </button>
+          <div class="add-app-display-options">
+            <label class="add-app-display-option"><input type="radio" name="display-mode" value="adjusted" />Adjusted (Default) — adapts to available width</label>
+            <label class="add-app-display-option"><input type="radio" name="display-mode" value="icon-text" checked />Icon + Text</label>
+            <label class="add-app-display-option"><input type="radio" name="display-mode" value="icon-only" />Icon Only</label>
+            <label class="add-app-display-option"><input type="radio" name="display-mode" value="text-only" />Text Only</label>
+          </div>
+        </div>
         <div class="add-app-footer">
           <span><span class="add-app-keycap">↑</span><span class="add-app-keycap">↓</span> Navigate</span>
           <span><span class="add-app-keycap">Enter</span> Toggle</span>
@@ -396,75 +364,8 @@
         </div>
       </div>
     </div>
-    <div class="tab-edit" id="tab-edit-btn" title="Edit Tab View"><span class="material-icons">edit</span></div>
     <div class="tab-spacer"></div>
     <button class="text-btn"><span class="material-icons">chat_bubble_outline</span>TEXT<span class="material-icons">arrow_drop_down</span></button>
-  </div>
-
-  <div class="etv-overlay" id="etv-overlay" hidden>
-    <div class="etv-dialog">
-      <div class="etv-header">
-        <span>Edit Tab View</span>
-        <button class="etv-close" id="etv-close" title="Close"><span class="material-icons">close</span></button>
-      </div>
-      <div class="etv-body">
-        <p class="etv-desc">Change the appearance of the menu bar across all of your workspace.</p>
-
-        <label class="etv-option" data-value="adjusted">
-          <div class="etv-option-row">
-            <input type="radio" name="etv" value="adjusted" />
-            <span class="etv-option-label">Adjusted View (Default) - Menu bar will adjust to icon or text view based on size of screen</span>
-          </div>
-        </label>
-
-        <label class="etv-option" data-value="icon-only">
-          <div class="etv-option-row">
-            <input type="radio" name="etv" value="icon-only" />
-            <span class="etv-option-label">Icon Only View - Menu bar will be truncated to just show the icons</span>
-          </div>
-          <div class="etv-preview">
-            <div class="etv-preview-tab"><span class="material-icons">person</span></div>
-            <div class="etv-preview-tab"><span class="material-icons">chat_bubble_outline</span></div>
-            <div class="etv-preview-tab"><span class="material-icons">event</span></div>
-            <div class="etv-preview-tab active"><span class="material-icons">payment</span></div>
-            <div class="etv-preview-tab"><span class="material-icons">center_focus_strong</span></div>
-            <div class="etv-preview-tab"><span class="material-icons">location_on</span></div>
-            <div class="etv-preview-tab"><span class="material-icons">call</span></div>
-            <div class="etv-preview-tab"><span class="material-icons">bar_chart</span></div>
-          </div>
-        </label>
-
-        <label class="etv-option" data-value="icon-text">
-          <div class="etv-option-row">
-            <input type="radio" name="etv" value="icon-text" />
-            <span class="etv-option-label">Icon with Text View - Menu bar will show icons with the text</span>
-          </div>
-          <div class="etv-preview">
-            <div class="etv-preview-tab"><span class="material-icons">person</span>Customer</div>
-            <div class="etv-preview-tab"><span class="material-icons">chat_bubble_outline</span>Messages</div>
-            <div class="etv-preview-tab"><span class="material-icons">event</span>Appointments</div>
-            <div class="etv-preview-tab active"><span class="material-icons">payment</span>Payments</div>
-          </div>
-        </label>
-
-        <label class="etv-option" data-value="text-only">
-          <div class="etv-option-row">
-            <input type="radio" name="etv" value="text-only" />
-            <span class="etv-option-label">Text Only View - Menu bar will show only text</span>
-          </div>
-          <div class="etv-preview">
-            <div class="etv-preview-tab">Customer</div>
-            <div class="etv-preview-tab">Messages</div>
-            <div class="etv-preview-tab">Appointments</div>
-            <div class="etv-preview-tab active">Payments</div>
-          </div>
-        </label>
-      </div>
-      <div class="etv-footer">
-        <button class="etv-cancel" id="etv-cancel">CANCEL</button>
-        <button class="etv-save" id="etv-save" disabled>SAVE CHANGES</button>
-      </div>
-    </div>
   </div>
 
   <div class="content">
@@ -866,40 +767,24 @@
     });
     document.addEventListener('click', function () { addAppWrap.classList.remove('open'); });
 
-    // ---- Edit Tab View modal ----
-    var etvOverlay = document.getElementById('etv-overlay');
-    var etvSaveBtn = document.getElementById('etv-save');
-    var etvOptions = document.querySelectorAll('.etv-option');
+    // ---- Display control — folded into the +App picker instead of a
+    // separate "Edit Tab View" modal, so app management and appearance
+    // live in one surface. Selecting an option applies immediately. ----
+    var DISPLAY_LABELS = { adjusted: 'Adjusted', 'icon-text': 'Icon + Text', 'icon-only': 'Icon Only', 'text-only': 'Text Only' };
+    var addAppDisplay = document.getElementById('add-app-display');
+    var addAppDisplayLabel = document.getElementById('add-app-display-label');
 
-    function etvSelect(value, isInitial) {
-      etvOptions.forEach(function (opt) {
-        var selected = opt.dataset.value === value;
-        opt.classList.toggle('selected', selected);
-        opt.querySelector('input').checked = selected;
-      });
-      etvSaveBtn.disabled = isInitial || value === tabViewMode;
-    }
-
-    function openEtv() {
-      etvSelect(tabViewMode, true);
-      etvOverlay.hidden = false;
-    }
-    function closeEtv() { etvOverlay.hidden = true; }
-
-    document.getElementById('tab-edit-btn').addEventListener('click', openEtv);
-    document.getElementById('etv-close').addEventListener('click', closeEtv);
-    document.getElementById('etv-cancel').addEventListener('click', closeEtv);
-    etvOverlay.addEventListener('click', function (e) { if (e.target === etvOverlay) closeEtv(); });
-
-    etvOptions.forEach(function (opt) {
-      opt.addEventListener('click', function () { etvSelect(opt.dataset.value, false); });
+    document.getElementById('add-app-display-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      addAppDisplay.classList.toggle('open');
     });
-
-    etvSaveBtn.addEventListener('click', function () {
-      var chosen = document.querySelector('.etv-option.selected').dataset.value;
-      tabViewMode = chosen;
-      renderTabRow();
-      closeEtv();
+    document.querySelectorAll('input[name="display-mode"]').forEach(function (input) {
+      input.addEventListener('click', function (e) { e.stopPropagation(); });
+      input.addEventListener('change', function () {
+        tabViewMode = input.value;
+        addAppDisplayLabel.textContent = DISPLAY_LABELS[tabViewMode];
+        renderTabRow();
+      });
     });
   </script>
 </body>
