@@ -111,6 +111,16 @@
   }
   #shell.light .app-header-help-btn:hover { background: var(--row-hover); }
 
+  /* ---- "Ask MK" AI assistant entry point ---- */
+  .v1-ask-mk-btn {
+    display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px;
+    border: none; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    background: linear-gradient(135deg, #0377B3, #7C4DFF);
+    color: #fff; font-family: 'Lato', sans-serif; font-size: 12.5px; font-weight: 700;
+  }
+  .v1-ask-mk-btn:hover { filter: brightness(1.08); }
+  .v1-ask-mk-btn .material-icons { font-size: 16px; }
+
   /* ---- "Switch to Old View" button ---- */
   .v1-switch-v0-btn {
     display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
@@ -224,6 +234,9 @@
           <div class="app-header-tabs dash-tab-strip" id="dashboard-tab-strip"></div>
 
           <div class="app-header-actions">
+            <button class="v1-ask-mk-btn" id="v1-ask-mk-btn" title="Ask MK — AI assistant">
+              <span class="material-icons">auto_awesome</span> Ask MK
+            </button>
             <button class="v1-switch-v0-btn" id="v1-switch-v0-btn" title="Switch back to the old view">
               <span class="material-icons">undo</span> Switch to Old View
             </button>
