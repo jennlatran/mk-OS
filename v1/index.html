@@ -115,6 +115,37 @@
   }
   #shell.light .app-header-help-btn:hover { background: var(--row-hover); }
 
+  /* ---- Nav rail: drag-to-reorder + Add-Ons expandable group ---- */
+  .dash-nav-rail-group { position: relative; }
+  .dash-nav-rail-group.dragging { opacity: .4; }
+  .dash-nav-rail-group.drag-over > .dash-nav-rail-item { box-shadow: inset 0 2px 0 var(--brand); }
+  .dash-nav-rail-item-trailing { margin-left: auto; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .dash-nav-rail-drag-handle {
+    font-size: 16px !important; color: var(--text-muted); cursor: grab; opacity: 0; transition: opacity .1s ease;
+  }
+  .dash-nav-rail-group:hover .dash-nav-rail-drag-handle { opacity: 1; }
+  .dash-nav-rail-expand-caret {
+    font-size: 18px !important; color: var(--text-muted); transition: transform .12s ease;
+  }
+  .dash-nav-rail-expand-caret.expanded { transform: rotate(180deg); }
+  .dash-nav-rail-submenu { display: flex; flex-direction: column; padding-left: 34px; }
+  .dash-nav-rail-subitem {
+    display: flex; align-items: center; gap: var(--space-2); width: 100%; text-align: left;
+    border: none; background: none; border-radius: var(--radius-sm); padding: 6px var(--space-3);
+    font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text-secondary); cursor: pointer;
+  }
+  .dash-nav-rail-subitem .material-icons { font-size: 16px; }
+  .dash-nav-rail-subitem:hover { background: var(--row-hover); }
+  .dash-nav-rail-subitem.active { background: var(--rail-active-bg); color: var(--brand); font-weight: 700; }
+  /* Collapsed/hover-collapsed rail: hide trailing controls and the submenu,
+     same pattern styles.css already uses to hide .dash-nav-rail-item-label. */
+  #shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item-trailing,
+  #shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item-trailing,
+  #shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-submenu,
+  #shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-submenu {
+    display: none;
+  }
+
   /* ---- Nav rail footer: dark mode toggle + nav-display popup (replaces
      the old 3-icons-in-a-row layout with 2 controls so the bottom-left
      corner doesn't get crowded) ---- */
@@ -320,35 +351,7 @@
         <section class="screen" id="screen-dashboard" data-screen>
           <div class="dash-shell">
             <nav class="dash-nav-rail" id="dash-nav-rail" data-mode="hover">
-              <div class="dash-nav-rail-list" id="dash-nav-rail-list">
-                <button class="dash-nav-rail-item active" data-app-id="customer" title="Customer">
-                  <span class="material-icons">person</span><span class="dash-nav-rail-item-label">Customer</span>
-                </button>
-                <button class="dash-nav-rail-item" data-app-id="messages" title="Messages">
-                  <span class="material-icons">chat_bubble_outline</span><span class="dash-nav-rail-item-label">Messages</span>
-                </button>
-                <button class="dash-nav-rail-item" data-app-id="payments" title="Payments">
-                  <span class="material-icons">payments</span><span class="dash-nav-rail-item-label">Payments</span>
-                </button>
-                <button class="dash-nav-rail-item" data-app-id="inspect" title="Inspect">
-                  <span class="material-icons">fact_check</span><span class="dash-nav-rail-item-label">Inspect</span>
-                </button>
-                <button class="dash-nav-rail-item" data-app-id="pickup-delivery" title="Pickup & Delivery">
-                  <span class="material-icons">local_shipping</span><span class="dash-nav-rail-item-label">Pickup &amp; Delivery</span>
-                </button>
-                <button class="dash-nav-rail-item" data-app-id="follow-up" title="Follow Up">
-                  <span class="material-icons">campaign</span><span class="dash-nav-rail-item-label">Follow Up</span>
-                </button>
-                <button class="dash-nav-rail-item" data-app-id="insights" title="Insights">
-                  <span class="material-icons">bar_chart</span><span class="dash-nav-rail-item-label">Insights</span>
-                </button>
-                <button class="dash-nav-rail-item" data-app-id="news" title="News">
-                  <span class="material-icons">article</span><span class="dash-nav-rail-item-label">News</span>
-                </button>
-                <button class="dash-nav-rail-item" data-app-id="add-ons" title="Add-Ons">
-                  <span class="material-icons">extension</span><span class="dash-nav-rail-item-label">Add-Ons</span>
-                </button>
-              </div>
+              <div class="dash-nav-rail-list" id="dash-nav-rail-list"></div>
               <div class="dash-nav-rail-footer">
                 <button class="dash-nav-rail-footer-btn" id="v1-theme-toggle-btn" title="Switch to dark mode">
                   <span class="material-icons" id="v1-theme-icon">dark_mode</span>
@@ -439,14 +442,130 @@
 
   <script>
     (function () {
-      // Nav rail — Customer stays the only wired destination for this draft;
-      // other items are present for the visual list but don't switch content.
-      document.querySelectorAll('.dash-nav-rail-item').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          document.querySelectorAll('.dash-nav-rail-item').forEach(function (b) { b.classList.remove('active'); });
-          btn.classList.add('active');
+      // Nav rail list — data-driven so it can be reordered (drag & drop) and
+      // so Add-Ons can be an expandable group with its own sub-items.
+      // Customer stays the only destination with real content; everything
+      // else is present for the visual list but doesn't switch content.
+      function escHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
         });
-      });
+      }
+
+      var NAV_ITEMS = {
+        customer: { icon: 'person', label: 'Customer' },
+        messages: { icon: 'chat_bubble_outline', label: 'Messages' },
+        payments: { icon: 'payments', label: 'Payments' },
+        inspect: { icon: 'fact_check', label: 'Inspect' },
+        'pickup-delivery': { icon: 'local_shipping', label: 'Pickup & Delivery' },
+        'follow-up': { icon: 'campaign', label: 'Follow Up' },
+        insights: { icon: 'bar_chart', label: 'Insights' },
+        news: { icon: 'article', label: 'News' },
+        'add-ons': {
+          icon: 'extension', label: 'Add-Ons',
+          children: [
+            { id: 'mb-vehicle-diagnosis', icon: 'build', label: 'MB Vehicle Diagnosis' },
+            { id: 'tire-recommendation', icon: 'donut_large', label: 'Tire Recommendation' }
+          ]
+        }
+      };
+      var DEFAULT_NAV_ORDER = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up', 'insights', 'news', 'add-ons'];
+
+      function loadNavOrder() {
+        try {
+          var saved = JSON.parse(localStorage.getItem('mkos-v1-nav-order') || 'null');
+          if (Array.isArray(saved) && saved.length === DEFAULT_NAV_ORDER.length && saved.every(function (id) { return NAV_ITEMS[id]; })) {
+            return saved;
+          }
+        } catch (e) { /* ignore malformed/unavailable storage */ }
+        return DEFAULT_NAV_ORDER.slice();
+      }
+
+      var navOrder = loadNavOrder();
+      var activeNavId = 'customer';
+      var activeSubId = null;
+      var addonsExpanded = false;
+      var draggedNavId = null;
+
+      function renderNavList() {
+        var list = document.getElementById('dash-nav-rail-list');
+        list.innerHTML = navOrder.map(function (id) {
+          var item = NAV_ITEMS[id];
+          var trailing = '<span class="dash-nav-rail-item-trailing">' +
+            (item.children ? '<span class="material-icons dash-nav-rail-expand-caret' + (addonsExpanded ? ' expanded' : '') + '">expand_more</span>' : '') +
+            '<span class="material-icons dash-nav-rail-drag-handle" title="Drag to reorder">drag_indicator</span>' +
+            '</span>';
+          var active = !item.children && id === activeNavId;
+          var itemHtml =
+            '<button class="dash-nav-rail-item' + (active ? ' active' : '') + '" data-app-id="' + id + '" title="' + escHtml(item.label) + '">' +
+              '<span class="material-icons">' + item.icon + '</span>' +
+              '<span class="dash-nav-rail-item-label">' + escHtml(item.label) + '</span>' +
+              trailing +
+            '</button>';
+          var submenuHtml = '';
+          if (item.children && addonsExpanded) {
+            submenuHtml = '<div class="dash-nav-rail-submenu">' + item.children.map(function (child) {
+              var subActive = child.id === activeSubId;
+              return '<button class="dash-nav-rail-subitem' + (subActive ? ' active' : '') + '" data-sub-id="' + child.id + '">' +
+                '<span class="material-icons">' + child.icon + '</span>' + escHtml(child.label) +
+                '</button>';
+            }).join('') + '</div>';
+          }
+          return '<div class="dash-nav-rail-group" data-app-id="' + id + '" draggable="true">' + itemHtml + submenuHtml + '</div>';
+        }).join('');
+
+        list.querySelectorAll('.dash-nav-rail-item').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var id = btn.dataset.appId;
+            if (NAV_ITEMS[id].children) {
+              addonsExpanded = !addonsExpanded;
+            } else {
+              activeNavId = id;
+            }
+            renderNavList();
+          });
+        });
+        list.querySelectorAll('.dash-nav-rail-subitem').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            activeSubId = btn.dataset.subId;
+            renderNavList();
+          });
+        });
+
+        // Drag to reorder top-level items (mirrors the real app's
+        // bindDragReorder() in app.js — splice the dragged id to the
+        // dropped-on id's position, then re-render).
+        list.querySelectorAll('.dash-nav-rail-group').forEach(function (el) {
+          el.addEventListener('dragstart', function () {
+            draggedNavId = el.dataset.appId;
+            el.classList.add('dragging');
+          });
+          el.addEventListener('dragend', function () {
+            el.classList.remove('dragging');
+            draggedNavId = null;
+          });
+          el.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            if (el.dataset.appId !== draggedNavId) el.classList.add('drag-over');
+          });
+          el.addEventListener('dragleave', function () { el.classList.remove('drag-over'); });
+          el.addEventListener('drop', function (e) {
+            e.preventDefault();
+            el.classList.remove('drag-over');
+            var targetId = el.dataset.appId;
+            if (!draggedNavId || draggedNavId === targetId) return;
+            var from = navOrder.indexOf(draggedNavId);
+            var to = navOrder.indexOf(targetId);
+            if (from === -1 || to === -1) return;
+            navOrder.splice(from, 1);
+            navOrder.splice(to, 0, draggedNavId);
+            try { localStorage.setItem('mkos-v1-nav-order', JSON.stringify(navOrder)); } catch (e) { /* ignore */ }
+            renderNavList();
+          });
+        });
+      }
+      renderNavList();
 
       // Nav rail mode (collapsed / expanded / hover-to-expand) — now chosen from
       // a popup instead of 3 always-visible icons, to keep the footer uncluttered.
@@ -525,12 +644,6 @@
         { name: 'Mercedes-Benz of Laguna Niguel', number: '(949) 347-5400' }
       ];
       var currentDealer = DEALERSHIPS[0].name;
-
-      function escHtml(s) {
-        return String(s).replace(/[&<>"']/g, function (c) {
-          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-        });
-      }
 
       function getDealer(name) {
         return DEALERSHIPS.find(function (d) { return d.name === name; });
