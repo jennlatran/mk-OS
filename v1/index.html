@@ -111,37 +111,44 @@
   .v1-switch-v0-btn:hover { background: #F7F8F9; }
   .v1-switch-v0-btn .material-icons { font-size: 16px; }
 
-  /* ---- Switch-back feedback modal ---- */
+  /* ---- Switch-back feedback modal ----
+     This dialog is rendered outside #shell.light in the DOM, so it can't
+     inherit that element's scoped custom properties (--bg-surface, --border,
+     etc. are only defined on #shell.light itself, not on :root) — every
+     var() here fell through to nothing, leaving the dialog transparent.
+     Colors are hardcoded to match the light theme instead of using those
+     tokens. */
   .v1-feedback-overlay {
     position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center;
     background: rgba(16, 24, 40, .45);
   }
   .v1-feedback-overlay[hidden] { display: none; }
   .v1-feedback-dialog {
-    width: min(440px, 90%); background: var(--bg-surface); border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg); font-family: 'Lato', sans-serif; overflow: hidden;
+    width: min(440px, 90%); background: #FFFFFF; border-radius: 10px;
+    box-shadow: 0 8px 20px -6px rgba(16, 24, 40, .12), 0 2px 4px -2px rgba(16, 24, 40, .05);
+    font-family: 'Lato', sans-serif; overflow: hidden;
   }
-  .v1-feedback-header { padding: 20px 20px 12px; border-bottom: 1px solid var(--border); }
-  .v1-feedback-title { font-size: 16px; font-weight: 800; color: var(--text-primary); }
-  .v1-feedback-sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; }
+  .v1-feedback-header { padding: 20px 20px 12px; border-bottom: 1px solid #E3E6EA; }
+  .v1-feedback-title { font-size: 16px; font-weight: 800; color: #101828; }
+  .v1-feedback-sub { font-size: 12.5px; color: #344054; margin-top: 4px; }
   .v1-feedback-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; }
-  .v1-feedback-label { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .v1-feedback-label { font-size: 13px; font-weight: 700; color: #101828; }
   .v1-feedback-body textarea {
-    resize: vertical; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
-    font-family: inherit; font-size: 13px; color: var(--text-primary); outline: none;
+    resize: vertical; border: 1px solid #E3E6EA; border-radius: 8px; padding: 10px 12px;
+    font-family: inherit; font-size: 13px; color: #101828; outline: none; background: #FFFFFF;
   }
-  .v1-feedback-body textarea:focus { border-color: var(--brand); }
+  .v1-feedback-body textarea:focus { border-color: #0377B3; }
   .v1-feedback-footer {
-    display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid #E3E6EA;
   }
   .v1-feedback-cancel {
-    height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--border);
-    background: var(--bg-surface); color: var(--text-primary); font-family: inherit; font-size: 13px;
+    height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid #E3E6EA;
+    background: #FFFFFF; color: #101828; font-family: inherit; font-size: 13px;
     font-weight: 700; cursor: pointer;
   }
   .v1-feedback-cancel:hover { background: #F7F8F9; }
   .v1-feedback-submit {
-    height: 36px; padding: 0 16px; border-radius: 999px; border: none; background: var(--brand);
+    height: 36px; padding: 0 16px; border-radius: 999px; border: none; background: #0377B3;
     color: #fff; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
   }
   .v1-feedback-submit:hover { filter: brightness(0.92); }
