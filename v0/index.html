@@ -80,7 +80,6 @@
     color: var(--ink-muted); cursor: pointer;
   }
   .icon-btn:hover { background: var(--bg-page); color: var(--ink); }
-  .icon-btn.rewards { color: #ED6D22; }
   .avatar {
     width: 34px; height: 34px; border-radius: 999px; background: #101828; color: #fff;
     display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
@@ -104,11 +103,20 @@
   .tab-row-scroll::-webkit-scrollbar { height: 4px; }
   .tab-row-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   .tab-row-scroll::-webkit-scrollbar-track { background: transparent; }
+  /* Chrome-tab-style continuous shrink: each tab shares the row's available
+     width equally (flex-basis 0, flex-grow/shrink 1) between a floor and a
+     ceiling, so adding more tabs makes every tab narrower instead of
+     overflowing — pure CSS, no measurement/resize JS needed. The label
+     truncates with an ellipsis as its tab narrows; the icon never shrinks. */
   .tab-item {
-    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 6px; overflow: hidden;
+    flex: 1 1 0%; min-width: 52px; max-width: 172px;
     padding: 13px 14px; font-size: 14px; color: var(--ink-secondary, #344054);
     cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
   }
+  .tab-item.tab-item--fixed { flex: 0 0 auto; min-width: 0; max-width: none; }
+  .tab-item .material-icons { flex-shrink: 0; font-size: 18px; }
+  .tab-item-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .tab-item:hover { color: var(--ink); }
   .tab-item.active { color: var(--brand); font-weight: 700; border-bottom-color: var(--brand); }
   /* ---- +App picker (replaces the old "Add-Ons" dropdown) ---- */
@@ -261,9 +269,6 @@
   .panels-row { display: flex; gap: 20px; }
   .panel-placeholder { flex: 1; height: 420px; background: #EDEEF0; border-radius: 6px; }
 
-  .tab-item { display: inline-flex; align-items: center; gap: 6px; }
-  .tab-item .material-icons { font-size: 18px; }
-
   /* ---- Display control (folded into the +App picker — replaces the old
      separate "Edit Tab View" modal so appearance and app management live
      in one surface instead of two entry points) ---- */
@@ -311,9 +316,7 @@
       <button class="icon-btn" title="Insights"><span class="material-icons">bar_chart</span></button>
       <button class="icon-btn" title="News"><span class="material-icons">article</span></button>
       <button class="icon-btn" title="Settings"><span class="material-icons">settings</span></button>
-      <button class="icon-btn rewards" title="Rewards">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 L21 12 L12 21 L3 12 Z"/></svg>
-      </button>
+      <button class="icon-btn" title="mK University"><span class="material-icons">school</span></button>
       <button class="icon-btn"><span class="material-icons">notifications_none</span></button>
       <div class="avatar">MG</div>
       <div class="presence">
@@ -443,17 +446,13 @@
     var activeTabIds = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up'];
     var activeTabId = 'customer';
     var tabViewMode = 'icon-text';
-    // "Adjusted" picks between these two based on measured available width —
-    // it never falls back to text-only, since icons alone are the densest
-    // real option before the row has to scroll.
-    var adjustedMode = 'icon-text';
 
-    function effectiveTabMode() {
-      return tabViewMode === 'adjusted' ? adjustedMode : tabViewMode;
-    }
-
+    // Continuous Chrome-tab-style shrink (see .tab-item CSS) handles fitting
+    // more tabs in the same space automatically — no measurement/resize JS
+    // needed. "Adjusted" renders the same as icon-text; the two remaining
+    // manual overrides (icon-only, text-only) opt out of shrinking one side.
     function renderTabRow() {
-      var mode = effectiveTabMode();
+      var mode = tabViewMode;
       var showIcon = mode !== 'text-only';
       var showLabel = mode !== 'icon-only';
       var container = document.getElementById('tab-row-items');
@@ -461,8 +460,9 @@
         var app = getApp(id);
         var active = id === activeTabId;
         var iconHtml = showIcon ? '<span class="material-icons">' + app.icon + '</span>' : '';
-        var labelHtml = showLabel ? '<span>' + escHtml(app.name) + '</span>' : '';
-        return '<div class="tab-item' + (active ? ' active' : '') + '" data-tab-id="' + id + '" title="' + escHtml(app.name) + '">' + iconHtml + labelHtml + '</div>';
+        var labelHtml = showLabel ? '<span class="tab-item-label">' + escHtml(app.name) + '</span>' : '';
+        var fixedClass = showLabel ? '' : ' tab-item--fixed';
+        return '<div class="tab-item' + (active ? ' active' : '') + fixedClass + '" data-tab-id="' + id + '" title="' + escHtml(app.name) + '">' + iconHtml + labelHtml + '</div>';
       }).join('');
       container.querySelectorAll('.tab-item').forEach(function (el) {
         el.addEventListener('click', function () {
@@ -470,40 +470,8 @@
           renderTabRow();
         });
       });
-      if (tabViewMode === 'adjusted') recomputeAdjustedMode();
     }
     renderTabRow();
-
-    // "Adjusted" mode: measure whether the full icon+text row actually fits
-    // in the space available (the tab-row's own scroll container, not the
-    // whole viewport, since +App/Edit/TEXT stay fixed-width beside it), and
-    // drop to icon-only the moment it doesn't — so adding more tabs shrinks
-    // the row's density instead of pushing controls off-screen.
-    var adjustingMode = false;
-    function recomputeAdjustedMode() {
-      if (adjustingMode) return;
-      var container = document.getElementById('tab-row-items');
-      if (adjustedMode !== 'icon-text') {
-        adjustedMode = 'icon-text';
-        adjustingMode = true;
-        renderTabRow();
-        adjustingMode = false;
-      }
-      requestAnimationFrame(function () {
-        if (container.scrollWidth > container.clientWidth + 1 && adjustedMode !== 'icon-only') {
-          adjustedMode = 'icon-only';
-          adjustingMode = true;
-          renderTabRow();
-          adjustingMode = false;
-        }
-      });
-    }
-    var resizeTimer = null;
-    window.addEventListener('resize', function () {
-      if (tabViewMode !== 'adjusted') return;
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(recomputeAdjustedMode, 100);
-    });
 
     // ---- +App picker: search, add, and remove apps without navigating away.
     // Applies design-skills/forms/03-searchable-picker-widget.md: auto-focus
