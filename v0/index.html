@@ -272,20 +272,21 @@
   /* ---- Display control (folded into the +App picker — replaces the old
      separate "Edit Tab View" modal so appearance and app management live
      in one surface instead of two entry points) ---- */
-  .add-app-display { border-top: 1px solid var(--border); }
-  .add-app-display-btn {
-    display: flex; align-items: center; justify-content: space-between; width: 100%;
-    padding: 10px 16px; border: none; background: none; cursor: pointer;
-    font-family: inherit; font-size: 12.5px; color: var(--ink-muted);
+  .add-app-panel-tabs {
+    display: flex; gap: 4px; margin: 12px 12px 0; padding-bottom: 8px; border-bottom: 1px solid var(--border);
   }
-  .add-app-display-btn strong { color: var(--ink); font-weight: 700; }
-  .add-app-display-btn .material-icons { font-size: 18px; color: var(--ink-muted); transition: transform .12s ease; }
-  .add-app-display.open .add-app-display-btn .material-icons { transform: rotate(180deg); }
-  .add-app-display-options { display: none; padding: 2px 16px 10px; }
-  .add-app-display.open .add-app-display-options { display: block; }
+  .add-app-panel-tab {
+    flex: 1; border: none; background: none; padding: 7px 0; border-radius: 7px;
+    font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink-muted); cursor: pointer;
+  }
+  .add-app-panel-tab.active { background: var(--brand-light); color: var(--brand); }
+  .add-app-panel-tab:hover:not(.active) { color: var(--ink); }
+
+  .add-app-display-intro { padding: 14px 16px 4px; font-size: 12.5px; color: var(--ink-muted); }
+  .add-app-display-options { padding: 6px 16px 16px; }
   .add-app-display-option {
-    display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer;
-    font-size: 13px; color: var(--ink);
+    display: flex; align-items: center; gap: 8px; padding: 8px 0; cursor: pointer;
+    font-size: 13.5px; color: var(--ink);
   }
   .add-app-display-option input { accent-color: var(--brand); cursor: pointer; }
 </style>
@@ -329,41 +330,46 @@
   <div class="tab-row">
     <div id="tab-row-items" class="tab-row-scroll"></div>
     <div class="add-app-wrap" id="add-app-wrap">
-      <button class="add-app-btn" id="add-app-btn" title="Add or remove apps">
-        <span class="material-icons">add</span>App
+      <button class="add-app-btn" id="add-app-btn" title="Customize tabs">
+        <span class="material-icons">tune</span>Customize
       </button>
       <div class="add-app-menu" id="add-app-menu">
-        <div class="add-app-search">
-          <span class="material-icons">search</span>
-          <input type="text" id="add-app-search-input" placeholder="Search apps" autocomplete="off" />
+        <div class="add-app-panel-tabs" role="tablist">
+          <button class="add-app-panel-tab active" data-panel="apps" id="add-app-panel-tab-apps">Apps</button>
+          <button class="add-app-panel-tab" data-panel="display" id="add-app-panel-tab-display">Display</button>
         </div>
-        <div class="add-app-toolbar">
-          <div class="add-app-view-toggle" role="tablist">
-            <button class="add-app-view-btn active" data-view="all" id="add-app-view-all">All</button>
-            <button class="add-app-view-btn" data-view="added" id="add-app-view-added">Added</button>
+
+        <div class="add-app-panel" id="add-app-panel-apps">
+          <div class="add-app-search">
+            <span class="material-icons">search</span>
+            <input type="text" id="add-app-search-input" placeholder="Search apps" autocomplete="off" />
           </div>
-          <div class="add-app-bulk-actions">
-            <button class="add-app-bulk-btn" id="add-app-select-all">Select all</button>
-            <button class="add-app-bulk-btn" id="add-app-clear-all">Clear all</button>
+          <div class="add-app-toolbar">
+            <div class="add-app-view-toggle" role="tablist">
+              <button class="add-app-view-btn active" data-view="all" id="add-app-view-all">All</button>
+              <button class="add-app-view-btn" data-view="added" id="add-app-view-added">Added</button>
+            </div>
+            <div class="add-app-bulk-actions">
+              <button class="add-app-bulk-btn" id="add-app-select-all">Select all</button>
+              <button class="add-app-bulk-btn" id="add-app-clear-all">Clear all</button>
+            </div>
+          </div>
+          <div class="add-app-list" id="add-app-list"></div>
+          <div class="add-app-footer">
+            <span><span class="add-app-keycap">↑</span><span class="add-app-keycap">↓</span> Navigate</span>
+            <span><span class="add-app-keycap">Enter</span> Toggle</span>
+            <span><span class="add-app-keycap">Esc</span> Close</span>
           </div>
         </div>
-        <div class="add-app-list" id="add-app-list"></div>
-        <div class="add-app-display" id="add-app-display">
-          <button class="add-app-display-btn" id="add-app-display-btn">
-            <span>Display: <strong id="add-app-display-label">Icon + Text</strong></span>
-            <span class="material-icons">expand_more</span>
-          </button>
+
+        <div class="add-app-panel" id="add-app-panel-display" hidden>
+          <div class="add-app-display-intro">Choose how the tab bar shows your apps.</div>
           <div class="add-app-display-options">
             <label class="add-app-display-option"><input type="radio" name="display-mode" value="adjusted" />Adjusted (Default) — adapts to available width</label>
             <label class="add-app-display-option"><input type="radio" name="display-mode" value="icon-text" checked />Icon + Text</label>
             <label class="add-app-display-option"><input type="radio" name="display-mode" value="icon-only" />Icon Only</label>
             <label class="add-app-display-option"><input type="radio" name="display-mode" value="text-only" />Text Only</label>
           </div>
-        </div>
-        <div class="add-app-footer">
-          <span><span class="add-app-keycap">↑</span><span class="add-app-keycap">↓</span> Navigate</span>
-          <span><span class="add-app-keycap">Enter</span> Toggle</span>
-          <span><span class="add-app-keycap">Esc</span> Close</span>
         </div>
       </div>
     </div>
@@ -668,6 +674,10 @@
       e.stopPropagation();
       addAppWrap.classList.toggle('open');
       if (addAppWrap.classList.contains('open')) {
+        document.getElementById('add-app-panel-tab-apps').classList.add('active');
+        document.getElementById('add-app-panel-tab-display').classList.remove('active');
+        document.getElementById('add-app-panel-apps').hidden = false;
+        document.getElementById('add-app-panel-display').hidden = true;
         appViewFilter = 'all';
         document.getElementById('add-app-view-all').classList.add('active');
         document.getElementById('add-app-view-added').classList.remove('active');
@@ -735,22 +745,26 @@
     });
     document.addEventListener('click', function () { addAppWrap.classList.remove('open'); });
 
-    // ---- Display control — folded into the +App picker instead of a
-    // separate "Edit Tab View" modal, so app management and appearance
-    // live in one surface. Selecting an option applies immediately. ----
-    var DISPLAY_LABELS = { adjusted: 'Adjusted', 'icon-text': 'Icon + Text', 'icon-only': 'Icon Only', 'text-only': 'Text Only' };
-    var addAppDisplay = document.getElementById('add-app-display');
-    var addAppDisplayLabel = document.getElementById('add-app-display-label');
-
-    document.getElementById('add-app-display-btn').addEventListener('click', function (e) {
-      e.stopPropagation();
-      addAppDisplay.classList.toggle('open');
+    // ---- "Customize" popover: two top-level panels (Apps / Display)
+    // instead of "+App" with a Display accordion buried at the bottom —
+    // the old trigger name/icon read as "add an app only", so a display
+    // setting hiding inside it wasn't discoverable. Both panels share the
+    // one popover; switching tabs never closes it. ----
+    document.querySelectorAll('.add-app-panel-tab').forEach(function (tabBtn) {
+      tabBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.querySelectorAll('.add-app-panel-tab').forEach(function (b) { b.classList.remove('active'); });
+        tabBtn.classList.add('active');
+        var target = tabBtn.dataset.panel;
+        document.getElementById('add-app-panel-apps').hidden = target !== 'apps';
+        document.getElementById('add-app-panel-display').hidden = target !== 'display';
+        if (target === 'apps') addAppSearchInput.focus();
+      });
     });
     document.querySelectorAll('input[name="display-mode"]').forEach(function (input) {
       input.addEventListener('click', function (e) { e.stopPropagation(); });
       input.addEventListener('change', function () {
         tabViewMode = input.value;
-        addAppDisplayLabel.textContent = DISPLAY_LABELS[tabViewMode];
         renderTabRow();
       });
     });
