@@ -61,32 +61,47 @@
   .v1-dealer-name { font-size: 14px; font-weight: 700; color: var(--text-primary); white-space: nowrap; }
   .v1-dealer-btn .material-icons { font-size: 18px; color: var(--text-secondary); }
   .v1-dealer-menu {
-    position: absolute; top: calc(100% + 6px); left: 0; width: 320px; max-height: 360px;
+    position: absolute; top: calc(100% + 8px); left: 0; width: 380px; max-height: 460px;
     background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg); z-index: 200; display: flex; flex-direction: column; overflow: hidden;
   }
   .v1-dealer-menu[hidden] { display: none; }
+
+  .v1-dealer-sitenum { padding: 16px 18px 14px; border-bottom: 1px solid var(--border); }
+  .v1-dealer-sitenum-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-secondary);
+  }
+  .v1-dealer-sitenum-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .v1-dealer-sitenum-value { font-size: 24px; font-weight: 800; color: var(--text-primary); }
+  .v1-dealer-copy-btn {
+    width: 34px; height: 34px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 8px;
+    background: none; color: var(--text-secondary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .v1-dealer-copy-btn:hover { background: #F7F8F9; }
+  .v1-dealer-copy-btn .material-icons { font-size: 18px; }
+
   .v1-dealer-search {
-    display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px; margin: 14px 18px; padding: 9px 12px;
+    border: 1px solid var(--border); border-radius: 8px;
   }
   .v1-dealer-search .material-icons { font-size: 18px; color: var(--text-secondary); }
   .v1-dealer-search input {
-    flex: 1; border: none; outline: none; font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text-primary);
+    flex: 1; border: none; outline: none; background: none; font-family: 'Lato', sans-serif;
+    font-size: 13px; color: var(--text-primary);
   }
-  .v1-dealer-list { overflow-y: auto; max-height: 300px; }
+  .v1-dealer-list { overflow-y: auto; max-height: 300px; padding-bottom: 8px; }
   .v1-dealer-item {
-    display: block; width: 100%; text-align: left; padding: 10px 14px; border: none; background: none;
-    cursor: pointer; border-bottom: 1px solid #F2F4F7;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+    text-align: left; padding: 10px 18px; border: none; background: none; cursor: pointer;
   }
-  .v1-dealer-item:last-child { border-bottom: none; }
   .v1-dealer-item:hover { background: #F7F8F9; }
-  .v1-dealer-item-name { display: block; font-size: 13px; font-weight: 700; color: var(--text-primary); }
-  .v1-dealer-item-addr { display: block; font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
-  .v1-dealer-item.current { background: var(--brand-light, #EBF4FA); }
-  .v1-dealer-item.current .v1-dealer-item-name { color: var(--brand); }
-  .v1-dealer-empty { padding: 16px 14px; font-size: 12.5px; color: var(--text-secondary); }
+  .v1-dealer-item-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .v1-dealer-item-num { font-size: 12.5px; color: var(--text-secondary); white-space: nowrap; }
+  .v1-dealer-item.current .v1-dealer-item-name { color: var(--brand); font-weight: 700; }
+  .v1-dealer-empty { padding: 16px 18px; font-size: 12.5px; color: var(--text-secondary); }
 
-  /* ---- "Switch to V0" button ---- */
+  /* ---- "Switch to Old View" button ---- */
   .v1-switch-v0-btn {
     display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
     border: 1px solid var(--border); border-radius: 999px; background: var(--bg-surface);
@@ -172,24 +187,28 @@
               <span class="material-icons">expand_more</span>
             </button>
             <div class="v1-dealer-menu" id="v1-dealer-menu" hidden>
+              <div class="v1-dealer-sitenum">
+                <div class="v1-dealer-sitenum-label">Site Number</div>
+                <div class="v1-dealer-sitenum-row">
+                  <div class="v1-dealer-sitenum-value" id="v1-dealer-sitenum-value">(562) 495-3200</div>
+                  <button class="v1-dealer-copy-btn" id="v1-dealer-copy-btn" title="Copy site number">
+                    <span class="material-icons">content_copy</span>
+                  </button>
+                </div>
+              </div>
               <div class="v1-dealer-search">
                 <span class="material-icons">search</span>
-                <input type="text" id="v1-dealer-search-input" placeholder="Search dealerships…" autocomplete="off" />
+                <input type="text" id="v1-dealer-search-input" placeholder="Search" autocomplete="off" />
               </div>
               <div class="v1-dealer-list" id="v1-dealer-list"></div>
             </div>
           </div>
 
-          <div class="app-header-search dash-search">
-            <span class="material-icons">search</span>
-            <input type="text" id="dashboard-search-input" placeholder="Search customers, ROs, or apps…" autocomplete="off" />
-          </div>
-
           <div class="app-header-tabs dash-tab-strip" id="dashboard-tab-strip"></div>
 
           <div class="app-header-actions">
-            <button class="v1-switch-v0-btn" id="v1-switch-v0-btn" title="Switch back to V0">
-              <span class="material-icons">undo</span> Switch to V0
+            <button class="v1-switch-v0-btn" id="v1-switch-v0-btn" title="Switch back to the old view">
+              <span class="material-icons">undo</span> Switch to Old View
             </button>
             <button class="app-header-help-btn" id="app-header-insights-btn" title="Insights">
               <span class="material-icons">bar_chart</span>
@@ -228,7 +247,7 @@
         <!-- Onboarding removed entirely for this draft — lands directly on the shell below -->
         <section class="screen" id="screen-dashboard" data-screen>
           <div class="dash-shell">
-            <nav class="dash-nav-rail" id="dash-nav-rail" data-mode="expanded">
+            <nav class="dash-nav-rail" id="dash-nav-rail" data-mode="hover">
               <div class="dash-nav-rail-list" id="dash-nav-rail-list">
                 <button class="dash-nav-rail-item active" data-app-id="customer" title="Customer">
                   <span class="material-icons">person</span><span class="dash-nav-rail-item-label">Customer</span>
@@ -261,8 +280,8 @@
               <div class="dash-nav-rail-footer">
                 <div class="dash-nav-mode-toggle" id="dash-nav-mode-toggle" role="group" aria-label="Nav rail mode">
                   <button class="dash-nav-mode-btn" data-mode="collapsed" title="Keep collapsed"><span class="material-icons">menu_open</span></button>
-                  <button class="dash-nav-mode-btn active" data-mode="expanded" title="Keep expanded"><span class="material-icons">view_sidebar</span></button>
-                  <button class="dash-nav-mode-btn" data-mode="hover" title="Expand on hover"><span class="material-icons">swipe</span></button>
+                  <button class="dash-nav-mode-btn" data-mode="expanded" title="Keep expanded"><span class="material-icons">view_sidebar</span></button>
+                  <button class="dash-nav-mode-btn active" data-mode="hover" title="Expand on hover"><span class="material-icons">swipe</span></button>
                 </div>
               </div>
             </nav>
@@ -318,12 +337,12 @@
         <div class="v1-feedback-sub">Help us understand what isn't working in this draft yet.</div>
       </div>
       <div class="v1-feedback-body">
-        <label class="v1-feedback-label" for="v1-feedback-textarea">Why are you switching back to V0?</label>
+        <label class="v1-feedback-label" for="v1-feedback-textarea">Why are you switching back to the old view?</label>
         <textarea id="v1-feedback-textarea" rows="4" placeholder="e.g. the vertical nav feels unfamiliar, I couldn't find X, …"></textarea>
       </div>
       <div class="v1-feedback-footer">
         <button class="v1-feedback-cancel" id="v1-feedback-cancel">Cancel</button>
-        <button class="v1-feedback-submit" id="v1-feedback-submit">Submit &amp; Switch to V0</button>
+        <button class="v1-feedback-submit" id="v1-feedback-submit">Submit &amp; Switch to Old View</button>
       </div>
     </div>
   </div>
@@ -386,13 +405,13 @@
 
       // Dealer group switcher — mock dealer list for this Mercedes-Benz group.
       var DEALERSHIPS = [
-        { name: 'Mercedes-Benz of Long Beach', addr: '1900 Long Beach Blvd, Long Beach, CA' },
-        { name: 'Mercedes-Benz of Beverly Hills', addr: '9250 Wilshire Blvd, Beverly Hills, CA' },
-        { name: 'Mercedes-Benz of Encino', addr: '16850 Ventura Blvd, Encino, CA' },
-        { name: 'Mercedes-Benz of South Bay', addr: '22430 Hawthorne Blvd, Torrance, CA' },
-        { name: 'Mercedes-Benz of Pasadena', addr: '1595 E Colorado Blvd, Pasadena, CA' },
-        { name: 'Mercedes-Benz of Anaheim', addr: '1330 S Auto Center Dr, Anaheim, CA' },
-        { name: 'Mercedes-Benz of Laguna Niguel', addr: '28802 Marguerite Pkwy, Laguna Niguel, CA' }
+        { name: 'Mercedes-Benz of Long Beach', number: '(562) 495-3200' },
+        { name: 'Mercedes-Benz of Beverly Hills', number: '(310) 274-7871' },
+        { name: 'Mercedes-Benz of Encino', number: '(818) 986-2277' },
+        { name: 'Mercedes-Benz of South Bay', number: '(310) 328-3313' },
+        { name: 'Mercedes-Benz of Pasadena', number: '(626) 683-6600' },
+        { name: 'Mercedes-Benz of Anaheim', number: '(714) 991-9000' },
+        { name: 'Mercedes-Benz of Laguna Niguel', number: '(949) 347-5400' }
       ];
       var currentDealer = DEALERSHIPS[0].name;
 
@@ -400,6 +419,10 @@
         return String(s).replace(/[&<>"']/g, function (c) {
           return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
         });
+      }
+
+      function getDealer(name) {
+        return DEALERSHIPS.find(function (d) { return d.name === name; });
       }
 
       function renderDealerList(filter) {
@@ -414,13 +437,14 @@
           var isCurrent = d.name === currentDealer;
           return '<button class="v1-dealer-item' + (isCurrent ? ' current' : '') + '" data-dealer="' + escHtml(d.name) + '">' +
             '<span class="v1-dealer-item-name">' + escHtml(d.name) + '</span>' +
-            '<span class="v1-dealer-item-addr">' + escHtml(d.addr) + '</span>' +
+            '<span class="v1-dealer-item-num">' + escHtml(d.number) + '</span>' +
             '</button>';
         }).join('');
         list.querySelectorAll('.v1-dealer-item').forEach(function (btn) {
           btn.addEventListener('click', function () {
             currentDealer = btn.dataset.dealer;
             document.getElementById('v1-dealer-name').textContent = currentDealer;
+            document.getElementById('v1-dealer-sitenum-value').textContent = getDealer(currentDealer).number;
             document.getElementById('v1-dealer-menu').hidden = true;
             document.getElementById('v1-dealer-search-input').value = '';
             renderDealerList('');
@@ -441,6 +465,14 @@
         renderDealerList(e.target.value);
       });
       document.addEventListener('click', function () { dealerMenu.hidden = true; });
+
+      document.getElementById('v1-dealer-copy-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        var value = document.getElementById('v1-dealer-sitenum-value').textContent;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(value).catch(function () {});
+        }
+      });
 
       // Switch-to-V0 button + feedback prompt
       var feedbackOverlay = document.getElementById('v1-feedback-overlay');
