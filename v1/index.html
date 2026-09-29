@@ -1,358 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mkOS — myKaarma</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>mkOS — Draft: Nav Rail Concept (V1)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  /* ---- V0's Customer-tab content, reused verbatim (same UI as V0), just
+     namespaced with a v0- prefix so nothing here collides with the real
+     app's own styles.css classes it now sits alongside. ---- */
+  .v0-content { padding: 22px 24px; font-family: 'Lato', sans-serif; }
+  .v0-field-label { font-size: 15px; color: #101828; margin-bottom: 10px; }
+  .v0-search-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .v0-search-input-wrap { position: relative; width: 420px; }
+  .v0-search-input-wrap input {
+    width: 100%; height: 38px; padding: 0 34px 0 12px; border: 1px solid #E4E7EC;
+    border-radius: 6px; font-family: inherit; font-size: 14px; color: #101828; outline: none;
+  }
+  .v0-search-input-wrap input:focus { border-color: #0377B3; }
+  .v0-search-clear {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; border-radius: 999px; background: #667085; color: #fff;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .v0-search-clear .material-icons { font-size: 12px; }
+  .v0-action-pill {
+    height: 38px; padding: 0 18px; border-radius: 6px; border: none;
+    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .03em; cursor: pointer;
+  }
+  .v0-action-pill.new { background: #EBF4FA; color: #0377B3; }
+  .v0-action-pill.edit { background: #F5F6F8; color: #667085; cursor: not-allowed; }
+  .v0-lookup-link { display: inline-block; margin-bottom: 22px; font-size: 13px; color: #0377B3; text-decoration: underline; }
+  .v0-lookup-link:hover { color: #025d8c; }
+  .v0-contact-row { display: flex; gap: 40px; margin-bottom: 26px; }
+  .v0-contact-field { flex: 0 0 340px; }
+  .v0-contact-field-label { display: flex; align-items: center; gap: 8px; font-size: 15px; color: #101828; margin-bottom: 8px; }
+  .v0-contact-field-label .material-icons { font-size: 16px; color: #667085; cursor: pointer; }
+  .v0-contact-input-wrap { display: flex; align-items: center; gap: 10px; }
+  .v0-contact-input-wrap input {
+    flex: 1; height: 38px; padding: 0 12px; border: 1px solid #E4E7EC;
+    border-radius: 6px; font-family: inherit; font-size: 14px; color: #101828; outline: none;
+  }
+  .v0-contact-input-wrap input:focus { border-color: #0377B3; }
+  .v0-contact-input-wrap .material-icons { color: #667085; cursor: pointer; flex-shrink: 0; }
+  .v0-panels-row { display: flex; gap: 20px; }
+  .v0-panel-placeholder { flex: 1; height: 420px; background: #EDEEF0; border-radius: 6px; }
+
+  /* ---- version switcher (not part of the real product) ---- */
+  .vsw { position: fixed; bottom: 16px; right: 16px; z-index: 99999; font-family: 'Lato', sans-serif; }
+  .vsw-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: #101828; color: #fff; border: none; border-radius: 999px;
+    padding: 7px 12px 7px 14px; font-size: 12px; font-weight: 700; letter-spacing: .02em;
+    cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.25);
+  }
+  .vsw-btn .material-icons { font-size: 16px; }
+  .vsw-menu {
+    display: none; position: absolute; bottom: calc(100% + 6px); right: 0; width: 240px;
+    background: #fff; border: 1px solid #E4E7EC; border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(16,24,40,.16); overflow: hidden;
+  }
+  .vsw.open .vsw-menu { display: block; }
+  .vsw-item { display: block; padding: 10px 14px; text-decoration: none; border-bottom: 1px solid #F2F4F7; }
+  .vsw-item:last-child { border-bottom: none; }
+  .vsw-item:hover { background: #F7F8F9; }
+  .vsw-item .vsw-label { display: block; font-size: 12.5px; font-weight: 800; color: #101828; }
+  .vsw-item .vsw-desc { display: block; font-size: 11.5px; color: #667085; margin-top: 2px; }
+  .vsw-item.current { background: #EBF4FA; }
+  .vsw-item.current .vsw-label { color: #0377B3; }
+</style>
 </head>
 <body>
   <div id="shell" class="light">
-
-    <!-- Prototype-only toolbar — quick navigation for reviewing the flow, not part of the product -->
-    <div class="proto-toolbar">
-      <div class="proto-toolbar-brand">
-        <span class="material-icons">apps</span>
-        mkOS Prototype
-      </div>
-      <div class="proto-toolbar-controls">
-        <div class="proto-jump">
-          <label for="proto-jump-select" class="sr-only">Jump to screen</label>
-          <select id="proto-jump-select">
-            <option value="onboarding-role">Onboarding — Pick a role</option>
-            <option value="dashboard">Dashboard</option>
-            <option value="home">Edit Home Screen</option>
-            <option value="manager">Manager / IT View</option>
-          </select>
-        </div>
-        <div class="proto-device-toggle" role="group" aria-label="Preview device size">
-          <button class="proto-device-btn active" data-device="desktop" title="Desktop"><span class="material-icons">desktop_windows</span></button>
-          <button class="proto-device-btn" data-device="tablet" title="Tablet"><span class="material-icons">tablet_mac</span></button>
-          <button class="proto-device-btn" data-device="mobile" title="Mobile"><span class="material-icons">phone_iphone</span></button>
-        </div>
-        <button class="mk-button tertiary-mk-button" id="proto-reset-btn">Reset</button>
-      </div>
-    </div>
-
     <div class="app-frame-wrap">
       <div class="app-frame" id="app-frame" data-device="desktop">
-       <!-- Global header, shown on every post-onboarding screen. Several element ids below
-            (dashboard-search-input, dashboard-tab-strip, dashboard-bell-*, dashboard-notif-*)
-            intentionally keep their "dashboard-" prefix from the old per-screen topbar this
-            replaces — reused as-is so app.js's existing render functions need no id changes.
-            They are NOT scoped to the Dashboard screen; they're global. See
-            docs/plans/2026-08-21-global-header-implementation.md, Task 1. -->
-       <header class="app-header" id="app-header" hidden>
-         <div class="app-header-logo">
-           <span class="material-icons">apps</span>
-           <span class="app-header-logo-text">myKaarma</span>
-         </div>
 
-         <div class="app-header-search dash-search">
-           <span class="material-icons">search</span>
-           <input type="text" id="dashboard-search-input" placeholder="Search customers, ROs, or apps…" autocomplete="off" />
-           <div class="dash-search-results" id="dashboard-search-results" hidden></div>
-         </div>
-
-         <div class="app-header-tabs dash-tab-strip" id="dashboard-tab-strip"></div>
-
-         <div class="app-header-actions">
-           <div class="notif-bell-wrap">
-             <button class="notif-bell-btn" id="dashboard-bell-btn" title="Notifications">
-               <span class="material-icons">notifications</span>
-               <span class="notif-badge" id="dashboard-bell-badge" hidden>0</span>
-             </button>
-             <div class="notif-panel" id="dashboard-notif-panel" hidden>
-               <div class="notif-panel-header"><div class="myk-subtitle1">Notifications</div></div>
-               <div class="notif-filter-row" id="dashboard-notif-filter"></div>
-               <div class="notif-list" id="dashboard-notif-list"></div>
-             </div>
-           </div>
-
-           <button class="app-header-help-btn" id="app-header-help-btn" title="Help">
-             <span class="material-icons">help_outline</span>
-           </button>
-
-           <div class="app-header-avatar-wrap">
-             <button class="app-header-avatar-btn" id="app-header-avatar-btn" title="Account">
-               <span id="app-header-avatar-initials">JD</span>
-             </button>
-             <div class="app-header-avatar-menu" id="app-header-avatar-menu" hidden>
-               <div class="app-header-avatar-role" id="app-header-avatar-role"></div>
-               <button class="app-header-avatar-item" id="app-header-manage-views-item" hidden>
-                 <span class="material-icons">admin_panel_settings</span> Manage Dealership Views
-               </button>
-               <button class="app-header-avatar-item" id="app-header-reset-password-item">
-                 <span class="material-icons">lock_reset</span> Reset password
-               </button>
-               <button class="app-header-avatar-item" id="app-header-edit-profile-item">
-                 <span class="material-icons">person</span> Edit profile
-               </button>
-             </div>
-           </div>
-         </div>
-       </header>
-       <div class="onboarding-layout">
-
-        <!-- Persistent branded sidebar — shown only while an onboarding screen is active -->
-        <aside class="onboarding-sidebar" id="onboarding-sidebar">
-          <div class="sidebar-blob sidebar-blob-1"></div>
-          <div class="sidebar-blob sidebar-blob-2"></div>
-          <div class="sidebar-content">
-            <div class="mk-logo">myKaarma</div>
-            <div class="sidebar-eyebrow">Let's Start</div>
-            <h2 class="sidebar-welcome">Welcome, John!</h2>
-            <p class="sidebar-sub myk-body2">We're here to make your day at the dealership easier and more personalized.</p>
+        <!-- Header — copied verbatim from the current repo's real global header -->
+        <header class="app-header" id="app-header">
+          <div class="app-header-logo">
+            <span class="material-icons">apps</span>
+            <span class="app-header-logo-text">myKaarma</span>
           </div>
-        </aside>
 
-        <div class="onboarding-stage" id="onboarding-stage">
-
-        <!-- ===================== ONBOARDING — ROLE SELECT ===================== -->
-        <section class="screen" id="screen-onboarding-role" data-screen>
-          <div class="onboarding-center">
-            <h1 class="onboarding-h1">Choose your role</h1>
-            <div class="progress-dots" data-progress-dots>
-              <span class="dot" data-step="0"></span>
-              <span class="dot" data-step="1"></span>
-              <span class="dot" data-step="2"></span>
-            </div>
-
-            <div class="role-grid" id="role-grid"></div>
+          <div class="app-header-search dash-search">
+            <span class="material-icons">search</span>
+            <input type="text" id="dashboard-search-input" placeholder="Search customers, ROs, or apps…" autocomplete="off" />
           </div>
-          <div class="onboarding-actions onboarding-actions--center">
-            <button class="mk-button primary-mk-button" id="role-next-btn" disabled>Next</button>
-          </div>
-        </section>
 
-        <!-- ===================== ONBOARDING — CHOOSE PATH ===================== -->
-        <section class="screen" id="screen-onboarding-path" data-screen hidden>
-          <div class="onboarding-center">
-            <div class="onboarding-eyebrow myk-subtitle1" id="path-role-label"></div>
-            <h1 class="onboarding-h1">How do you want to start?</h1>
-            <div class="progress-dots" data-progress-dots>
-              <span class="dot" data-step="0"></span>
-              <span class="dot" data-step="1"></span>
-              <span class="dot" data-step="2"></span>
-            </div>
-            <p class="onboarding-sub myk-body2">Pick a starting point — you can reorder, resize, and add or remove widgets anytime from your Dashboard.</p>
+          <div class="app-header-tabs dash-tab-strip" id="dashboard-tab-strip"></div>
 
-            <div class="path-choice-grid">
-              <button class="path-card" id="path-myk-recommended-card">
-                <div class="path-card-thumb" id="path-myk-recommended-thumb"></div>
-                <span class="material-icons path-card-icon">auto_awesome</span>
-                <div class="path-card-title">myKaarma Recommended</div>
-                <div class="path-card-sub myk-body2">Pre-built by myKaarma for this role.</div>
-              </button>
-              <button class="path-card" id="path-dealer-recommended-card">
-                <div class="path-card-thumb" id="path-dealer-recommended-thumb"></div>
-                <span class="material-icons path-card-icon">store</span>
-                <div class="path-card-title">Dealer Recommended</div>
-                <div class="path-card-sub myk-body2">Your dealership's default for this role.</div>
+          <div class="app-header-actions">
+            <div class="notif-bell-wrap">
+              <button class="notif-bell-btn" id="dashboard-bell-btn" title="Notifications">
+                <span class="material-icons">notifications</span>
               </button>
             </div>
-
-            <button class="path-scratch-link" id="path-scratch-card">Or start from scratch</button>
-          </div>
-          <div class="onboarding-actions onboarding-actions--center">
-            <button class="mk-button tertiary-mk-button" data-back-to="onboarding-role">‹ Back</button>
-          </div>
-        </section>
-
-        <!-- ===================== ONBOARDING — SCRATCH BUILDER ===================== -->
-        <section class="screen" id="screen-onboarding-scratch" data-screen hidden>
-          <div class="scratch-layout">
-            <h1 class="onboarding-h1">Build your home screen</h1>
-            <div class="progress-dots" data-progress-dots>
-              <span class="dot" data-step="0"></span>
-              <span class="dot" data-step="1"></span>
-              <span class="dot" data-step="2"></span>
+            <div class="notif-bell-wrap">
+              <button class="notif-bell-btn" id="app-header-updates-btn" title="Updates & System Status">
+                <span class="material-icons">campaign</span>
+              </button>
             </div>
-
-            <div class="ai-prompt-card">
-              <div class="ai-prompt-label">
-                <span class="material-icons">auto_awesome</span>
-                Tell mkOS what you want to do
-              </div>
-              <div class="ai-prompt-row">
-                <input type="text" id="ai-prompt-input" placeholder="e.g. &quot;I schedule appointments and text customers about their car&quot;" />
-                <button class="mk-button primary-mk-button" id="ai-prompt-btn">Suggest apps</button>
-              </div>
-              <div class="ai-prompt-result" id="ai-prompt-result" hidden></div>
-            </div>
-
-            <div class="myk-subtitle1 selected-tiles-heading">Your apps</div>
-            <div id="scratch-selected-tiles"></div>
-
-            <div class="myk-subtitle1">Or browse the app marketplace</div>
-            <div id="scratch-marketplace"></div>
-          </div>
-          <div class="onboarding-actions onboarding-actions--center">
-            <button class="mk-button tertiary-mk-button" data-back-to="onboarding-path">‹ Back</button>
-            <button class="mk-button primary-mk-button" id="scratch-continue-btn">Next ›</button>
-          </div>
-        </section>
-
-        <!-- ===================== EDIT HOME SCREEN (always editable) ===================== -->
-        <section class="screen" id="screen-home" data-screen hidden>
-          <div class="home-content-header">
-            <div class="home-role-sub myk-body2">Edit your products — remove with the ✕, or add more below.</div>
-            <button class="mk-button primary-mk-button" id="home-to-dashboard-btn">
-              <span class="material-icons">check</span> Done
+            <button class="app-header-help-btn" id="app-header-insights-btn" title="Insights">
+              <span class="material-icons">bar_chart</span>
             </button>
+            <button class="app-header-help-btn" id="app-header-help-btn" title="Help">
+              <span class="material-icons">help_outline</span>
+            </button>
+            <button class="app-header-help-btn" id="app-header-settings-btn" title="Settings">
+              <span class="material-icons">settings</span>
+            </button>
+            <div class="app-header-avatar-wrap">
+              <button class="app-header-avatar-btn" id="app-header-avatar-btn" title="Account">
+                <span id="app-header-avatar-initials">JD</span>
+                <span class="app-header-presence-dot" id="app-header-presence-dot" title="Available"></span>
+              </button>
+              <div class="app-header-avatar-menu" id="app-header-avatar-menu" hidden>
+                <div class="app-header-avatar-role">Service Advisor</div>
+                <button class="app-header-avatar-item"><span class="material-icons">person</span> Edit profile</button>
+                <button class="app-header-avatar-item"><span class="material-icons">lock_reset</span> Reset password</button>
+                <button class="app-header-avatar-item"><span class="material-icons">logout</span> Sign out</button>
+              </div>
+            </div>
           </div>
+        </header>
 
-          <div class="lock-notice-banner" id="lock-notice-banner" hidden>
-            <span class="material-icons">lock</span>
-            <span id="lock-notice-text"></span>
-            <button class="mk-button tertiary-mk-button" id="lock-notice-dismiss-btn">Got it</button>
-          </div>
-
-          <div class="home-grid" id="home-grid"></div>
-
-          <div class="home-add-catalog">
-            <div class="myk-subtitle1">Add a Widget</div>
-            <div id="home-marketplace"></div>
-          </div>
-        </section>
-
-        <!-- ===================== DASHBOARD (the real landing screen) ===================== -->
-        <section class="screen" id="screen-dashboard" data-screen hidden>
+        <!-- Onboarding removed entirely for this draft — lands directly on the shell below -->
+        <section class="screen" id="screen-dashboard" data-screen>
           <div class="dash-shell">
             <nav class="dash-nav-rail" id="dash-nav-rail" data-mode="expanded">
-              <div class="dash-nav-rail-list" id="dash-nav-rail-list"></div>
-              <div class="dash-nav-rail-footer">
-                <button class="dash-nav-rail-edit-btn" id="dash-nav-rail-edit-btn" title="Edit products">
-                  <span class="material-icons">edit</span><span class="dash-nav-rail-label">Edit</span>
+              <div class="dash-nav-rail-list" id="dash-nav-rail-list">
+                <button class="dash-nav-rail-item active" data-app-id="customer" title="Customer">
+                  <span class="material-icons">person</span><span class="dash-nav-rail-item-label">Customer</span>
                 </button>
+                <button class="dash-nav-rail-item" data-app-id="messages" title="Messages">
+                  <span class="material-icons">chat_bubble_outline</span><span class="dash-nav-rail-item-label">Messages</span>
+                </button>
+                <button class="dash-nav-rail-item" data-app-id="payments" title="Payments">
+                  <span class="material-icons">payments</span><span class="dash-nav-rail-item-label">Payments</span>
+                </button>
+                <button class="dash-nav-rail-item" data-app-id="inspect" title="Inspect">
+                  <span class="material-icons">fact_check</span><span class="dash-nav-rail-item-label">Inspect</span>
+                </button>
+                <button class="dash-nav-rail-item" data-app-id="pickup-delivery" title="Pickup & Delivery">
+                  <span class="material-icons">local_shipping</span><span class="dash-nav-rail-item-label">Pickup &amp; Delivery</span>
+                </button>
+                <button class="dash-nav-rail-item" data-app-id="follow-up" title="Follow Up">
+                  <span class="material-icons">campaign</span><span class="dash-nav-rail-item-label">Follow Up</span>
+                </button>
+                <button class="dash-nav-rail-item" data-app-id="insights" title="Insights">
+                  <span class="material-icons">bar_chart</span><span class="dash-nav-rail-item-label">Insights</span>
+                </button>
+                <button class="dash-nav-rail-item" data-app-id="news" title="News">
+                  <span class="material-icons">article</span><span class="dash-nav-rail-item-label">News</span>
+                </button>
+                <button class="dash-nav-rail-item" data-app-id="settings-item" title="Settings">
+                  <span class="material-icons">settings</span><span class="dash-nav-rail-item-label">Settings</span>
+                </button>
+                <button class="dash-nav-rail-item" data-app-id="add-ons" title="Add-Ons">
+                  <span class="material-icons">extension</span><span class="dash-nav-rail-item-label">Add-Ons</span>
+                </button>
+              </div>
+              <div class="dash-nav-rail-footer">
                 <div class="dash-nav-mode-toggle" id="dash-nav-mode-toggle" role="group" aria-label="Nav rail mode">
                   <button class="dash-nav-mode-btn" data-mode="collapsed" title="Keep collapsed"><span class="material-icons">menu_open</span></button>
-                  <button class="dash-nav-mode-btn" data-mode="expanded" title="Keep expanded"><span class="material-icons">view_sidebar</span></button>
+                  <button class="dash-nav-mode-btn active" data-mode="expanded" title="Keep expanded"><span class="material-icons">view_sidebar</span></button>
                   <button class="dash-nav-mode-btn" data-mode="hover" title="Expand on hover"><span class="material-icons">swipe</span></button>
                 </div>
               </div>
             </nav>
 
             <div class="dash-main">
-              <div class="dash-tab-content" id="dashboard-tab-content"></div>
+              <!-- ── Customer tab content — same UI as V0, unchanged ── -->
+              <div class="v0-content">
+                <div class="v0-field-label">Lookup Contact</div>
+                <div class="v0-search-row">
+                  <div class="v0-search-input-wrap">
+                    <input type="text" />
+                    <div class="v0-search-clear"><span class="material-icons">close</span></div>
+                  </div>
+                  <button class="v0-action-pill new">NEW</button>
+                  <button class="v0-action-pill edit" disabled>EDIT</button>
+                </div>
+                <a href="#" class="v0-lookup-link">Look up contact not working? Search here!</a>
+
+                <div class="v0-contact-row">
+                  <div class="v0-contact-field">
+                    <div class="v0-contact-field-label">Phone <span class="material-icons">content_copy</span></div>
+                    <div class="v0-contact-input-wrap">
+                      <input type="text" />
+                      <span class="material-icons">edit</span>
+                    </div>
+                  </div>
+                  <div class="v0-contact-field">
+                    <div class="v0-contact-field-label">Email <span class="material-icons">content_copy</span></div>
+                    <div class="v0-contact-input-wrap">
+                      <input type="text" />
+                      <span class="material-icons">edit</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="v0-panels-row">
+                  <div class="v0-panel-placeholder"></div>
+                  <div class="v0-panel-placeholder"></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- ===================== MANAGER / IT VIEW ===================== -->
-        <section class="screen" id="screen-manager" data-screen hidden>
-          <div class="manager-header">
-            <button class="back-link" data-back-to="home"><span class="material-icons">arrow_back</span> Back to home screen</button>
-            <div>
-              <h1 class="onboarding-h1" style="text-align:left">Manage dealership views</h1>
-              <p class="onboarding-sub myk-body2" style="text-align:left;margin:0">
-                Set a default view per role, and decide whether users can customize it themselves.
-              </p>
-            </div>
-          </div>
-
-          <div class="manager-role-list" id="manager-role-list"></div>
-        </section>
-
-        <!-- ===================== MANAGER — EDIT ROLE VIEW ===================== -->
-        <section class="screen" id="screen-manager-edit" data-screen hidden>
-          <div class="scratch-layout">
-            <button class="back-link" data-back-to="manager"><span class="material-icons">arrow_back</span> Back to Manage dealership views</button>
-            <h1 class="onboarding-h1" id="manager-edit-heading">Edit view</h1>
-
-            <div class="myk-subtitle1 selected-tiles-heading">Apps in this view</div>
-            <div id="manager-edit-selected-tiles"></div>
-
-            <div class="myk-subtitle1">Or browse the app marketplace</div>
-            <div id="manager-edit-marketplace"></div>
-
-            <div class="scratch-footer">
-              <button class="mk-button primary-mk-button" id="manager-edit-save-btn">Save view</button>
-            </div>
-          </div>
-        </section>
-
-        </div>
-       </div>
-
-       <!-- ===================== MORE DETAILS DRAWER ===================== -->
-       <div class="details-drawer-overlay" id="details-drawer-overlay" hidden>
-         <aside class="details-drawer" id="details-drawer">
-           <div class="details-drawer-header">
-             <div class="myk-subtitle1" id="details-drawer-title"></div>
-             <button class="details-drawer-close-btn" id="details-drawer-close-btn"><span class="material-icons">close</span></button>
-           </div>
-           <div class="details-drawer-body" id="details-drawer-body"></div>
-         </aside>
-       </div>
-
-       <!-- ===================== CREATE YOUR OWN APP (modal) ===================== -->
-       <div class="create-app-overlay" id="create-app-overlay" hidden aria-modal="true" role="dialog" aria-label="Create Your Own App">
-         <div class="create-app-dialog">
-           <div class="create-app-header">
-             <h2 class="myk-h6">Create Your Own App</h2>
-           </div>
-           <div class="create-app-body">
-             <label class="create-app-field">
-               <span class="myk-subtitle1">App name</span>
-               <input type="text" id="create-app-name" placeholder="e.g. Loaner Car Tracker" />
-             </label>
-             <label class="create-app-field">
-               <span class="myk-subtitle1">Category</span>
-               <select id="create-app-category"></select>
-             </label>
-             <div class="create-app-field">
-               <span class="myk-subtitle1">Connect a data source</span>
-               <div class="create-app-endpoints" id="create-app-endpoints"></div>
-             </div>
-           </div>
-           <div class="create-app-footer">
-             <button class="mk-button tertiary-mk-button" id="create-app-cancel-btn">Cancel</button>
-             <button class="mk-button primary-mk-button" id="create-app-submit-btn">Create App</button>
-           </div>
-         </div>
-       </div>
       </div>
     </div>
-
   </div>
 
-  <!-- ── version switcher (not part of the real product) ── -->
-  <style>
-    .vsw { position: fixed; bottom: 16px; right: 16px; z-index: 99999; font-family: 'Lato', sans-serif; }
-    .vsw-btn {
-      display: flex; align-items: center; gap: 6px;
-      background: #101828; color: #fff; border: none; border-radius: 999px;
-      padding: 7px 12px 7px 14px; font-size: 12px; font-weight: 700; letter-spacing: .02em;
-      cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.25);
-    }
-    .vsw-btn .material-icons { font-size: 16px; }
-    .vsw-menu {
-      display: none; position: absolute; bottom: calc(100% + 6px); right: 0; width: 240px;
-      background: #fff; border: 1px solid #E4E7EC; border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(16,24,40,.16); overflow: hidden;
-    }
-    .vsw.open .vsw-menu { display: block; }
-    .vsw-item { display: block; padding: 10px 14px; text-decoration: none; border-bottom: 1px solid #F2F4F7; }
-    .vsw-item:last-child { border-bottom: none; }
-    .vsw-item:hover { background: #F7F8F9; }
-    .vsw-item .vsw-label { display: block; font-size: 12.5px; font-weight: 800; color: #101828; }
-    .vsw-item .vsw-desc { display: block; font-size: 11.5px; color: #667085; margin-top: 2px; }
-    .vsw-item.current { background: #EBF4FA; }
-    .vsw-item.current .vsw-label { color: #0377B3; }
-  </style>
   <div class="vsw" id="vsw">
     <button class="vsw-btn" id="vsw-btn"><span class="material-icons">layers</span>V1 <span class="material-icons">expand_more</span></button>
     <div class="vsw-menu">
       <a class="vsw-item" href="../v0/index.html"><span class="vsw-label">V0 — Current Production</span><span class="vsw-desc">Today's live horizontal nav</span></a>
-      <a class="vsw-item current" href="index.html"><span class="vsw-label">V1 — Draft: Nav Rail Concept</span><span class="vsw-desc">Nav moved to a vertical rail, same header (this page)</span></a>
+      <a class="vsw-item current" href="index.html"><span class="vsw-label">V1 — Draft: Nav Rail Concept</span><span class="vsw-desc">Same Customer-tab UI as V0, nav moved to a vertical rail (this page)</span></a>
       <a class="vsw-item" href="../index.html"><span class="vsw-label">V2 — Current Prototype</span><span class="vsw-desc">Full mkOS shell, in active development</span></a>
     </div>
   </div>
+
   <script>
     (function () {
+      // Nav rail — Customer stays the only wired destination for this draft;
+      // other items are present for the visual list but don't switch content.
+      document.querySelectorAll('.dash-nav-rail-item').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.dash-nav-rail-item').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+        });
+      });
+
+      // Avatar dropdown
+      var avatarBtn = document.getElementById('app-header-avatar-btn');
+      var avatarMenu = document.getElementById('app-header-avatar-menu');
+      avatarBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        avatarMenu.hidden = !avatarMenu.hidden;
+      });
+      document.addEventListener('click', function () { avatarMenu.hidden = true; });
+
+      // Version switcher
       var vsw = document.getElementById('vsw');
       document.getElementById('vsw-btn').addEventListener('click', function (e) {
         e.stopPropagation();
@@ -361,7 +253,5 @@
       document.addEventListener('click', function () { vsw.classList.remove('open'); });
     })();
   </script>
-
-  <script src="app.js"></script>
 </body>
 </html>

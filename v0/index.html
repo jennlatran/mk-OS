@@ -50,7 +50,7 @@
   /* ---- top identity row ---- */
   .top-row {
     display: flex; align-items: center; justify-content: space-between;
-    background: #fff; border-bottom: 1px solid var(--border);
+    background: #fff;
     padding: 10px 20px;
   }
   .dealer-id { display: flex; align-items: center; gap: 10px; cursor: pointer; }
@@ -90,7 +90,7 @@
   /* ---- horizontal tab row ---- */
   .tab-row {
     display: flex; align-items: center;
-    background: var(--tab-bg); border-bottom: 1px solid var(--border);
+    background: #fff; border-bottom: 1px solid var(--border);
     padding: 0 20px;
   }
   .tab-item {
@@ -142,7 +142,7 @@
 
   .contact-row { display: flex; gap: 40px; margin-bottom: 26px; }
   .contact-field { flex: 0 0 340px; }
-  .contact-field-label { display: flex; align-items: center; justify-content: space-between; font-size: 15px; color: var(--ink); margin-bottom: 8px; }
+  .contact-field-label { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink); margin-bottom: 8px; }
   .contact-field-label .material-icons { font-size: 16px; color: var(--ink-muted); cursor: pointer; }
   .contact-input-wrap { display: flex; align-items: center; gap: 10px; }
   .contact-input-wrap input {
@@ -176,7 +176,9 @@
     <div class="top-actions">
       <button class="top-btn"><span class="material-icons" style="font-size:17px">storefront</span>MKSTORE</button>
       <button class="top-btn"><span class="material-icons" style="font-size:17px">help_outline</span>HELP</button>
-      <button class="icon-btn rewards"><span class="material-icons">loyalty</span></button>
+      <button class="icon-btn rewards" title="Insights">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 L21 12 L12 21 L3 12 Z"/></svg>
+      </button>
       <button class="icon-btn"><span class="material-icons">notifications_none</span></button>
       <div class="avatar">MG</div>
       <div class="presence">
