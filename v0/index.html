@@ -244,7 +244,10 @@
       </a>
       <button class="top-btn"><span class="material-icons" style="font-size:17px">storefront</span>MKSTORE</button>
       <button class="top-btn"><span class="material-icons" style="font-size:17px">help_outline</span>HELP</button>
-      <button class="icon-btn rewards" title="Insights">
+      <button class="icon-btn" title="Insights"><span class="material-icons">bar_chart</span></button>
+      <button class="icon-btn" title="News"><span class="material-icons">article</span></button>
+      <button class="icon-btn" title="Settings"><span class="material-icons">settings</span></button>
+      <button class="icon-btn rewards" title="Rewards">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 L21 12 L12 21 L3 12 Z"/></svg>
       </button>
       <button class="icon-btn"><span class="material-icons">notifications_none</span></button>
@@ -381,15 +384,12 @@
       { id: 'payments', icon: 'payment', label: 'Payments' },
       { id: 'inspect', icon: 'fact_check', label: 'Inspect' },
       { id: 'pickup-delivery', icon: 'local_shipping', label: 'Pickup & Delivery' },
-      { id: 'follow-up', icon: 'campaign', label: 'Follow Up' },
-      { id: 'insights', icon: 'bar_chart', label: 'Insights' },
-      { id: 'news', icon: 'article', label: 'News' },
-      { id: 'settings', icon: 'settings', label: 'Settings' }
+      { id: 'follow-up', icon: 'campaign', label: 'Follow Up' }
     ];
     var activeTabId = 'customer';
     // 'adjusted' has no real breakpoint to demonstrate in a fixed-width
     // prototype, so it renders the same as icon-with-text here.
-    var tabViewMode = 'text-only';
+    var tabViewMode = 'icon-text';
 
     function escHtml(s) {
       return String(s).replace(/[&<>"']/g, function (c) {
