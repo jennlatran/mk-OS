@@ -92,25 +92,25 @@
           <div class="app-header-tabs dash-tab-strip" id="dashboard-tab-strip"></div>
 
           <div class="app-header-actions">
-            <div class="notif-bell-wrap">
-              <button class="notif-bell-btn" id="dashboard-bell-btn" title="Notifications">
-                <span class="material-icons">notifications</span>
-              </button>
-            </div>
+            <button class="app-header-help-btn" id="app-header-insights-btn" title="Insights">
+              <span class="material-icons">bar_chart</span>
+            </button>
             <div class="notif-bell-wrap">
               <button class="notif-bell-btn" id="app-header-updates-btn" title="Updates & System Status">
                 <span class="material-icons">campaign</span>
               </button>
             </div>
-            <button class="app-header-help-btn" id="app-header-insights-btn" title="Insights">
-              <span class="material-icons">bar_chart</span>
-            </button>
             <button class="app-header-help-btn" id="app-header-help-btn" title="Help">
               <span class="material-icons">help_outline</span>
             </button>
             <button class="app-header-help-btn" id="app-header-settings-btn" title="Settings">
               <span class="material-icons">settings</span>
             </button>
+            <div class="notif-bell-wrap">
+              <button class="notif-bell-btn" id="dashboard-bell-btn" title="Notifications">
+                <span class="material-icons">notifications</span>
+              </button>
+            </div>
             <div class="app-header-avatar-wrap">
               <button class="app-header-avatar-btn" id="app-header-avatar-btn" title="Account">
                 <span id="app-header-avatar-initials">JD</span>
@@ -233,6 +233,25 @@
           document.querySelectorAll('.dash-nav-rail-item').forEach(function (b) { b.classList.remove('active'); });
           btn.classList.add('active');
         });
+      });
+
+      // Nav rail mode toggle (collapsed / expanded / hover-to-expand) — mirrors
+      // the real app's setNavMode()/renderNavRail() behavior in app.js.
+      var navRail = document.getElementById('dash-nav-rail');
+      document.querySelectorAll('.dash-nav-mode-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var mode = btn.dataset.mode;
+          navRail.dataset.mode = mode;
+          document.querySelectorAll('.dash-nav-mode-btn').forEach(function (b) {
+            b.classList.toggle('active', b === btn);
+          });
+        });
+      });
+      navRail.addEventListener('mouseenter', function () {
+        if (navRail.dataset.mode === 'hover') navRail.classList.add('dash-nav-rail--hover-expanded');
+      });
+      navRail.addEventListener('mouseleave', function () {
+        navRail.classList.remove('dash-nav-rail--hover-expanded');
       });
 
       // Avatar dropdown
