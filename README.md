@@ -16,6 +16,18 @@ Open `index.html` directly in a browser — no server or build step required.
 open index.html
 ```
 
+## Rollout Showcase (V0 / V1 / V2)
+
+To walk stakeholders through the planned rollout, the repo is published to **GitHub Pages** with one folder per version. Every page has a version-switcher pill in the bottom-right corner for jumping between them.
+
+| Version | Folder | Live URL | What it is |
+|---|---|---|---|
+| **V0** | `v0/` | https://jennlatran.github.io/mk-OS/v0/ | Pixel-accurate recreation of today's live production UI (horizontal nav) — the baseline everyone currently uses. Includes a "Try New View" button linking to V1. |
+| **V1 — Vertical Nav** | `v1/` | https://jennlatran.github.io/mk-OS/v1/ | Draft concept: same Customer-tab content as V0, but with the nav moved to a collapsible/hover-expand vertical rail, a dealer-group switcher, dark mode, an "Ask MK" AI entry point, and a "Switch to Old View" button that prompts for feedback before navigating back to V0 (logged to `localStorage` for now — no backend yet). |
+| **V2 — Current Prototype** | `/` (this repo's root, described below) | https://jennlatran.github.io/mk-OS/ | The actively-developed mkOS shell prototype. |
+
+V0 and V1 are self-contained single-file pages (their own inline CSS/JS) so they render correctly as static GitHub Pages content independent of this root prototype's `app.js`/`styles.css` — V1 does link to the root `styles.css` for its header/nav-rail styling, matching the real app's design tokens.
+
 ## What's Built
 
 ### Prototype toolbar
@@ -62,9 +74,13 @@ Carries over the myKaarma token set (`--brand`, `--bg-surface`, `--text-primary`
 
 ```
 mk-OS/
-├── index.html      # All screens: onboarding, Edit Home Screen, Dashboard, Manager views, Create App modal
+├── index.html      # V2 — All screens: onboarding, Edit Home Screen, Dashboard, Manager views, Create App modal
 ├── styles.css      # Design tokens, layout, and every component's styling
-└── app.js          # Mock data, app state, rendering, and all event handling
+├── app.js          # Mock data, app state, rendering, and all event handling
+├── v0/
+│   └── index.html  # V0 — self-contained recreation of today's production horizontal-nav UI
+└── v1/
+    └── index.html  # V1 — self-contained "Vertical Nav" draft (links to the root styles.css)
 ```
 
 ## Mock Data
