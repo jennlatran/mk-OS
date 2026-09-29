@@ -115,6 +115,18 @@
   }
   #shell.light .app-header-help-btn:hover { background: var(--row-hover); }
 
+  /* ---- Tighten the collapsed rail: the shared 64px width was sized for a
+     left-padded icon+label row, so with the label hidden the icon sat
+     left-aligned inside it, leaving a wide dead strip on the right.
+     Narrower + centered gives that width back to the main content. ---- */
+  #shell.light .dash-nav-rail { width: 48px; }
+  #shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item,
+  #shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   /* ---- Nav rail: drag-to-reorder + Add-Ons expandable group ---- */
   .dash-nav-rail-group { position: relative; }
   .dash-nav-rail-group.dragging { opacity: .4; }
