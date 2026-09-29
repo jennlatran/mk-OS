@@ -103,7 +103,57 @@
   }
   .tab-item:hover { color: var(--ink); }
   .tab-item.active { color: var(--brand); font-weight: 700; border-bottom-color: var(--brand); }
-  .tab-addons { display: flex; align-items: center; gap: 2px; padding: 13px 14px; color: var(--ink-secondary, #344054); cursor: pointer; }
+  /* ---- +App picker (replaces the old "Add-Ons" dropdown) ---- */
+  .add-app-wrap { position: relative; }
+  .add-app-btn {
+    display: flex; align-items: center; gap: 4px; margin: 0 4px;
+    height: 30px; padding: 0 12px 0 10px; border-radius: 999px; border: 1px dashed var(--border);
+    background: none; color: var(--ink-muted); font-family: inherit; font-size: 13px; font-weight: 700;
+    cursor: pointer;
+  }
+  .add-app-btn:hover { border-color: var(--brand); color: var(--brand); }
+  .add-app-btn .material-icons { font-size: 17px; }
+  .add-app-menu {
+    display: none; position: absolute; top: calc(100% + 8px); left: 0; width: 320px; max-height: 420px;
+    background: #fff; border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(16,24,40,.18); z-index: 400; flex-direction: column; overflow: hidden;
+  }
+  .add-app-wrap.open .add-app-menu { display: flex; }
+  .add-app-search {
+    display: flex; align-items: center; gap: 8px; margin: 12px; padding: 8px 12px;
+    border: 1px solid var(--border); border-radius: 8px;
+  }
+  .add-app-search .material-icons { font-size: 18px; color: var(--ink-muted); }
+  .add-app-search input {
+    flex: 1; border: none; outline: none; background: none; font-family: inherit;
+    font-size: 13px; color: var(--ink);
+  }
+  .add-app-list { overflow-y: auto; padding: 0 6px 8px; }
+  .add-app-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-muted); padding: 8px 10px 4px;
+  }
+  .add-app-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; }
+  .add-app-row:hover { background: var(--bg-page); }
+  .add-app-tile {
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    width: 32px; height: 32px; border-radius: 8px; background: var(--brand-light); color: var(--brand);
+  }
+  .add-app-tile.custom { background: #F1F2F4; color: #667085; border: 1px dashed #C7CDD6; }
+  .add-app-tile .material-icons { font-size: 18px; }
+  .add-app-info { flex: 1; min-width: 0; }
+  .add-app-name { font-size: 13.5px; color: var(--ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .add-app-by { font-size: 11.5px; color: var(--ink-muted); }
+  .add-app-toggle {
+    flex-shrink: 0; height: 26px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border);
+    background: #fff; color: var(--ink); font-family: inherit; font-size: 11.5px; font-weight: 700;
+    letter-spacing: .02em; cursor: pointer;
+  }
+  .add-app-toggle:hover { border-color: var(--brand); color: var(--brand); }
+  .add-app-toggle.added { background: var(--brand-light); border-color: var(--brand-light); color: var(--brand); }
+  .add-app-toggle.locked { color: #C7CDD6; border-color: var(--border); cursor: not-allowed; }
+  .add-app-empty { padding: 16px; font-size: 12.5px; color: var(--ink-muted); text-align: center; }
+
   .tab-edit {
     display: inline-flex; align-items: center; justify-content: center;
     width: 26px; height: 26px; border-radius: 999px; background: var(--border); color: var(--ink);
@@ -261,7 +311,18 @@
 
   <div class="tab-row">
     <div id="tab-row-items" style="display:contents;"></div>
-    <div class="tab-addons">Add-Ons <span class="material-icons" style="font-size:18px">arrow_drop_down</span></div>
+    <div class="add-app-wrap" id="add-app-wrap">
+      <button class="add-app-btn" id="add-app-btn" title="Add or remove apps">
+        <span class="material-icons">add</span>App
+      </button>
+      <div class="add-app-menu" id="add-app-menu">
+        <div class="add-app-search">
+          <span class="material-icons">search</span>
+          <input type="text" id="add-app-search-input" placeholder="Search apps" autocomplete="off" />
+        </div>
+        <div class="add-app-list" id="add-app-list"></div>
+      </div>
+    </div>
     <div class="tab-edit" id="tab-edit-btn" title="Edit Tab View"><span class="material-icons">edit</span></div>
     <div class="tab-spacer"></div>
     <button class="text-btn"><span class="material-icons">chat_bubble_outline</span>TEXT<span class="material-icons">arrow_drop_down</span></button>
@@ -376,36 +437,51 @@
     });
     document.addEventListener('click', function () { vsw.classList.remove('open'); });
 
-    // ---- Horizontal tab row: data-driven so Edit Tab View can actually
-    // change how it renders (icon-only / icon+text / text-only / adjusted). ----
-    var TABS = [
-      { id: 'customer', icon: 'person', label: 'Customer' },
-      { id: 'messages', icon: 'chat_bubble_outline', label: 'Messages' },
-      { id: 'payments', icon: 'payment', label: 'Payments' },
-      { id: 'inspect', icon: 'fact_check', label: 'Inspect' },
-      { id: 'pickup-delivery', icon: 'local_shipping', label: 'Pickup & Delivery' },
-      { id: 'follow-up', icon: 'campaign', label: 'Follow Up' }
-    ];
-    var activeTabId = 'customer';
-    // 'adjusted' has no real breakpoint to demonstrate in a fixed-width
-    // prototype, so it renders the same as icon-with-text here.
-    var tabViewMode = 'icon-text';
-
+    // ---- App catalog: every app that can appear in the tab row, default
+    // (myKaarma/Partner-built, each with its own designed icon) or custom
+    // (dealer-created via "Create Your Own App", no designed icon — they
+    // all share the generic "widgets" icon, matching the real app.js
+    // convention in submitCreateApp(), which hardcodes icon:'widgets' for
+    // every custom app since we can't require a dealer to design/upload
+    // one for each app they create). ----
     function escHtml(s) {
       return String(s).replace(/[&<>"']/g, function (c) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
       });
     }
 
+    var APP_CATALOG = [
+      { id: 'customer', name: 'Customer', icon: 'person', createdBy: 'myKaarma', locked: true },
+      { id: 'messages', name: 'Messages', icon: 'chat_bubble_outline', createdBy: 'myKaarma' },
+      { id: 'payments', name: 'Payments', icon: 'payment', createdBy: 'myKaarma' },
+      { id: 'inspect', name: 'Inspect', icon: 'fact_check', createdBy: 'myKaarma' },
+      { id: 'pickup-delivery', name: 'Pickup & Delivery', icon: 'local_shipping', createdBy: 'Partner' },
+      { id: 'follow-up', name: 'Follow Up', icon: 'campaign', createdBy: 'myKaarma' },
+      { id: 'appointments', name: 'Appointments', icon: 'event', createdBy: 'myKaarma' },
+      { id: 'video', name: 'Video', icon: 'videocam', createdBy: 'myKaarma' },
+      { id: 'vehicle-tracking', name: 'Vehicle Tracking', icon: 'my_location', createdBy: 'myKaarma' },
+      { id: 'mb-vehicle-diagnosis', name: 'MB Vehicle Diagnosis', icon: 'widgets', createdBy: 'You', custom: true },
+      { id: 'tire-recommendation', name: 'Tire Recommendation', icon: 'widgets', createdBy: 'You', custom: true },
+      { id: 'loaner-tracker', name: 'Loaner Tracker', icon: 'widgets', createdBy: 'You', custom: true }
+    ];
+    function getApp(id) { return APP_CATALOG.filter(function (a) { return a.id === id; })[0]; }
+
+    var activeTabIds = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up'];
+    var activeTabId = 'customer';
+    // 'adjusted' has no real breakpoint to demonstrate in a fixed-width
+    // prototype, so it renders the same as icon-with-text here.
+    var tabViewMode = 'icon-text';
+
     function renderTabRow() {
       var showIcon = tabViewMode !== 'text-only';
       var showLabel = tabViewMode !== 'icon-only';
       var container = document.getElementById('tab-row-items');
-      container.innerHTML = TABS.map(function (t) {
-        var active = t.id === activeTabId;
-        var iconHtml = showIcon ? '<span class="material-icons">' + t.icon + '</span>' : '';
-        var labelHtml = showLabel ? '<span>' + escHtml(t.label) + '</span>' : '';
-        return '<div class="tab-item' + (active ? ' active' : '') + '" data-tab-id="' + t.id + '" title="' + escHtml(t.label) + '">' + iconHtml + labelHtml + '</div>';
+      container.innerHTML = activeTabIds.map(function (id) {
+        var app = getApp(id);
+        var active = id === activeTabId;
+        var iconHtml = showIcon ? '<span class="material-icons">' + app.icon + '</span>' : '';
+        var labelHtml = showLabel ? '<span>' + escHtml(app.name) + '</span>' : '';
+        return '<div class="tab-item' + (active ? ' active' : '') + '" data-tab-id="' + id + '" title="' + escHtml(app.name) + '">' + iconHtml + labelHtml + '</div>';
       }).join('');
       container.querySelectorAll('.tab-item').forEach(function (el) {
         el.addEventListener('click', function () {
@@ -415,6 +491,65 @@
       });
     }
     renderTabRow();
+
+    // ---- +App picker: search, add, and remove apps without navigating away ----
+    var addAppWrap = document.getElementById('add-app-wrap');
+    var addAppMenu = document.getElementById('add-app-menu');
+
+    function renderAddAppList(filter) {
+      var q = (filter || '').trim().toLowerCase();
+      var matches = APP_CATALOG.filter(function (a) { return a.name.toLowerCase().indexOf(q) !== -1; });
+      var list = document.getElementById('add-app-list');
+      if (!matches.length) {
+        list.innerHTML = '<div class="add-app-empty">No apps match "' + escHtml(filter) + '"</div>';
+        return;
+      }
+      function rowHtml(a) {
+        var active = activeTabIds.indexOf(a.id) !== -1;
+        var tileClass = 'add-app-tile' + (a.custom ? ' custom' : '');
+        var toggleHtml = a.locked
+          ? '<span class="add-app-toggle locked">Default</span>'
+          : '<button class="add-app-toggle' + (active ? ' added' : '') + '" data-app-id="' + a.id + '">' + (active ? 'Remove' : 'Add') + '</button>';
+        return '<div class="add-app-row">' +
+          '<div class="' + tileClass + '"><span class="material-icons">' + a.icon + '</span></div>' +
+          '<div class="add-app-info"><div class="add-app-name">' + escHtml(a.name) + '</div><div class="add-app-by">by ' + escHtml(a.createdBy) + '</div></div>' +
+          toggleHtml +
+          '</div>';
+      }
+      var defaults = matches.filter(function (a) { return !a.custom; });
+      var customs = matches.filter(function (a) { return a.custom; });
+      var html = '';
+      if (defaults.length) html += '<div class="add-app-section-label">Default Apps</div>' + defaults.map(rowHtml).join('');
+      if (customs.length) html += '<div class="add-app-section-label">Custom Apps</div>' + customs.map(rowHtml).join('');
+      list.innerHTML = html;
+      list.querySelectorAll('.add-app-toggle:not(.locked)').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var id = btn.dataset.appId;
+          var idx = activeTabIds.indexOf(id);
+          if (idx === -1) {
+            activeTabIds.push(id);
+          } else {
+            activeTabIds.splice(idx, 1);
+            if (activeTabId === id) activeTabId = 'customer';
+          }
+          renderTabRow();
+          renderAddAppList(document.getElementById('add-app-search-input').value);
+        });
+      });
+    }
+    renderAddAppList('');
+
+    document.getElementById('add-app-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      addAppWrap.classList.toggle('open');
+      if (addAppWrap.classList.contains('open')) document.getElementById('add-app-search-input').focus();
+    });
+    addAppMenu.addEventListener('click', function (e) { e.stopPropagation(); });
+    document.getElementById('add-app-search-input').addEventListener('input', function (e) {
+      renderAddAppList(e.target.value);
+    });
+    document.addEventListener('click', function () { addAppWrap.classList.remove('open'); });
 
     // ---- Edit Tab View modal ----
     var etvOverlay = document.getElementById('etv-overlay');
