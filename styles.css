@@ -20,25 +20,30 @@
    ============================================================ */
 #shell.light {
   --brand: #0377B3;
-  --brand-hover: #025d8c;
+  --brand-hover: #045C87;
   --brand-light: #EBF4FA;
-  --bg-page: #F9FAFB;
+  --bg-page: #F7F8FA;
   --bg-surface: #FFFFFF;
   --bg-card: #FFFFFF;
-  --border: #E9EAEB;
+  --border: #E3E6EA;
+  --border-strong: #D3D9DF;
   --text-primary: #101828;
   --text-secondary: #344054;
-  --text-muted: #B8B8B8;
+  --text-muted: #7C8698;
   --row-hover: #F0F6FB;
   --chip-active-bg: #D3E4F1;
   --chip-bg: #F2F4F7;
-  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .05);
-  --shadow-md: 0 4px 8px -2px rgba(16, 24, 40, .10), 0 2px 4px -2px rgba(16, 24, 40, .06);
-  --shadow-lg: 0 12px 16px -4px rgba(16, 24, 40, .08), 0 4px 6px -2px rgba(16, 24, 40, .03);
+  --rail-active-bg: #EBF4FA;
+  --focus-ring: rgba(3, 119, 179, .35);
+  /* Restrained, mostly-hairline elevation — borders carry most of the
+     separation, shadows only add a soft lift on floating/overlay surfaces. */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, .04);
+  --shadow-md: 0 2px 6px -2px rgba(16, 24, 40, .08), 0 1px 2px rgba(16, 24, 40, .04);
+  --shadow-lg: 0 8px 20px -6px rgba(16, 24, 40, .12), 0 2px 4px -2px rgba(16, 24, 40, .05);
   --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -46,10 +51,54 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--text-primary);
   background: var(--bg-page);
   min-height: 100vh;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+/* All 58 icon usages in index.html/app.js keep the .material-icons class —
+   this just repoints which font-face that class renders with, so every
+   icon in the app becomes outlined without touching any markup. */
+/* text-transform: none is required here, not cosmetic — these fonts render
+   icons via ligature substitution on the literal lowercase name ("check"),
+   and an ancestor's `text-transform: uppercase` (e.g. .mk-button) rewrites
+   that text to "CHECK" before the ligature matches, so the browser falls
+   back to printing the literal word instead of the glyph. */
+.material-icons { font-family: 'Material Icons Outlined'; text-transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  #shell.light { transition: none; }
+}
+
+/* ------------------------------------------------------------
+   DARK THEME — same token names, redefined. Every component rule
+   below reads colors through these custom properties, so this
+   block (plus the handful of hardcoded-color patches marked
+   "dark theme patch") is the entire dark-mode implementation.
+   Toggled via #shell's data-theme attribute (app.js: setTheme()),
+   persisted to localStorage like the nav rail mode.
+   ------------------------------------------------------------ */
+#shell.light[data-theme="dark"] {
+  --brand: #3E9FE0;
+  --brand-hover: #5AB0E8;
+  --brand-light: #16324A;
+  --bg-page: #10161B;
+  --bg-surface: #161D23;
+  --bg-card: #161D23;
+  --border: #262E35;
+  --border-strong: #333D45;
+  --text-primary: #E7EBEF;
+  --text-secondary: #AAB4BD;
+  --text-muted: #6E7885;
+  --row-hover: #182731;
+  --chip-active-bg: #1B3A4E;
+  --chip-bg: #1C242B;
+  --rail-active-bg: #16324A;
+  --focus-ring: rgba(62, 159, 224, .4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+  --shadow-md: 0 4px 10px -4px rgba(0, 0, 0, .5), 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow-lg: 0 10px 24px -8px rgba(0, 0, 0, .55), 0 2px 4px -2px rgba(0, 0, 0, .3);
 }
 
 /* ============================================================
@@ -74,24 +123,39 @@
    ============================================================ */
 #shell.light .mk-button {
   box-sizing: border-box !important;
-  font-size: 0.875rem !important;
-  height: 2.25rem !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  height: 2.125rem !important;
   padding: 0 var(--space-4) !important;
   cursor: pointer !important;
   border: none !important;
   outline: none !important;
   width: max-content !important;
-  border-radius: 0.5rem !important;
-  letter-spacing: 0.8px;
+  border-radius: var(--radius-md) !important;
+  letter-spacing: 0.4px;
   display: flex;
   align-items: center;
   gap: var(--space-2);
   text-transform: uppercase;
-  font-weight: normal;
   font-family: inherit;
   user-select: none;
   white-space: nowrap;
-  transition: background-color .15s, border-color .15s, color .15s;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .1s ease;
+}
+#shell.light .mk-button:active { transform: translateY(1px); }
+#shell.light .mk-button:focus-visible { box-shadow: 0 0 0 3px var(--focus-ring); }
+
+/* Consistent keyboard-focus ring across the other clickable card/row
+   types that aren't .mk-button — role/path/market cards, nav rail
+   items, tabs, and table rows all take real actions on click. */
+#shell.light .role-card:focus-visible,
+#shell.light .path-card:focus-visible,
+#shell.light .market-card--create:focus-visible,
+#shell.light .dash-nav-rail-item:focus-visible,
+#shell.light .dash-tab:focus-visible,
+#shell.light .app-table tr.clickable:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 #shell.light .mk-button .material-icons {
@@ -109,10 +173,11 @@
   background-color: var(--brand-hover) !important;
   border: 1px solid var(--brand-hover) !important;
   color: #fff !important;
+  box-shadow: var(--shadow-sm);
 }
 
 #shell.light .tertiary-mk-button {
-  background-color: #fff !important;
+  background-color: var(--bg-card) !important;
   border: 1px solid var(--brand) !important;
   color: var(--text-primary) !important;
 }
@@ -122,8 +187,8 @@
 }
 
 #shell.light .functional-mk-button {
-  background-color: #fff !important;
-  border: 1px solid #dadada !important;
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-strong) !important;
   color: var(--text-primary) !important;
 }
 
@@ -193,6 +258,21 @@
 #shell.light .proto-device-btn.active { background: var(--brand); color: #fff; }
 #shell.light .proto-device-btn .material-icons { font-size: 18px; }
 
+#shell.light .proto-theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #475467;
+  border-radius: var(--radius-sm);
+  background: #1D2939;
+  color: #98A2B3;
+  cursor: pointer;
+}
+#shell.light .proto-theme-btn:hover { color: #fff; }
+#shell.light .proto-theme-btn .material-icons { font-size: 18px; }
+
 #shell.light .proto-toolbar .tertiary-mk-button {
   background: transparent !important;
   border: 1px solid #475467 !important;
@@ -250,7 +330,7 @@
   justify-content: space-between;
   padding: var(--space-6) var(--space-5);
   overflow: hidden;
-  background: linear-gradient(180deg, var(--brand-light) 0%, #FFFFFF 70%);
+  background: linear-gradient(180deg, var(--brand-light) 0%, var(--bg-surface) 70%);
   border-right: 1px solid var(--border);
 }
 
@@ -443,7 +523,7 @@
 
 #shell.light .role-card.selected {
   border-color: var(--brand);
-  background: #FFFFFF;
+  background: var(--bg-card);
   box-shadow: var(--shadow-md);
 }
 
@@ -455,7 +535,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: var(--bg-card);
   color: var(--brand);
 }
 
@@ -578,8 +658,17 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 0 var(--space-3);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   font-size: 14px;
   font-family: inherit;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+#shell.light .ai-prompt-row input::placeholder { color: var(--text-muted); }
+#shell.light .ai-prompt-row input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 #shell.light .ai-prompt-result {
@@ -645,9 +734,12 @@
   height: 36px;
   border: none;
   outline: none;
+  background: transparent;
+  color: var(--text-primary);
   font-size: 14px;
   font-family: inherit;
 }
+#shell.light .market-search-input::placeholder { color: var(--text-muted); }
 
 #shell.light .market-filter-select {
   height: 36px;
@@ -679,6 +771,12 @@
   border-radius: var(--radius-lg);
   background: var(--bg-surface);
   text-align: left;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .1s ease;
+}
+#shell.light .market-card:hover:not(.market-card--create) {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 #shell.light .market-card--create {
@@ -705,11 +803,12 @@
   letter-spacing: 0.4px;
   padding: 3px 8px;
   border-radius: 10px;
-  color: #fff;
 }
 
-#shell.light .market-badge--bestseller { background: #027A48; }
-#shell.light .market-badge--spotlight { background: #6941C6; }
+#shell.light .market-badge--bestseller { background: #E3F5EC; color: #027A48; }
+#shell.light .market-badge--spotlight { background: #F1EBFB; color: #6941C6; }
+#shell.light[data-theme="dark"] .market-badge--bestseller { background: #103726; color: #4ADE9A; }
+#shell.light[data-theme="dark"] .market-badge--spotlight { background: #2C1F42; color: #C9A8F2; }
 
 #shell.light .market-card-icon {
   display: flex; align-items: center; justify-content: center;
@@ -822,6 +921,31 @@
 }
 
 #shell.light .app-tile-remove .material-icons { font-size: 14px; }
+
+/* Drag-to-reorder — Edit Home Screen tiles only (renderHome's own markup;
+   the shared selectedTilesHTML() tiles used elsewhere don't have a handle
+   or drag wiring, so nothing implies they're reorderable there). Sits in
+   normal flex flow as the tile's first child, not absolutely positioned —
+   .app-tile-remove already owns the top-right corner, and the app icon
+   directly below would collide with a top-left-pinned handle. */
+#shell.light .app-tile-drag-handle {
+  align-self: flex-start;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: grab;
+}
+#shell.light .app-tile.dragging { opacity: .4; }
+#shell.light .app-tile.drag-over {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand-light);
+}
+
+/* Sits directly in the screen's flow (not inside .home-grid's own padded
+   box), so without this it's flush with the screen edge instead of lining
+   up with the grid/header content 20px in from it. */
+#shell.light #home-add-app-toggle-btn {
+  margin: 0 var(--space-5) var(--space-4);
+}
 
 #shell.light .home-add-catalog {
   padding: var(--space-5) var(--space-5) var(--space-6);
@@ -998,8 +1122,18 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 0 var(--space-3);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   font-size: 14px;
   font-family: inherit;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+#shell.light .create-app-field input::placeholder { color: var(--text-muted); }
+#shell.light .create-app-field input:focus,
+#shell.light .create-app-field select:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 #shell.light .create-app-endpoints {
@@ -1069,12 +1203,22 @@
 
 #shell.light .dash-search input {
   width: 100%;
-  height: 26px;
-  border: 1px solid var(--border);
+  height: 28px;
+  border: 1px solid transparent;
+  background: var(--chip-bg);
   border-radius: var(--radius-md);
   padding: 0 var(--space-2) 0 28px;
   font-size: 12px;
   font-family: inherit;
+  color: var(--text-primary);
+  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+#shell.light .dash-search input::placeholder { color: var(--text-muted); }
+#shell.light .dash-search input:focus {
+  outline: none;
+  background: var(--bg-surface);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 #shell.light .dash-search-results {
@@ -1153,6 +1297,17 @@
   display: flex; align-items: center; justify-content: center;
 }
 
+/* System-health signal on the Updates & Status icon — a plain dot, not a
+   count, since it means "something's wrong" rather than "N unread". */
+#shell.light .notif-badge--dot {
+  min-width: 8px;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  top: -1px; right: -1px;
+  background: #B42318;
+}
+
 #shell.light .notif-panel {
   position: absolute;
   top: calc(100% + 8px);
@@ -1171,6 +1326,37 @@
 #shell.light .notif-panel-header {
   padding: var(--space-4) var(--space-4) var(--space-2);
 }
+
+/* Updates & System Status panel — reuses .notif-panel's chrome, adds two
+   stacked sections instead of one flat list. */
+#shell.light .updates-panel { overflow-y: auto; padding: var(--space-2) 0; }
+#shell.light .updates-panel-section { padding: var(--space-2) var(--space-4) var(--space-3); }
+#shell.light .updates-panel-section + .updates-panel-section { border-top: 1px solid var(--border); }
+#shell.light .updates-panel-section-label { margin-bottom: var(--space-2); }
+
+#shell.light .system-status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+#shell.light .system-status-row--ok { color: #197A45; }
+#shell.light .system-status-row--ok .material-icons { color: #197A45; }
+#shell.light .system-status-row--warn { color: #A85A0A; }
+#shell.light .system-status-row--warn .material-icons { color: #A85A0A; }
+#shell.light .system-status-row .material-icons { font-size: 18px; }
+
+#shell.light .system-status-incident {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--chip-bg);
+  border-radius: var(--radius-sm);
+}
+#shell.light .system-status-incident-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+#shell.light .system-status-incident-time { color: var(--text-muted); }
+
+#shell.light .changelog-date { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
 
 #shell.light .notif-filter-row {
   display: flex;
@@ -1233,7 +1419,10 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  overflow-x: auto;
+  /* Chrome-style: tabs shrink to share the available width instead of the
+     strip scrolling — with a 10-tab cap (enforced in openTab()) they always
+     have somewhere to shrink to. */
+  overflow: hidden;
   min-width: 0;
 }
 
@@ -1246,11 +1435,16 @@
   font-size: 12px;
   color: var(--text-secondary);
   cursor: pointer;
-  flex-shrink: 0;
+  flex: 1 1 160px;
+  min-width: 44px;
   max-width: 200px;
+  overflow: hidden;
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
 }
 
-#shell.light .dash-tab.pinned { max-width: none; padding: var(--space-2); }
+/* Pinned tabs stay their own fixed icon-only size — like Chrome, they don't
+   take part in the shrink pool the way unpinned tabs do. */
+#shell.light .dash-tab.pinned { flex: 0 0 auto; max-width: none; padding: var(--space-2); }
 
 #shell.light .dash-tab.active {
   background: var(--bg-surface);
@@ -1264,6 +1458,7 @@
 #shell.light .dash-tab-type-icon { font-size: 14px; flex-shrink: 0; }
 
 #shell.light .dash-tab-label {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1335,6 +1530,10 @@
   align-items: center;
   gap: var(--space-2);
   flex-shrink: 0;
+  /* Normally pushed right by .app-header-tabs's flex:1 — this keeps it
+     pinned right even on screens (like Edit Home Screen) where search
+     and tabs are hidden and no other flexible spacer remains. */
+  margin-left: auto;
 }
 
 #shell.light .app-header-help-btn {
@@ -1351,6 +1550,7 @@
 
 #shell.light .app-header-avatar-wrap { position: relative; }
 #shell.light .app-header-avatar-btn {
+  position: relative;
   display: flex; align-items: center; justify-content: center;
   width: 24px; height: 24px;
   border: none;
@@ -1363,11 +1563,27 @@
 }
 #shell.light .app-header-avatar-btn:hover { background: var(--chip-active-bg); }
 
+/* Presence dot — like a chat app's active/away indicator. Its own click
+   target (stopPropagation in app.js) so tapping it toggles status directly
+   instead of just opening the avatar menu underneath it. */
+#shell.light .app-header-presence-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #1a9c56;
+  border: 2px solid var(--bg-surface);
+  cursor: pointer;
+}
+#shell.light .app-header-presence-dot.ooo { background: var(--text-muted); }
+
 #shell.light .app-header-avatar-menu {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: 240px;
+  width: 270px;
   display: flex;
   flex-direction: column;
   background: var(--bg-surface);
@@ -1399,6 +1615,41 @@
 }
 #shell.light .app-header-avatar-item:hover { background: var(--row-hover); }
 #shell.light .app-header-avatar-item .material-icons { font-size: 16px; color: var(--text-muted); }
+
+/* Availability — lives under the avatar/initials, not in Settings. Narrower
+   than the equivalent Settings row was, so the toggle and date field stack
+   full-width instead of sitting side by side. */
+#shell.light .avatar-menu-availability {
+  padding: var(--space-1) var(--space-2) var(--space-3);
+  margin-bottom: var(--space-1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+#shell.light .avatar-menu-availability-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+#shell.light .avatar-menu-availability .settings-presence-toggle { width: 100%; }
+#shell.light .avatar-menu-availability .settings-presence-btn { flex: 1; text-align: center; }
+#shell.light .avatar-ooo-schedule { display: flex; gap: var(--space-2); }
+#shell.light .avatar-ooo-schedule input[type="date"] {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-2);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+}
+#shell.light .avatar-ooo-schedule .mk-button { height: 32px !important; padding: 0 var(--space-3) !important; }
 
 #shell.light .home-content-header {
   display: flex;
@@ -1453,7 +1704,12 @@
   overflow: hidden;
 }
 #shell.light .dash-nav-rail-item:hover { background: var(--row-hover); }
-#shell.light .dash-nav-rail-item.active { background: var(--chip-bg); color: var(--brand); font-weight: 600; }
+#shell.light .dash-nav-rail-item.active {
+  background: var(--rail-active-bg);
+  color: var(--brand);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--brand);
+}
 #shell.light .dash-nav-rail-item .material-icons { font-size: 22px; flex-shrink: 0; }
 #shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item-label,
 #shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item-label {
@@ -1517,22 +1773,262 @@
   min-width: 0;
 }
 
-#shell.light .product-table-wrap { flex: 1; overflow: auto; padding: var(--space-3); }
-#shell.light .product-table { width: 100%; border-collapse: collapse; }
-#shell.light .product-table th {
+#shell.light .app-table-wrap { flex: 1; overflow: auto; padding: var(--space-5) var(--space-6); }
+#shell.light .app-table-wrap .myk-h6 { margin-bottom: var(--space-4); font-size: 1.05rem; }
+#shell.light .app-table { width: 100%; border-collapse: collapse; }
+#shell.light .app-table th {
   text-align: left;
   padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-strong);
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-#shell.light .product-table td {
+#shell.light .app-table td {
+  padding: var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+#shell.light .app-table tr.clickable { cursor: pointer; transition: background-color .1s ease; }
+#shell.light .app-table tr.clickable:hover { background: var(--row-hover); }
+
+/* ============================================================
+   PRODUCT SUB-TABS — Payments, Inspect, Video, Pickup & Delivery,
+   Mobile Service, Uber. One horizontal row under the product title;
+   what's beneath it varies (table / calendar / map / map-split).
+   ============================================================ */
+#shell.light .app-subtab-row {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-4);
+  overflow-x: auto;
+}
+#shell.light .app-subtab {
+  border: none;
+  background: none;
   padding: var(--space-2) var(--space-3);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .15s ease, border-color .15s ease;
+}
+#shell.light .app-subtab:hover { color: var(--text-primary); }
+#shell.light .app-subtab.active { color: var(--brand); font-weight: 600; border-bottom-color: var(--brand); }
+#shell.light .app-subtab-content { flex: 1; min-height: 0; }
+
+/* ---- Calendar view (Mobile Service > Schedule) ---- */
+#shell.light .mkos-calendar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+#shell.light .mkos-calendar-day {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+#shell.light .mkos-calendar-day-label {
+  padding: var(--space-2) var(--space-3);
+  background: var(--chip-bg);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+#shell.light .mkos-cal-event {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color .1s ease;
+}
+#shell.light .mkos-cal-event:last-child { border-bottom: none; }
+#shell.light .mkos-cal-event:hover { background: var(--row-hover); }
+#shell.light .mkos-cal-event-time { font-size: 0.72rem; font-weight: 700; color: var(--brand); }
+#shell.light .mkos-cal-event-title { font-size: 0.85rem; color: var(--text-primary); }
+#shell.light .mkos-cal-event-status { font-size: 0.75rem; color: var(--text-muted); }
+
+/* ---- Mock map (no real geo library — a bordered field with positioned pins,
+   consistent with the rest of the app's mocked-data approach) ---- */
+#shell.light .mkos-map-mock {
+  position: relative;
+  height: 280px;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(var(--border) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, var(--border) 1px, transparent 1px) 0 0 / 32px 32px,
+    var(--chip-bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+#shell.light .mkos-map-pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+#shell.light .mkos-map-pin .material-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border-bottom-left-radius: 2px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 16px;
+  box-shadow: var(--shadow-md);
+}
+#shell.light .mkos-map-pin-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+#shell.light .mkos-map-pin.focused .material-icons { background: #A85A0A; box-shadow: 0 0 0 4px var(--brand-light); }
+#shell.light .mkos-map-caption { margin-top: var(--space-2); color: var(--text-muted); }
+#shell.light .mkos-map-standalone { padding-top: var(--space-1); }
+
+/* ---- Split view (Pickup & Delivery > Trips): full trips table beside a
+   map that plots only the trips currently In Route. ---- */
+#shell.light .mkos-map-split {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--space-5);
+  align-items: start;
+  height: 100%;
+}
+#shell.light .mkos-map-split-table { overflow: auto; }
+#shell.light .mkos-map-split .mkos-map-mock { height: 320px; }
+#shell.light tr.mkos-trip-row-active { cursor: pointer; }
+#shell.light tr.trip-focused { background: var(--rail-active-bg); box-shadow: inset 3px 0 0 var(--brand); }
+
+@media (max-width: 980px) {
+  #shell.light .mkos-map-split { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   SETTINGS SCREEN
+   ============================================================ */
+#shell.light .settings-section {
+  margin: var(--space-6) 0;
+  padding-bottom: var(--space-5);
   border-bottom: 1px solid var(--border);
 }
-#shell.light .product-table tr.clickable { cursor: pointer; }
-#shell.light .product-table tr.clickable:hover { background: var(--row-hover); }
+#shell.light .settings-section:last-child { border-bottom: none; }
+#shell.light .settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+}
+#shell.light .settings-row-label { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
+#shell.light .settings-row-sub { margin-top: 2px; max-width: 420px; }
+
+#shell.light .settings-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-strong);
+}
+#shell.light .settings-user-row:last-child { border-bottom: none; }
+#shell.light .settings-user-authority {
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-2);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+#shell.light .settings-presence-toggle { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; flex-shrink: 0; }
+#shell.light .settings-presence-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#shell.light .settings-presence-btn .material-icons { font-size: 15px; }
+#shell.light .settings-presence-btn.active { background: var(--brand); color: #fff; }
+
+#shell.light .settings-ooo-schedule { display: flex; gap: var(--space-2); align-items: center; flex-shrink: 0; }
+#shell.light .settings-ooo-schedule input[type="date"] {
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-2);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+#shell.light .settings-ooo-current { color: var(--text-muted); }
+
+/* ============================================================
+   INSIGHTS / MY PERFORMANCE SCREEN
+   ============================================================ */
+#shell.light .insights-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+#shell.light .insights-tile {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+#shell.light .insights-tile-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--brand);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--space-1);
+}
+#shell.light .insights-tile-label { color: var(--text-secondary); }
 
 #shell.light .dash-widget-grid {
   display: grid;

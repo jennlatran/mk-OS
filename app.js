@@ -1,29 +1,23 @@
 /* ============================================================
    DATA — app catalog, roles, per-role recommendations
    ============================================================ */
-// pricing: 'free' | 'plan' ("Request Widget" sends a request to sales instead of adding instantly)
-// createdBy: 'myKaarma' | 'Partner' | 'You' (custom apps built via "Create Your Own App")
+// pricing: 'free' | 'plan' ("Request App"/"Request Widget" sends a request to sales instead of adding instantly)
+// createdBy: 'myKaarma' | 'Partner' | 'You' — 'You' is unused for now; "Create Your Own App" is hidden
 // label: null | 'bestseller' | 'spotlight' — a mix of install-driven ranking and myKaarma team curation
 const APPS = [
-  { id: 'communication',    name: 'Communication',            icon: 'chat',                cat: 'Communication', pricing: 'free', createdBy: 'myKaarma', label: 'bestseller', desc: 'Text, call, and message customers from one thread, synced to the repair order.' },
-  { id: 'payments',         name: 'Payments',                 icon: 'payments',             cat: 'Payments',      pricing: 'plan', createdBy: 'myKaarma', label: 'bestseller', desc: 'Collect payment in-person, online, or by text with surcharge and split-tender support.' },
-  { id: 'mpi',              name: 'Multipoint Inspection',     icon: 'fact_check',           cat: 'Inspection',    pricing: 'plan', createdBy: 'myKaarma', label: 'spotlight', desc: 'Guided digital inspections with photo/video evidence attached to every line item.' },
-  { id: 'tech-video',       name: 'Tech Video Grader',         icon: 'video_camera_front',   cat: 'Inspection',    pricing: 'plan', createdBy: 'myKaarma', label: null, desc: 'Techs record a quick video grading the vehicle condition for the advisor and customer.' },
-  { id: 'video-walkaround', name: 'Video Walkaround',          icon: 'videocam',             cat: 'Inspection',    pricing: 'plan', createdBy: 'myKaarma', label: null, desc: 'Send customers a personal video walkaround before they arrive or while they wait.' },
-  { id: 'scheduler',        name: 'Appointment Scheduler',     icon: 'event',                cat: 'Appointments',  pricing: 'free', createdBy: 'myKaarma', label: 'bestseller', desc: 'Online and phone booking with real-time bay/tech capacity.' },
-  { id: 'check-in',         name: 'Check-In',                  icon: 'how_to_reg',           cat: 'Appointments',  pricing: 'free', createdBy: 'myKaarma', label: null, desc: 'Digital check-in that pulls the appointment straight into the write-up.' },
-  { id: 'follow-up',        name: 'Follow Up Campaigns',       icon: 'campaign',             cat: 'Marketing',     pricing: 'plan', createdBy: 'myKaarma', label: 'spotlight', desc: 'Automated reminders and win-back campaigns based on service history.' },
-  { id: 'transportation',   name: 'Transportation',            icon: 'local_shipping',       cat: 'Logistics',     pricing: 'plan', createdBy: 'Partner', label: null, desc: 'Coordinate shuttles, loaners, and tow pickups from a live dispatch board.' },
-  { id: 'mobile-service',   name: 'Mobile Service',            icon: 'build',                cat: 'Logistics',     pricing: 'plan', createdBy: 'Partner', label: null, desc: 'Dispatch a technician to the customer for on-site service and payment.' },
-  { id: 'repair-orders',    name: 'Repair Order Queue',        icon: 'assignment',           cat: 'Operations',    pricing: 'free', createdBy: 'myKaarma', label: null, desc: 'A live queue of every open RO with status, tech assignment, and age.' },
-  { id: 'parts-lookup',     name: 'Parts Lookup',              icon: 'inventory_2',          cat: 'Parts',         pricing: 'free', createdBy: 'myKaarma', label: null, desc: 'Cross-reference part numbers and check on-hand inventory in seconds.' },
-  { id: 'parts-ordering',   name: 'Parts Ordering',            icon: 'shopping_cart',        cat: 'Parts',         pricing: 'plan', createdBy: 'myKaarma', label: null, desc: 'Order from suppliers and track incoming parts against open ROs.' },
-  { id: 'reporting',        name: 'Reporting & Analytics',     icon: 'bar_chart',            cat: 'Insights',      pricing: 'plan', createdBy: 'myKaarma', label: 'spotlight', desc: 'Dashboards across payments, CSI, and technician productivity.' },
-  { id: 'team-schedule',    name: 'Team Schedule',             icon: 'groups',               cat: 'Operations',    pricing: 'free', createdBy: 'myKaarma', label: null, desc: 'Shift and PTO planning for advisors, techs, and BDC reps.' },
-  { id: 'customer-directory', name: 'Customer Directory',      icon: 'contacts',             cat: 'Communication', pricing: 'free', createdBy: 'myKaarma', label: null, desc: 'Every customer’s contact info, vehicles, and service history in one place.' },
+  { id: 'messages',         name: 'Messages',           icon: 'chat',           cat: 'Communication', pricing: 'free', createdBy: 'myKaarma', label: 'bestseller', desc: 'Text, call, and message customers from one thread, synced to the repair order.' },
+  { id: 'appointments',     name: 'Appointments',       icon: 'event',          cat: 'Appointments',  pricing: 'free', createdBy: 'myKaarma', label: 'bestseller', desc: 'Online and phone booking with real-time bay/tech capacity.' },
+  { id: 'payments',         name: 'Payments',           icon: 'payments',       cat: 'Payments',      pricing: 'plan', createdBy: 'myKaarma', label: 'bestseller', desc: 'Collect payment in-person, online, or by text with surcharge and split-tender support.' },
+  { id: 'inspect',          name: 'Inspect',            icon: 'fact_check',     cat: 'Inspection',    pricing: 'plan', createdBy: 'myKaarma', label: 'spotlight', desc: 'Guided digital inspections, with workflows and statuses configurable per dealer.' },
+  { id: 'video',            name: 'Video',              icon: 'videocam',       cat: 'Inspection',    pricing: 'plan', createdBy: 'myKaarma', label: null, desc: 'Customer and loaner walkarounds, plus technician video inspections, in one place.' },
+  { id: 'pickup-delivery',  name: 'Pickup & Delivery',  icon: 'local_shipping', cat: 'Logistics',     pricing: 'plan', createdBy: 'Partner',  label: null, desc: 'Dispatch and track pickup, delivery, and loaner-swap trips from a live board.' },
+  { id: 'follow-up',        name: 'Follow Up',          icon: 'campaign',       cat: 'Marketing',     pricing: 'plan', createdBy: 'myKaarma', label: 'spotlight', desc: 'Automated reminders and win-back campaigns based on service history.' },
+  { id: 'uber',             name: 'Uber',               icon: 'local_taxi',     cat: 'Logistics',     pricing: 'plan', createdBy: 'Partner',  label: null, desc: 'Book and manage rideshare trips for customers waiting on service.' },
+  { id: 'mobile-service',   name: 'Mobile Service',     icon: 'build',          cat: 'Logistics',     pricing: 'plan', createdBy: 'Partner',  label: null, desc: 'Dispatch a technician to the customer for on-site service and payment.' },
+  { id: 'vehicle-tracking', name: 'Vehicle Tracking',   icon: 'my_location',    cat: 'Operations',    pricing: 'plan', createdBy: 'myKaarma', label: null, desc: 'Live location for loaner, shuttle, and service vehicles.' },
 ];
 
-const CATEGORIES = ['Appointments', 'Payments', 'Inspection', 'Insights', 'Communication', 'Marketing', 'Logistics', 'Operations', 'Parts'];
+const CATEGORIES = ['Appointments', 'Payments', 'Inspection', 'Communication', 'Marketing', 'Logistics', 'Operations'];
 
 // Mocked list of data sources a custom app could pull from — illustrative only, no real
 // integration behind this in the prototype.
@@ -41,116 +35,94 @@ const ROLES = [
   { id: 'loaner-manager', name: 'Loaner Manager',                      icon: 'car_rental' },
 ];
 
+// Parts Rep and Loaner Manager lost the apps their old defaults leaned on
+// (Parts Lookup/Ordering, Transportation, Customer Directory, Reporting — all
+// dropped from the catalog). These are best-fit substitutes from the new 10,
+// not a like-for-like replacement — flagged for a app/role conversation,
+// not something this prototype can resolve on its own.
 const RECOMMENDED = {
-  'bdc-rep':          ['communication', 'follow-up', 'scheduler', 'check-in', 'customer-directory'],
-  'parts-rep':        ['parts-lookup', 'parts-ordering', 'reporting', 'communication'],
-  'service-advisor':  ['communication', 'scheduler', 'check-in', 'payments', 'follow-up', 'mpi', 'video-walkaround', 'transportation'],
-  'manager-admin':    ['reporting', 'team-schedule', 'follow-up', 'communication', 'scheduler'],
-  'technician':       ['mpi', 'tech-video', 'video-walkaround', 'repair-orders', 'parts-lookup'],
-  'loaner-manager':   ['transportation', 'mobile-service', 'customer-directory', 'communication', 'reporting'],
+  'bdc-rep':          ['messages', 'appointments', 'follow-up', 'pickup-delivery'],
+  'parts-rep':        ['messages', 'appointments', 'payments'],
+  'service-advisor':  ['messages', 'appointments', 'payments', 'inspect', 'video', 'follow-up'],
+  'manager-admin':    ['appointments', 'payments', 'follow-up', 'messages'],
+  'technician':       ['inspect', 'video', 'vehicle-tracking', 'mobile-service'],
+  'loaner-manager':   ['pickup-delivery', 'vehicle-tracking', 'messages', 'mobile-service'],
 };
 
 // Rough keyword → app mapping for the "start from scratch" AI prompt (mocked, no real model).
 const AI_KEYWORDS = {
-  communication:      ['text', 'call', 'message', 'customer', 'chat'],
-  payments:           ['pay', 'payment', 'invoice', 'charge', 'bill'],
-  mpi:                ['inspect', 'multipoint', 'mpi'],
-  'tech-video':       ['video grade', 'grader', 'tech video'],
-  'video-walkaround':  ['walkaround', 'video', 'record'],
-  scheduler:          ['schedule', 'appointment', 'book'],
-  'check-in':          ['check in', 'check-in', 'checkin'],
+  messages:            ['text', 'call', 'message', 'customer', 'chat'],
+  appointments:        ['schedule', 'appointment', 'book'],
+  payments:            ['pay', 'payment', 'invoice', 'charge', 'bill'],
+  inspect:             ['inspect', 'multipoint', 'mpi', 'commercial van'],
+  video:               ['walkaround', 'video', 'record', 'technician inspection'],
+  'pickup-delivery':   ['pickup', 'delivery', 'tow', 'shuttle', 'dispatch', 'trip'],
   'follow-up':         ['follow up', 'follow-up', 'campaign', 'remind', 'entice'],
-  transportation:     ['tow', 'shuttle', 'pickup', 'drop off', 'transport'],
-  'mobile-service':    ['mobile', 'onsite', 'on-site', 'at home'],
-  'repair-orders':     ['repair order', 'ro queue', 'queue'],
-  'parts-lookup':      ['part lookup', 'find part', 'part'],
-  'parts-ordering':    ['order part', 'ordering'],
-  reporting:          ['report', 'analytic', 'metric', 'dashboard'],
-  'team-schedule':     ['team', 'staff', 'roster', 'shift'],
-  'customer-directory': ['directory', 'contact'],
+  uber:                ['uber', 'ride', 'rideshare'],
+  'mobile-service':    ['mobile', 'onsite', 'on-site', 'at home', 'lead'],
+  'vehicle-tracking':  ['track', 'gps', 'location', 'tracking'],
 };
 
 // Mocked live-data line shown on each app's dashboard widget (no backing data source).
 const WIDGET_PREVIEW = {
-  communication:      '3 unread messages',
-  payments:           '$1,240 collected today',
-  mpi:                '2 inspections pending review',
-  'tech-video':        '1 video pending grading',
-  'video-walkaround':  '4 walkarounds this week',
-  scheduler:          '5 appointments today',
-  'check-in':          '2 customers checked in',
+  messages:            '3 unread messages',
+  appointments:        '5 appointments today',
+  payments:            '$1,240 collected today',
+  inspect:             '2 inspections pending review',
+  video:               '4 walkarounds this week',
+  'pickup-delivery':   '2 trips in route',
   'follow-up':         '12 active campaigns',
-  transportation:     '3 pickups scheduled',
+  uber:                '1 ride in progress',
   'mobile-service':    '1 mobile job today',
-  'repair-orders':     '8 ROs in queue',
-  'parts-lookup':      '6 lookups today',
-  'parts-ordering':    '2 orders awaiting approval',
-  reporting:          'Weekly report ready',
-  'team-schedule':     '6 techs on shift today',
-  'customer-directory': '1,204 customers',
+  'vehicle-tracking':  '4 vehicles tracked live',
 };
 
 // Richer per-app rows shown when a widget is toggled to the Large preset.
 const WIDGET_DETAIL = {
-  communication: [
+  messages: [
     { label: 'Jane Smith', value: '"When will my car be ready?"' },
     { label: 'Mike Johnson', value: '"Thanks for the update!"' },
     { label: 'Aisha Patel', value: '"Can I add an oil change?"' },
+  ],
+  appointments: [
+    { label: '9:00 AM', value: 'Jane Smith — Oil Change' },
+    { label: '11:30 AM', value: 'Carlos Rivera — Brake Inspection' },
+    { label: '2:00 PM', value: 'Aisha Patel — 30k Service' },
   ],
   payments: [
     { label: 'RO-10198', value: '$412.50 · Paid' },
     { label: 'RO-10212', value: '$89.00 · Pending' },
     { label: 'RO-10231', value: '$1,204.00 · Paid' },
   ],
-  mpi: [
+  inspect: [
     { label: 'RO-10267', value: 'Brakes flagged — needs approval' },
     { label: 'RO-10198', value: 'Passed, no issues' },
   ],
-  scheduler: [
-    { label: '9:00 AM', value: 'Jane Smith — Oil Change' },
-    { label: '11:30 AM', value: 'Carlos Rivera — Brake Inspection' },
-    { label: '2:00 PM', value: 'Aisha Patel — 30k Service' },
+  video: [
+    { label: 'Jane Smith', value: 'Customer walkaround sent' },
+    { label: 'Loaner 3', value: 'Loaner walkaround recorded' },
   ],
-  'check-in': [
-    { label: 'Mike Johnson', value: 'Checked in 8:45 AM' },
-    { label: 'Carlos Rivera', value: 'Checked in 9:15 AM' },
+  'pickup-delivery': [
+    { label: 'Trip — Jane Smith', value: 'In route, ETA 12 min' },
+    { label: 'Trip — Mike Johnson', value: 'In route, ETA 6 min' },
   ],
   'follow-up': [
     { label: 'Win-back campaign', value: '48 customers · 12 responded' },
     { label: '6-month reminder', value: '112 customers · 30 responded' },
   ],
-  transportation: [
-    { label: 'Shuttle', value: '2 pickups scheduled today' },
-    { label: 'Loaner', value: '1 vehicle out — due back Friday' },
+  uber: [
+    { label: 'Jane Smith', value: 'Ride ongoing, ETA 8 min' },
   ],
   'mobile-service': [
     { label: 'Carlos Rivera', value: 'On-site oil change, 1:00 PM' },
   ],
-  'repair-orders': [
-    { label: 'RO-10231', value: 'Awaiting Parts' },
-    { label: 'RO-10245', value: 'In Progress' },
-    { label: 'RO-10198', value: 'Ready for Pickup' },
-  ],
-  'parts-lookup': [
-    { label: 'Brake pads (Accord)', value: 'In stock — 4 units' },
-    { label: 'Cabin filter (RAV4)', value: 'Backordered' },
-  ],
-  'parts-ordering': [
-    { label: 'PO-2291', value: 'Awaiting supplier confirmation' },
-  ],
-  reporting: [
-    { label: 'CSI this week', value: '4.7 / 5' },
-    { label: 'Avg RO value', value: '$482' },
-  ],
-  'team-schedule': [
-    { label: 'On shift today', value: '6 of 8 techs' },
-  ],
-  'customer-directory': [
-    { label: 'Total customers', value: '1,204' },
+  'vehicle-tracking': [
+    { label: 'Loaner 3', value: 'Moving — Main St & 5th Ave' },
+    { label: 'Shuttle 1', value: 'Moving — near dealership' },
   ],
 };
 
-// Per-product table shown on the base surface (left-nav selection) when no tab is
+// Per-app table shown on the base surface (left-nav selection) when no tab is
 // focused. rows() returns { cells, linkType, linkId } — linkType null means the row
 // has no backing customer/RO record, so it isn't clickable.
 function custName(id) { return MOCK_CUSTOMERS.find(c => c.id === id).name; }
@@ -164,98 +136,212 @@ const customerLinkedRows = key => WIDGET_DETAIL[key].map((row, i) => {
   return { cells: [row.label, row.value], linkType: cust ? 'customer' : 'row', linkId: cust ? cust.id : `${key}-${i}` };
 });
 
-const PRODUCT_TABLES = {
-  scheduler: {
+// Flat apps — one table, no sub-navigation.
+const APP_TABLES = {
+  appointments: {
     columns: ['Customer', 'Vehicle', 'Service', 'Date', 'Status'],
     rows: () => MOCK_APPOINTMENTS.map(a => ({
       cells: [custName(a.customerId), a.vehicle, a.service, a.date, a.upcoming ? 'Upcoming' : 'Completed'],
       linkType: 'customer', linkId: a.customerId,
     })),
   },
-  'check-in': {
-    columns: ['Customer', 'Vehicle', 'Checked In'],
-    rows: () => MOCK_APPOINTMENTS.filter(a => a.upcoming).map(a => ({
-      cells: [custName(a.customerId), a.vehicle, a.date],
-      linkType: 'customer', linkId: a.customerId,
+  messages: {
+    columns: ['Customer', 'Last Message'],
+    rows: () => customerLinkedRows('messages'),
+  },
+  'follow-up': {
+    columns: ['Campaign', 'Detail'],
+    rows: () => plainRows('follow-up'),
+  },
+  'vehicle-tracking': {
+    columns: ['Vehicle', 'Type', 'Assigned To', 'Status', 'Location'],
+    rows: () => MOCK_VEHICLE_TRACKING.map(v => ({
+      cells: [v.vehicleLabel, v.type, v.assignedTo || '—', v.status, v.location],
+      linkType: 'row', linkId: v.id,
     })),
   },
-  mpi: {
-    columns: ['RO', 'Customer', 'Vehicle', 'Date', 'Status'],
-    rows: () => MOCK_INSPECTIONS.map(i => {
-      const ro = MOCK_ROS.find(r => r.customerId === i.customerId);
-      return { cells: [ro ? ro.number : '—', custName(i.customerId), i.vehicle, i.date, i.status], linkType: 'customer', linkId: i.customerId };
-    }),
-  },
-  'tech-video': {
-    columns: ['Customer', 'Vehicle', 'Status'],
-    rows: () => MOCK_INSPECTIONS.map(i => ({
-      cells: [custName(i.customerId), i.vehicle, i.status.includes('flagged') ? 'Needs grading' : 'Graded'],
-      linkType: 'customer', linkId: i.customerId,
+};
+
+// Fallback for any app without a APP_TABLES entry (e.g. a custom app created
+// via "Create Your Own App") — an empty-state table rather than a missing render.
+function appTableFor(appId) {
+  return APP_TABLES[appId] || { columns: ['Detail'], rows: () => [] };
+}
+
+/* ============================================================
+   APP SUB-TABS — some apps are an umbrella over several
+   distinct workflows/views rather than one flat table. Every
+   sub-tab is one of:
+     'table'      — same {columns, rows()} shape as APP_TABLES
+     'calendar'   — events grouped by date (Mobile Service's Schedule
+                    renders the same underlying data as its Appointments
+                    table, just grouped by day instead of listed as rows)
+     'map'        — pins only, no list (Mobile Service's Global Map)
+     'map-split'  — a table alongside a map that plots only a subset of
+                    its rows (Pickup & Delivery's Trips: the table lists
+                    every trip including ones that haven't started yet;
+                    the map only plots trips currently in route, which is
+                    the only pin position that means anything in real time)
+   ============================================================ */
+const APP_SUBTABS = {
+  payments: [
+    { id: 'pay-now', name: 'Pay Now', view: 'table' },
+    { id: 'payment-request', name: 'Payment Request', view: 'table' },
+    { id: 'order-status', name: 'Order Status', view: 'table' },
+    { id: 'payment-report', name: 'Payment Report', view: 'table' },
+  ],
+  // Workflow names are configured per dealer in the real app — these two
+  // are fillers standing in for whatever a given dealership has set up.
+  inspect: [
+    { id: 'customer-mpi', name: 'Customer MPI', view: 'table' },
+    { id: 'commercial-vans', name: 'Commercial Vans', view: 'table' },
+  ],
+  video: [
+    { id: 'customer-walkaround', name: 'Customer Walkaround', view: 'table' },
+    { id: 'loaner-walkaround', name: 'Loaner Walkaround', view: 'table' },
+    { id: 'technician-inspections', name: 'Technician Inspections', view: 'table' },
+  ],
+  'pickup-delivery': [
+    { id: 'trips', name: 'Trips', view: 'map-split' },
+    { id: 'vehicles', name: 'Vehicles', view: 'table' },
+    { id: 'drivers', name: 'Drivers', view: 'table' },
+    { id: 'driver-payment', name: 'Driver Payment', view: 'table' },
+  ],
+  'mobile-service': [
+    { id: 'schedule', name: 'Schedule', view: 'calendar' },
+    { id: 'appointments', name: 'Appointments', view: 'table' },
+    { id: 'leads', name: 'Leads', view: 'table' },
+    { id: 'technicians', name: 'Technicians', view: 'table' },
+    { id: 'vehicles', name: 'Vehicles', view: 'table' },
+    { id: 'global-map', name: 'Global Map', view: 'map' },
+  ],
+  uber: [
+    { id: 'book-rides', name: 'Book Rides', view: 'table' },
+    { id: 'vouchers-issued', name: 'Vouchers Issued', view: 'table' },
+    { id: 'ongoing-rides', name: 'Ongoing Rides', view: 'table' },
+    { id: 'past-booked', name: 'Past Booked', view: 'table' },
+    { id: 'billed', name: 'Billed', view: 'table' },
+  ],
+};
+
+function appHasSubtabs(appId) { return Object.prototype.hasOwnProperty.call(APP_SUBTABS, appId); }
+function getSubtabs(appId) { return APP_SUBTABS[appId] || []; }
+function getSubtabDef(appId, subtabId) { return getSubtabs(appId).find(s => s.id === subtabId); }
+
+// 'table'-view sub-tabs, keyed "appId:subtabId". 'calendar'/'map'/'map-split'
+// sub-tabs are rendered by dedicated functions further down instead — see
+// renderSubtabContent.
+const SUBTAB_TABLES = {
+  'payments:pay-now': {
+    columns: ['Customer', 'RO', 'Amount Due', 'Method'],
+    rows: () => MOCK_INVOICES.filter(inv => inv.status === 'Pending').map(inv => ({
+      cells: [custName(inv.customerId), inv.roNumber, `$${inv.amount.toFixed(2)}`, 'Card on file'],
+      linkType: 'customer', linkId: inv.customerId,
     })),
   },
-  'video-walkaround': {
-    columns: ['Customer', 'Vehicle', 'Sent'],
-    rows: () => MOCK_INSPECTIONS.map(i => ({
-      cells: [custName(i.customerId), i.vehicle, i.date],
-      linkType: 'customer', linkId: i.customerId,
+  'payments:payment-request': {
+    columns: ['Customer', 'RO', 'Amount', 'Sent'],
+    rows: () => MOCK_INVOICES.map(inv => ({
+      cells: [custName(inv.customerId), inv.roNumber, `$${inv.amount.toFixed(2)}`, inv.date],
+      linkType: 'customer', linkId: inv.customerId,
     })),
   },
-  payments: {
+  'payments:order-status': {
     columns: ['Invoice', 'Customer', 'RO', 'Amount', 'Status'],
     rows: () => MOCK_INVOICES.map(inv => ({
       cells: [inv.id.toUpperCase(), custName(inv.customerId), inv.roNumber, `$${inv.amount.toFixed(2)}`, inv.status],
       linkType: 'customer', linkId: inv.customerId,
     })),
   },
-  'repair-orders': {
-    columns: ['RO', 'Customer', 'Vehicle', 'Status'],
-    rows: () => MOCK_ROS.map(r => ({
-      cells: [r.number, custName(r.customerId), r.vehicle, r.status],
-      linkType: 'ro', linkId: r.id,
+  'payments:payment-report': {
+    columns: ['Metric', 'Value'],
+    rows: () => [
+      { cells: ['Collected today', '$1,705.50'], linkType: 'row', linkId: 'payrep-1' },
+      { cells: ['Pending', '$89.00'], linkType: 'row', linkId: 'payrep-2' },
+      { cells: ['Refunded this week', '$0.00'], linkType: 'row', linkId: 'payrep-3' },
+    ],
+  },
+  'inspect:customer-mpi': {
+    columns: ['RO', 'Customer', 'Vehicle', 'Date', 'Status'],
+    rows: () => MOCK_INSPECTIONS.map(i => {
+      const ro = MOCK_ROS.find(r => r.customerId === i.customerId);
+      return { cells: [ro ? ro.number : '—', custName(i.customerId), i.vehicle, i.date, i.status], linkType: 'customer', linkId: i.customerId };
+    }),
+  },
+  'inspect:commercial-vans': {
+    columns: ['Vehicle', 'Fleet Account', 'Date', 'Status'],
+    rows: () => MOCK_VAN_INSPECTIONS.map(v => ({ cells: [v.vehicle, v.fleetAccount, v.date, v.status], linkType: 'row', linkId: v.id })),
+  },
+  'video:customer-walkaround': {
+    columns: ['Customer', 'Vehicle', 'Sent'],
+    rows: () => MOCK_INSPECTIONS.map(i => ({ cells: [custName(i.customerId), i.vehicle, i.date], linkType: 'customer', linkId: i.customerId })),
+  },
+  'video:loaner-walkaround': {
+    columns: ['Loaner Vehicle', 'Assigned To', 'Recorded'],
+    rows: () => MOCK_FLEET_VEHICLES.filter(v => v.type === 'Loaner').map(v => ({ cells: [v.label, v.assignedTo || '—', '2026-08-20'], linkType: 'row', linkId: v.id })),
+  },
+  'video:technician-inspections': {
+    columns: ['Customer', 'Vehicle', 'Status'],
+    rows: () => MOCK_INSPECTIONS.map(i => ({ cells: [custName(i.customerId), i.vehicle, i.status.includes('flagged') ? 'Needs grading' : 'Graded'], linkType: 'customer', linkId: i.customerId })),
+  },
+  'pickup-delivery:vehicles': {
+    columns: ['Vehicle', 'Type', 'Status'],
+    rows: () => MOCK_FLEET_VEHICLES.map(v => ({ cells: [v.label, v.type, v.status], linkType: 'row', linkId: v.id })),
+  },
+  'pickup-delivery:drivers': {
+    columns: ['Driver', 'Status', 'Trips Today'],
+    rows: () => MOCK_DRIVERS.map(d => ({ cells: [d.name, d.status, String(d.tripsToday)], linkType: 'row', linkId: d.id })),
+  },
+  'pickup-delivery:driver-payment': {
+    columns: ['Driver', 'Period', 'Amount', 'Status'],
+    rows: () => MOCK_DRIVER_PAYMENTS.map(p => ({
+      cells: [(MOCK_DRIVERS.find(d => d.id === p.driverId) || {}).name || '—', p.period, `$${p.amount.toFixed(2)}`, p.status],
+      linkType: 'row', linkId: p.id,
     })),
   },
-  communication: {
-    columns: ['Customer', 'Last Message'],
-    rows: () => customerLinkedRows('communication'),
+  'mobile-service:appointments': {
+    columns: ['Customer', 'Vehicle', 'Service', 'When', 'Status'],
+    rows: () => MOCK_MOBILE_APPTS.map(a => ({
+      cells: [custName(a.customerId), a.vehicle, a.service, `${a.date} · ${a.time}`, a.status],
+      linkType: 'customer', linkId: a.customerId,
+    })),
   },
-  'follow-up': {
-    columns: ['Campaign', 'Detail'],
-    rows: () => plainRows('follow-up'),
+  'mobile-service:leads': {
+    columns: ['Name', 'Phone', 'Interested In', 'Status'],
+    rows: () => MOCK_LEADS.map(l => ({ cells: [l.name, l.phone, l.service, l.status], linkType: 'row', linkId: l.id })),
   },
-  transportation: {
-    columns: ['Type', 'Detail'],
-    rows: () => plainRows('transportation'),
+  'mobile-service:technicians': {
+    columns: ['Technician', 'Status', 'Jobs Today'],
+    rows: () => MOCK_MOBILE_TECHS.map(t => ({ cells: [t.name, t.status, String(t.jobsToday)], linkType: 'row', linkId: t.id })),
   },
-  'mobile-service': {
-    columns: ['Customer', 'Detail'],
-    rows: () => customerLinkedRows('mobile-service'),
+  'mobile-service:vehicles': {
+    columns: ['Vehicle', 'Type', 'Status'],
+    rows: () => MOCK_FLEET_VEHICLES.map(v => ({ cells: [v.label, v.type, v.status], linkType: 'row', linkId: v.id })),
   },
-  'parts-lookup': {
-    columns: ['Part', 'Availability'],
-    rows: () => plainRows('parts-lookup'),
+  'uber:book-rides': {
+    columns: ['Customer', 'Pickup', 'Dropoff'],
+    rows: () => MOCK_CUSTOMERS.slice(0, 3).map(c => ({ cells: [c.name, 'Dealership', 'Home'], linkType: 'customer', linkId: c.id })),
   },
-  'parts-ordering': {
-    columns: ['Order', 'Status'],
-    rows: () => plainRows('parts-ordering'),
+  'uber:vouchers-issued': {
+    columns: ['Customer', 'Amount', 'Status', 'Issued'],
+    rows: () => MOCK_VOUCHERS.map(v => ({ cells: [custName(v.customerId), `$${v.amount.toFixed(2)}`, v.status, v.issuedDate], linkType: 'customer', linkId: v.customerId })),
   },
-  reporting: {
-    columns: ['Metric', 'Value'],
-    rows: () => plainRows('reporting'),
+  'uber:ongoing-rides': {
+    columns: ['Customer', 'Status', 'ETA'],
+    rows: () => MOCK_UBER_RIDES.filter(r => r.status === 'Ongoing').map(r => ({ cells: [custName(r.customerId), r.status, r.eta || '—'], linkType: 'customer', linkId: r.customerId })),
   },
-  'team-schedule': {
-    columns: ['Metric', 'Value'],
-    rows: () => plainRows('team-schedule'),
+  'uber:past-booked': {
+    columns: ['Customer', 'Date', 'Cost', 'Status'],
+    rows: () => MOCK_UBER_RIDES.filter(r => r.status === 'Completed' || r.status === 'Billed').map(r => ({ cells: [custName(r.customerId), r.requestedAt, `$${r.cost.toFixed(2)}`, r.status], linkType: 'customer', linkId: r.customerId })),
   },
-  'customer-directory': {
-    columns: ['Customer', 'Phone', 'Email'],
-    rows: () => MOCK_CUSTOMERS.map(c => ({ cells: [c.name, c.phone, c.email], linkType: 'customer', linkId: c.id })),
+  'uber:billed': {
+    columns: ['Customer', 'Cost', 'Billed On'],
+    rows: () => MOCK_UBER_RIDES.filter(r => r.status === 'Billed').map(r => ({ cells: [custName(r.customerId), `$${r.cost.toFixed(2)}`, r.requestedAt], linkType: 'customer', linkId: r.customerId })),
   },
 };
 
-// Fallback for any app without a PRODUCT_TABLES entry (e.g. a custom app created
-// via "Create Your Own App") — an empty-state table rather than a missing render.
-function productTableFor(appId) {
-  return PRODUCT_TABLES[appId] || { columns: ['Detail'], rows: () => [] };
+function subtabTableFor(appId, subtabId) {
+  return SUBTAB_TABLES[`${appId}:${subtabId}`] || { columns: ['Detail'], rows: () => [] };
 }
 
 /* ============================================================
@@ -297,6 +383,151 @@ const MOCK_INVOICES = [
   { id: 'inv-3', customerId: 'cust-4', roNumber: 'RO-10212', date: '2026-08-13', amount: 89.00, status: 'Pending' },
 ];
 
+/* ============================================================
+   MOCK DATA — app-specific (Inspect, Video, Pickup & Delivery,
+   Mobile Service, Uber, Vehicle Tracking)
+   ============================================================ */
+const MOCK_VAN_INSPECTIONS = [
+  { id: 'van-1', vehicle: '2023 Ford Transit #4', fleetAccount: 'Acme Delivery Co.', date: '2026-08-18', status: 'Passed, no issues' },
+  { id: 'van-2', vehicle: '2022 Mercedes Sprinter #2', fleetAccount: 'Metro Courier', date: '2026-08-19', status: 'Brake wear flagged' },
+];
+
+// Shared by Pickup & Delivery's Vehicles sub-tab, Mobile Service's Vehicles
+// sub-tab, and Video's Loaner Walkaround table.
+const MOCK_FLEET_VEHICLES = [
+  { id: 'fleet-1', label: '2024 Chevrolet Equinox (Loaner 3)', type: 'Loaner', status: 'In Use', assignedTo: 'Jane Smith' },
+  { id: 'fleet-2', label: '2023 Ford Transit (Shuttle 1)', type: 'Shuttle', status: 'Available', assignedTo: null },
+  { id: 'fleet-3', label: '2024 Toyota Camry (Loaner 7)', type: 'Loaner', status: 'In Use', assignedTo: 'Mike Johnson' },
+  { id: 'fleet-4', label: 'Service Van 2', type: 'Service Vehicle', status: 'Available', assignedTo: null },
+];
+
+const MOCK_DRIVERS = [
+  { id: 'drv-1', name: 'Marcus Lee', status: 'On Trip', tripsToday: 4 },
+  { id: 'drv-2', name: 'Sam Ortiz', status: 'On Trip', tripsToday: 3 },
+  { id: 'drv-3', name: 'Priya Nair', status: 'Available', tripsToday: 2 },
+];
+
+const MOCK_DRIVER_PAYMENTS = [
+  { id: 'paydrv-1', driverId: 'drv-1', period: 'Week of Aug 17', amount: 412.00, status: 'Paid' },
+  { id: 'paydrv-2', driverId: 'drv-2', period: 'Week of Aug 17', amount: 356.50, status: 'Paid' },
+  { id: 'paydrv-3', driverId: 'drv-3', period: 'Week of Aug 24', amount: 198.00, status: 'Pending' },
+];
+
+// Pickup & Delivery's Trips (map-split): the table lists every trip regardless
+// of status; only 'In Route' trips carry map coordinates, since that's the
+// only status a live map position means anything for.
+const MOCK_TRIPS = [
+  { id: 'trip-1', customerId: 'cust-1', vehicle: '2021 Honda Accord', type: 'Pickup', status: 'In Route', driverId: 'drv-1', eta: '12 min', mapX: 32, mapY: 46 },
+  { id: 'trip-2', customerId: 'cust-2', vehicle: '2020 Ford F-150', type: 'Delivery', status: 'In Route', driverId: 'drv-2', eta: '6 min', mapX: 63, mapY: 27 },
+  { id: 'trip-3', customerId: 'cust-3', vehicle: '2022 Subaru Outback', type: 'Loaner Swap', status: 'Upcoming', driverId: null, eta: null, mapX: null, mapY: null },
+  { id: 'trip-4', customerId: 'cust-4', vehicle: '2018 Chevrolet Malibu', type: 'Pickup', status: 'Pending Approval', driverId: null, eta: null, mapX: null, mapY: null },
+  { id: 'trip-5', customerId: 'cust-1', vehicle: '2019 Toyota RAV4', type: 'Delivery', status: 'Completed', driverId: 'drv-1', eta: null, mapX: null, mapY: null },
+];
+
+const MOCK_UBER_RIDES = [
+  { id: 'uber-1', customerId: 'cust-1', status: 'Ongoing', eta: '8 min', cost: 18.40, requestedAt: '2026-08-24' },
+  { id: 'uber-2', customerId: 'cust-2', status: 'Completed', eta: null, cost: 22.10, requestedAt: '2026-08-20' },
+  { id: 'uber-3', customerId: 'cust-3', status: 'Billed', eta: null, cost: 15.75, requestedAt: '2026-08-15' },
+];
+
+const MOCK_VOUCHERS = [
+  { id: 'vch-1', customerId: 'cust-4', amount: 25.00, status: 'Issued', issuedDate: '2026-08-22' },
+  { id: 'vch-2', customerId: 'cust-2', amount: 15.00, status: 'Redeemed', issuedDate: '2026-08-10' },
+];
+
+const MOCK_LEADS = [
+  { id: 'lead-1', name: 'Dana Reyes', phone: '(555) 987-6543', service: 'Mobile Oil Change', status: 'New' },
+  { id: 'lead-2', name: 'Tom Becker', phone: '(555) 876-5432', service: 'Battery Replacement', status: 'Contacted' },
+  { id: 'lead-3', name: 'Priya Shah', phone: '(555) 765-4321', service: 'Brake Service', status: 'Scheduled' },
+];
+
+// Also the pin source for Mobile Service's Global Map — only technicians
+// currently out (En Route / On Site) carry map coordinates.
+const MOCK_MOBILE_TECHS = [
+  { id: 'mtech-1', name: 'Carlos Diaz', status: 'On Site', jobsToday: 3, mapX: 45, mapY: 62 },
+  { id: 'mtech-2', name: 'Wendy Park', status: 'En Route', jobsToday: 2, mapX: 71, mapY: 34 },
+  { id: 'mtech-3', name: 'Reggie Fox', status: 'Available', jobsToday: 0, mapX: null, mapY: null },
+];
+
+// Backs both Mobile Service sub-tabs that show appointments: 'Schedule'
+// (grouped by date) and 'Appointments' (flat table) render this same data.
+const MOCK_MOBILE_APPTS = [
+  { id: 'mappt-1', customerId: 'cust-1', vehicle: '2021 Honda Accord', service: 'Mobile Oil Change', date: '2026-08-24', time: '9:00 AM', techId: 'mtech-1', status: 'In Progress' },
+  { id: 'mappt-2', customerId: 'cust-3', vehicle: '2022 Subaru Outback', service: 'Battery Replacement', date: '2026-08-24', time: '11:30 AM', techId: 'mtech-2', status: 'Scheduled' },
+  { id: 'mappt-3', customerId: 'cust-4', vehicle: '2023 Kia Sportage', service: 'Brake Inspection', date: '2026-08-25', time: '1:00 PM', techId: null, status: 'Scheduled' },
+];
+
+const MOCK_VEHICLE_TRACKING = [
+  { id: 'vt-1', vehicleLabel: 'Loaner 3 — Chevrolet Equinox', type: 'Loaner', assignedTo: 'Jane Smith', status: 'Moving', location: 'Main St & 5th Ave' },
+  { id: 'vt-2', vehicleLabel: 'Shuttle 1 — Ford Transit', type: 'Shuttle', assignedTo: 'Marcus Lee', status: 'Moving', location: 'Near dealership' },
+  { id: 'vt-3', vehicleLabel: 'Loaner 7 — Toyota Camry', type: 'Loaner', assignedTo: 'Mike Johnson', status: 'Parked', location: 'Customer address' },
+  { id: 'vt-4', vehicleLabel: 'Service Van 2', type: 'Service Vehicle', assignedTo: null, status: 'Idle', location: 'Dealership lot' },
+];
+
+/* ============================================================
+   MOCK DATA — Settings > User Management (manager-admin only)
+   ============================================================ */
+// authority: 'Standard' | 'Admin' — a per-user permission level, separate
+// from role (which app view they get) and from managerConfig's per-role
+// lock/default toggle.
+const MOCK_STAFF_USERS = [
+  { id: 'usr-1', name: 'Jane Kim', roleId: 'service-advisor', authority: 'Standard' },
+  { id: 'usr-2', name: 'Marcus Lee', roleId: 'technician', authority: 'Standard' },
+  { id: 'usr-3', name: 'Priya Nair', roleId: 'bdc-rep', authority: 'Standard' },
+  { id: 'usr-4', name: 'Sam Ortiz', roleId: 'parts-rep', authority: 'Standard' },
+  { id: 'usr-5', name: 'Dana Reyes', roleId: 'loaner-manager', authority: 'Admin' },
+];
+
+/* ============================================================
+   MOCK DATA — What's New / System Status, My Performance, Insights
+   ============================================================ */
+const MOCK_CHANGELOG = [
+  { id: 'cl-1', date: '2026-08-28', title: 'Book Uber rides for waiting customers', detail: 'Book and track rideshare trips right from the Uber tab.' },
+  { id: 'cl-2', date: '2026-08-21', title: 'Redesigned app shell', detail: 'New left nav rail, global tab strip, and unified search.' },
+  { id: 'cl-3', date: '2026-08-14', title: 'Dark mode', detail: 'Toggle light/dark from the prototype toolbar.' },
+];
+
+// state: 'operational' | 'degraded' | 'down'. incidents is empty when operational.
+const MOCK_SYSTEM_STATUS = { state: 'operational', incidents: [] };
+
+// Personal metrics shown in "My Performance" — every role except manager-admin
+// sees their own numbers here instead of the aggregate Insights dashboard.
+// Technician's Video Grading Score is where the old "Tech Video Grader" app's
+// metric lives now — it's a personal stat, not a app tab.
+const MY_PERFORMANCE = {
+  technician: [
+    { label: 'Video Grading Score', value: '94%' },
+    { label: 'Inspections Completed (7d)', value: '18' },
+    { label: 'Avg Grading Time', value: '3m 40s' },
+  ],
+  'service-advisor': [
+    { label: 'CSI Score', value: '4.8 / 5' },
+    { label: 'ROs Closed (7d)', value: '32' },
+    { label: 'Upsell Rate', value: '21%' },
+  ],
+  'bdc-rep': [
+    { label: 'Appointments Booked (7d)', value: '46' },
+    { label: 'Avg Response Time', value: '4 min' },
+  ],
+  'parts-rep': [
+    { label: 'Orders Fulfilled (7d)', value: '58' },
+    { label: 'Fill Rate', value: '92%' },
+  ],
+  'loaner-manager': [
+    { label: 'Loaners Dispatched (7d)', value: '21' },
+    { label: 'Avg Turnaround', value: '1h 12m' },
+  ],
+};
+function myPerformanceFor(roleId) { return MY_PERFORMANCE[roleId] || [{ label: 'No metrics yet', value: '—' }]; }
+
+// Aggregate, dealership-wide — manager-admin only.
+const MOCK_INSIGHTS = [
+  { label: 'Revenue This Week', value: '$42,180' },
+  { label: 'CSI (Dealership Avg)', value: '4.7 / 5' },
+  { label: 'ROs In Progress', value: '27' },
+  { label: 'Technician Utilization', value: '86%' },
+];
+
 // Available content widgets per tab type — what a Customer or RO tab can be built
 // from. Every open tab gets its own independent widgets list + sizes, so two
 // different customers' tabs can look completely different.
@@ -332,19 +563,28 @@ const MOCK_NOTIFICATIONS = [
 const state = {
   role: null,
   pendingRole: null,
-  navProducts: [],   // was homeApps — same marketplace/manager-lock mechanism, now a nav list
+  navApps: [],   // was homeApps — same marketplace/manager-lock mechanism, now a nav list
   scratchSelected: new Set(),
   device: 'desktop',
   managerConfig: {},        // { [roleId]: { appIds: [...], mode: 'default' | 'locked' } }
   managerEditingRoleId: null,
   managerEditSelected: new Set(),
 
+  theme: 'light',    // 'light' | 'dark' — persisted: mkos-theme
+
   // Dashboard — nav rail, tabs, widget sizes, and notification filter
   navMode: 'expanded',   // 'collapsed' | 'expanded' | 'hover'
-  selectedProduct: null, // appId shown on the base surface; not persisted, resets on reload
+  selectedApp: null, // appId shown on the base surface; not persisted, resets on reload
+  selectedSubTab: null,  // sub-tab id within selectedApp, for apps with APP_SUBTABS
   tabs: [],               // record-detail tabs only — no seeded "overview" tab
-  activeTabId: null,      // null = show selectedProduct's table; else a tab id
+  activeTabId: null,      // null = show selectedApp's table; else a tab id
   notifFilter: '',   // '' | 'vehicle' | 'customer' | 'internal'
+  focusedTripId: null,    // Pickup & Delivery Trips map-split: which active trip is highlighted
+
+  // Header — presence, updates & system status panel
+  presence: 'available',   // 'available' | 'ooo' — persisted: mkos-presence
+  oooReturnDate: '',        // set via Settings > Out of Office
+  updatesPanelOpen: false,
 };
 
 function getApp(id) { return APPS.find(a => a.id === id); }
@@ -357,6 +597,10 @@ function getRole(id) { return ROLES.find(r => r.id === id); }
 const ONBOARDING_STEPS = ['onboarding-role', 'onboarding-path', 'onboarding-scratch'];
 // The branded welcome sidebar only shows before a role is picked.
 const SIDEBAR_SCREENS = ['onboarding-role'];
+// Edit Home Screen is about arranging your own app list, not working a
+// record — search (which opens record tabs) and the tab strip itself aren't
+// relevant there, so the header shows without them on this one screen.
+const HIDE_HEADER_SEARCH_AND_TABS_SCREENS = ['home'];
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.setAttribute('hidden', ''));
@@ -371,6 +615,9 @@ function showScreen(id) {
   });
 
   document.getElementById('app-header').hidden = ONBOARDING_STEPS.includes(id);
+  const hideSearchAndTabs = HIDE_HEADER_SEARCH_AND_TABS_SCREENS.includes(id);
+  document.querySelector('.app-header-search').hidden = hideSearchAndTabs;
+  document.getElementById('dashboard-tab-strip').hidden = hideSearchAndTabs;
   renderAppHeader();
 
   document.getElementById('app-frame').scrollTop = 0;
@@ -432,14 +679,16 @@ function schematicThumbHTML(appIds) {
    ONBOARDING — PATH CHOICE
    ============================================================ */
 function choosePathMykRecommended() {
-  state.navProducts = [...RECOMMENDED[state.role]];
+  state.navApps = [...RECOMMENDED[state.role]];
+  homeAddAppOpen = false;
   renderHome();
   showScreen('home');
 }
 
 function choosePathDealerRecommended() {
   ensureManagerConfig();
-  state.navProducts = [...state.managerConfig[state.role].appIds];
+  state.navApps = [...state.managerConfig[state.role].appIds];
+  homeAddAppOpen = false;
   renderHome();
   showScreen('home');
 }
@@ -482,18 +731,19 @@ const MARKET_LABELS = { bestseller: 'Best Seller', spotlight: 'Spotlight' };
 const marketState = { search: '', category: '', pricing: '', createdBy: '', label: '' };
 const marketRequestedPlan = new Set(); // appIds already requested-to-plan this session
 let marketCreateContext = null;        // which context "Create Your Own App" was opened from
+let homeAddAppOpen = false;            // Edit Home Screen's marketplace panel — hidden until "Add App" is clicked
 
 // A "context" is any screen that lets a user add apps — each owns its own selection
 // of app ids, so the marketplace just needs to know which one it's serving. Tab
 // contexts are identified as "tab:<tabId>" and resolve to that tab's own widgets list,
 // so every open Customer/RO tab gets the exact same marketplace experience as Edit
-// Home Screen, just scoped to its own widget set instead of state.navProducts.
+// Home Screen, just scoped to its own widget set instead of state.navApps.
 function resolveTabContext(context) {
   return context.startsWith('tab:') ? state.tabs.find(t => t.id === context.slice(4)) : null;
 }
 
 function getContextSelection(context) {
-  if (context === 'home') return state.navProducts;
+  if (context === 'home') return state.navApps;
   if (context === 'scratch') return [...state.scratchSelected];
   if (context === 'manager-edit') return [...state.managerEditSelected];
   const tab = resolveTabContext(context);
@@ -501,7 +751,7 @@ function getContextSelection(context) {
 }
 
 function addToContext(context, appId) {
-  if (context === 'home') { if (!state.navProducts.includes(appId)) state.navProducts.push(appId); return; }
+  if (context === 'home') { if (!state.navApps.includes(appId)) state.navApps.push(appId); return; }
   if (context === 'scratch') { state.scratchSelected.add(appId); return; }
   if (context === 'manager-edit') { state.managerEditSelected.add(appId); return; }
   const tab = resolveTabContext(context);
@@ -509,7 +759,7 @@ function addToContext(context, appId) {
 }
 
 function removeFromContext(context, appId) {
-  if (context === 'home') { state.navProducts = state.navProducts.filter(id => id !== appId); return; }
+  if (context === 'home') { state.navApps = state.navApps.filter(id => id !== appId); return; }
   if (context === 'scratch') { state.scratchSelected.delete(appId); return; }
   if (context === 'manager-edit') { state.managerEditSelected.delete(appId); return; }
   const tab = resolveTabContext(context);
@@ -553,7 +803,12 @@ function bindSelectedTiles(mountEl, context) {
   });
 }
 
+// "Widget" only applies to what a Customer/RO tab renders (small, resizable
+// cards); every other context is adding a full app to a nav/selection list.
+function marketActionNoun(context) { return context.startsWith('tab:') ? 'Widget' : 'App'; }
+
 function marketActionHTML(context, app) {
+  const noun = marketActionNoun(context);
   if (getContextSelection(context).includes(app.id)) {
     return `<button class="mk-button functional-mk-button market-action-btn" disabled><span class="material-icons">check</span> Added</button>`;
   }
@@ -561,9 +816,9 @@ function marketActionHTML(context, app) {
     if (marketRequestedPlan.has(app.id)) {
       return `<button class="mk-button functional-mk-button market-action-btn" disabled><span class="material-icons">schedule</span> Requested</button>`;
     }
-    return `<button class="mk-button secondary-mk-button market-action-btn market-plan-btn" data-app-id="${app.id}">Request Widget</button>`;
+    return `<button class="mk-button secondary-mk-button market-action-btn market-plan-btn" data-app-id="${app.id}">Request ${noun}</button>`;
   }
-  return `<button class="mk-button primary-mk-button market-action-btn market-add-btn" data-app-id="${app.id}">Add Widget</button>`;
+  return `<button class="mk-button primary-mk-button market-action-btn market-add-btn" data-app-id="${app.id}">Add ${noun}</button>`;
 }
 
 function marketCardHTML(context, app) {
@@ -582,16 +837,25 @@ function marketCardHTML(context, app) {
   `;
 }
 
+// Best Sellers first, then Spotlight, then everything else — alphabetical
+// within each tier. Uses the curation signal the catalog already carries
+// instead of leaving list order to be whatever APPS happened to be defined in.
+const MARKET_LABEL_RANK = { bestseller: 0, spotlight: 1 };
 function filteredMarketApps(extraApps = []) {
   const q = marketState.search.toLowerCase().trim();
-  return [...extraApps, ...APPS].filter(app => {
-    if (q && !app.name.toLowerCase().includes(q)) return false;
-    if (marketState.category && app.cat !== marketState.category) return false;
-    if (marketState.pricing && app.pricing !== marketState.pricing) return false;
-    if (marketState.createdBy && app.createdBy !== marketState.createdBy) return false;
-    if (marketState.label && app.label !== marketState.label) return false;
-    return true;
-  });
+  return [...extraApps, ...APPS]
+    .filter(app => {
+      if (q && !app.name.toLowerCase().includes(q)) return false;
+      if (marketState.category && app.cat !== marketState.category) return false;
+      if (marketState.pricing && app.pricing !== marketState.pricing) return false;
+      if (marketState.createdBy && app.createdBy !== marketState.createdBy) return false;
+      if (marketState.label && app.label !== marketState.label) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const rankDiff = (MARKET_LABEL_RANK[a.label] ?? 2) - (MARKET_LABEL_RANK[b.label] ?? 2);
+      return rankDiff !== 0 ? rankDiff : a.name.localeCompare(b.name);
+    });
 }
 
 function marketToolbarHTML() {
@@ -624,15 +888,14 @@ function marketToolbarHTML() {
   `;
 }
 
-// "Create Your Own App" isn't relevant during initial onboarding (building apps isn't
-// part of getting set up) or inside a Customer/RO tab's widget picker, so it's hidden
-// for the scratch-builder and tab contexts.
+// "Create Your Own App" is hidden everywhere for now — building custom apps
+// isn't a workflow being built yet, not just an onboarding-specific carve-out.
 // extraApps lets a caller merge in additional catalog-shaped entries (e.g. a tab's
 // page-info widgets) so they browse/search/filter identically to real apps.
 function renderMarketplace(mountId, context, extraApps = []) {
   const mount = document.getElementById(mountId);
   const apps = filteredMarketApps(extraApps);
-  const showCreateCard = context !== 'scratch' && !context.startsWith('tab:');
+  const showCreateCard = false;
   mount.innerHTML = `
     ${marketToolbarHTML()}
     <div class="market-count myk-body2">Showing ${apps.length} app${apps.length === 1 ? '' : 's'}</div>
@@ -755,9 +1018,10 @@ function runAIPrompt() {
 }
 
 function finishScratch() {
-  state.navProducts = state.scratchSelected.size > 0
+  state.navApps = state.scratchSelected.size > 0
     ? [...state.scratchSelected]
     : [...RECOMMENDED[state.role]];
+  homeAddAppOpen = false;
   renderHome();
   renderDashboard();
   showScreen('dashboard');
@@ -788,14 +1052,17 @@ function dismissLockNotice() {
 }
 
 // Edit Home Screen — always editable, no separate customize mode/toggle.
+// Tiles are draggable to reorder your own nav rail; the app marketplace stays
+// collapsed until "Add App" is clicked, same pattern as a tab's widget picker.
 function renderHome() {
   renderLockNotice();
 
   const grid = document.getElementById('home-grid');
-  grid.innerHTML = state.navProducts.map(id => {
+  grid.innerHTML = state.navApps.map(id => {
     const app = getApp(id);
     return `
-      <div class="app-tile" data-app-id="${app.id}">
+      <div class="app-tile" data-app-id="${app.id}" draggable="true">
+        <span class="material-icons app-tile-drag-handle" title="Drag to reorder">drag_indicator</span>
         <button class="app-tile-remove" data-remove-id="${app.id}"><span class="material-icons">close</span></button>
         <div class="app-tile-icon material-icons">${app.icon}</div>
         <div class="app-tile-name">${app.name}</div>
@@ -807,12 +1074,15 @@ function renderHome() {
   grid.querySelectorAll('.app-tile-remove').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      state.navProducts = state.navProducts.filter(id => id !== btn.dataset.removeId);
+      state.navApps = state.navApps.filter(id => id !== btn.dataset.removeId);
       renderHome();
     });
   });
+  bindDragReorder(grid, '.app-tile', () => state.navApps, list => { state.navApps = list; }, renderHome);
 
-  renderMarketplace('home-marketplace', 'home');
+  document.getElementById('home-add-app-toggle-btn').hidden = homeAddAppOpen;
+  document.getElementById('home-add-catalog').hidden = !homeAddAppOpen;
+  if (homeAddAppOpen) renderMarketplace('home-marketplace', 'home');
 }
 
 /* ============================================================
@@ -833,13 +1103,190 @@ function renderAppHeader() {
   if (!state.role) return; // nothing to show before a role is picked
   const role = getRole(state.role);
   document.getElementById('app-header-avatar-role').textContent = `Signed in as: ${role.name}`;
-  document.getElementById('app-header-manage-views-item').hidden = state.role !== 'manager-admin';
+  const isManager = state.role === 'manager-admin';
+  const insightsBtn = document.getElementById('app-header-insights-btn');
+  insightsBtn.title = isManager ? 'Insights' : 'My Performance';
+  insightsBtn.querySelector('.material-icons').textContent = isManager ? 'bar_chart' : 'insights';
+  // Settings is now a manager-only product/user configuration console —
+  // personal account settings live under the avatar instead.
+  document.getElementById('app-header-settings-btn').hidden = !isManager;
+  applyPresence();
   renderTabStrip();
   renderNotifBell();
   renderNotifPanel();
+  renderUpdatesBadge();
 }
 
-/* ---- Left product nav rail (collapsed / expanded / hover modes) ---- */
+/* ---- Theme (light / dark) — real in-app toggle lives in the avatar
+   dropdown's Appearance section; the prototype toolbar's button is a
+   reviewer-only shortcut to the same state, not a separate setting. ---- */
+function loadTheme() {
+  const saved = localStorage.getItem('mkos-theme');
+  state.theme = saved === 'dark' ? 'dark' : 'light';
+  applyTheme();
+}
+
+function applyTheme() {
+  document.getElementById('shell').dataset.theme = state.theme;
+  document.getElementById('proto-theme-icon').textContent = state.theme === 'dark' ? 'light_mode' : 'dark_mode';
+  document.querySelectorAll('.avatar-theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === state.theme);
+  });
+}
+
+function setTheme(value) {
+  state.theme = value;
+  localStorage.setItem('mkos-theme', state.theme);
+  applyTheme();
+}
+
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('mkos-theme', state.theme);
+  applyTheme();
+}
+
+/* ---- Presence (Available / Out of Office) — a dot on the avatar, like a
+   chat app's active/away indicator. Quick-toggle from the header; scheduling
+   a future return date lives in Settings. ---- */
+function loadPresence() {
+  const saved = localStorage.getItem('mkos-presence');
+  state.presence = saved === 'ooo' ? 'ooo' : 'available';
+  applyPresence();
+}
+
+// Drives the presence dot, the avatar dropdown's toggle buttons, and its
+// "currently Out of Office" line — called on load and on every change, so
+// all three stay in sync regardless of whether the dropdown is open.
+function applyPresence() {
+  const dot = document.getElementById('app-header-presence-dot');
+  if (dot) dot.classList.toggle('ooo', state.presence === 'ooo');
+  document.querySelectorAll('.settings-presence-btn[data-presence]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.presence === state.presence);
+  });
+  const currentEl = document.getElementById('avatar-ooo-current');
+  if (currentEl) {
+    if (state.presence === 'ooo' && state.oooReturnDate) {
+      currentEl.hidden = false;
+      currentEl.textContent = `Currently Out of Office — back ${state.oooReturnDate}.`;
+    } else {
+      currentEl.hidden = true;
+    }
+  }
+}
+
+function setPresence(value) {
+  state.presence = value;
+  if (value === 'available') state.oooReturnDate = '';
+  localStorage.setItem('mkos-presence', value);
+  applyPresence();
+}
+
+function togglePresenceQuick() {
+  setPresence(state.presence === 'available' ? 'ooo' : 'available');
+}
+
+/* ---- Settings screen (manager-admin only — product + user configuration) ---- */
+function renderSettingsScreen() {
+  const isManager = state.role === 'manager-admin';
+  document.getElementById('settings-admin-section').hidden = !isManager;
+  if (isManager) renderSettingsUserList();
+}
+
+function renderSettingsUserList() {
+  const list = document.getElementById('settings-user-list');
+  list.innerHTML = MOCK_STAFF_USERS.map(u => `
+    <div class="settings-user-row">
+      <div>
+        <div class="settings-row-label">${escHtml(u.name)}</div>
+        <p class="myk-body2 settings-row-sub">${escHtml(getRole(u.roleId).name)}</p>
+      </div>
+      <select class="settings-user-authority" data-user-id="${u.id}">
+        <option value="Standard"${u.authority === 'Standard' ? ' selected' : ''}>Standard</option>
+        <option value="Admin"${u.authority === 'Admin' ? ' selected' : ''}>Admin</option>
+      </select>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.settings-user-authority').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const user = MOCK_STAFF_USERS.find(u => u.id === sel.dataset.userId);
+      if (!user) return;
+      user.authority = sel.value;
+      showToast(`${user.name}'s authority set to ${user.authority}.`);
+    });
+  });
+}
+
+/* ---- Insights (manager-admin) / My Performance (everyone else) — same
+   header icon slot and screen, content swapped by role. ---- */
+function renderInsightsScreen() {
+  const isManager = state.role === 'manager-admin';
+  document.getElementById('insights-heading').textContent = isManager ? 'Insights' : 'My Performance';
+  document.getElementById('insights-sub').textContent = isManager
+    ? 'Aggregate performance across the dealership.'
+    : 'Your own performance metrics — visible only to you.';
+  const tiles = isManager ? MOCK_INSIGHTS : myPerformanceFor(state.role);
+  document.getElementById('insights-tile-grid').innerHTML = tiles.map(t => `
+    <div class="insights-tile">
+      <div class="insights-tile-value">${escHtml(t.value)}</div>
+      <div class="insights-tile-label myk-body2">${escHtml(t.label)}</div>
+    </div>
+  `).join('');
+}
+
+/* ---- Updates & System Status (combined header icon) ---- */
+function systemStatusHTML() {
+  if (MOCK_SYSTEM_STATUS.state === 'operational') {
+    return `<div class="system-status-row system-status-row--ok"><span class="material-icons">check_circle</span> All systems operational</div>`;
+  }
+  const label = MOCK_SYSTEM_STATUS.state === 'degraded' ? 'Degraded performance' : 'Service disruption';
+  return `
+    <div class="system-status-row system-status-row--warn"><span class="material-icons">error_outline</span> ${escHtml(label)}</div>
+    ${MOCK_SYSTEM_STATUS.incidents.map(inc => `
+      <div class="system-status-incident">
+        <div class="system-status-incident-title">${escHtml(inc.title)}</div>
+        <p class="myk-body2">${escHtml(inc.detail)}</p>
+        <span class="myk-body2 system-status-incident-time">Since ${escHtml(inc.since)}</span>
+      </div>
+    `).join('')}
+  `;
+}
+
+function changelogListHTML() {
+  return MOCK_CHANGELOG.map(c => `
+    <div class="notif-item">
+      <span class="material-icons notif-item-icon">celebration</span>
+      <div class="notif-item-body">
+        <div class="notif-item-title">${escHtml(c.title)}</div>
+        <div class="notif-item-detail">${escHtml(c.detail)}</div>
+        <div class="myk-body2 changelog-date">${escHtml(c.date)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderUpdatesPanel() {
+  document.getElementById('app-header-system-status').innerHTML = systemStatusHTML();
+  document.getElementById('app-header-changelog-list').innerHTML = changelogListHTML();
+  renderUpdatesBadge();
+}
+
+// The badge is a health signal, not a "you have unread items" counter — it
+// only appears when something's actually wrong, so it stays trustworthy.
+function renderUpdatesBadge() {
+  const badge = document.getElementById('app-header-updates-badge');
+  if (badge) badge.hidden = MOCK_SYSTEM_STATUS.state === 'operational';
+}
+
+function toggleUpdatesPanel(show) {
+  const panel = document.getElementById('app-header-updates-panel');
+  const nextOpen = show === undefined ? panel.hidden : show;
+  closeAllHeaderPopovers();
+  panel.hidden = !nextOpen;
+}
+
+/* ---- Left app nav rail (collapsed / expanded / hover modes) ---- */
 const NAV_MODES = ['collapsed', 'expanded', 'hover'];
 
 function loadNavMode() {
@@ -853,9 +1300,11 @@ function setNavMode(mode) {
   renderNavRail();
 }
 
-function selectProduct(appId) {
-  state.selectedProduct = appId;
+function selectApp(appId) {
+  state.selectedApp = appId;
   state.activeTabId = null;
+  state.selectedSubTab = appHasSubtabs(appId) ? getSubtabs(appId)[0].id : null;
+  state.focusedTripId = null;
   renderNavRail();
   renderTabStrip();
   renderDashboardTabContent();
@@ -865,15 +1314,15 @@ function renderNavRail() {
   const rail = document.getElementById('dash-nav-rail');
   rail.dataset.mode = state.navMode;
 
-  // Fall back to the first available product if the current selection was
+  // Fall back to the first available app if the current selection was
   // removed from the nav (e.g. a manager re-locked the role's app list).
-  if (!state.navProducts.includes(state.selectedProduct)) {
-    state.selectedProduct = state.navProducts[0] || null;
+  if (!state.navApps.includes(state.selectedApp)) {
+    state.selectedApp = state.navApps[0] || null;
   }
 
-  document.getElementById('dash-nav-rail-list').innerHTML = state.navProducts.map(id => {
+  document.getElementById('dash-nav-rail-list').innerHTML = state.navApps.map(id => {
     const app = getApp(id);
-    const active = id === state.selectedProduct && state.activeTabId === null;
+    const active = id === state.selectedApp && state.activeTabId === null;
     return `
       <button class="dash-nav-rail-item${active ? ' active' : ''}" data-app-id="${app.id}" title="${escHtml(app.name)}">
         <span class="material-icons">${app.icon}</span>
@@ -883,7 +1332,7 @@ function renderNavRail() {
   }).join('');
 
   document.getElementById('dash-nav-rail-list').querySelectorAll('.dash-nav-rail-item').forEach(btn => {
-    btn.addEventListener('click', () => selectProduct(btn.dataset.appId));
+    btn.addEventListener('click', () => selectApp(btn.dataset.appId));
   });
 
   document.querySelectorAll('.dash-nav-mode-btn').forEach(btn => {
@@ -915,12 +1364,18 @@ function loadPinnedTabs() {
   });
 }
 
+const MAX_TABS = 10;
+
 // Opens a tab for this customer/RO, or focuses it if already open — never duplicates.
 function openTab(type, targetId, label) {
   const existing = state.tabs.find(t => t.type === type && t.targetId === targetId);
   if (existing) {
     state.activeTabId = existing.id;
   } else {
+    if (state.tabs.length >= MAX_TABS) {
+      showToast(`You can have up to ${MAX_TABS} tabs open at once — close one to open another.`);
+      return;
+    }
     const catalog = TAB_WIDGET_CATALOG[type] || [];
     const tab = {
       id: `${type}-${targetId}`, type, targetId, label, pinned: false,
@@ -964,10 +1419,10 @@ function renderTabStrip() {
   const tabsHTML = ordered.map(tab => {
     const active = tab.id === state.activeTabId;
     // 'customer'/'ro' tabs (opened via the header search) show a person/car icon;
-    // any other tab.type is a product id (opened via a product-table row click),
-    // so show that product's own icon instead.
+    // any other tab.type is a app id (opened via a app-table row click),
+    // so show that app's own icon instead.
     const typeIcon = tab.type === 'customer' ? 'person' : tab.type === 'ro' ? 'directions_car' : (getApp(tab.type) || {}).icon || 'widgets';
-    return `<div class="dash-tab${active ? ' active' : ''}${tab.pinned ? ' pinned' : ''}" data-tab-id="${tab.id}">
+    return `<div class="dash-tab${active ? ' active' : ''}${tab.pinned ? ' pinned' : ''}" data-tab-id="${tab.id}" tabindex="0" role="button" aria-current="${active}">
       <span class="material-icons dash-tab-type-icon">${typeIcon}</span>
       ${tab.pinned ? '' : `<span class="dash-tab-label">${escHtml(tab.label)}</span>`}
       <button class="dash-tab-pin-btn${tab.pinned ? ' pinned' : ''}" data-tab-id="${tab.id}" title="${tab.pinned ? 'Unpin' : 'Pin'} tab">
@@ -981,6 +1436,12 @@ function renderTabStrip() {
 
   strip.querySelectorAll('.dash-tab').forEach(el => {
     el.addEventListener('click', () => setActiveTab(el.dataset.tabId));
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setActiveTab(el.dataset.tabId);
+      }
+    });
   });
   strip.querySelectorAll('.dash-tab-pin-btn').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); togglePinTab(btn.dataset.tabId); });
@@ -990,13 +1451,12 @@ function renderTabStrip() {
   });
 }
 
-/* ---- Tab content: product table (base surface), Customer, RO ---- */
+/* ---- Tab content: app table (base surface), Customer, RO ---- */
 function renderDashboardTabContent() {
   const container = document.getElementById('dashboard-tab-content');
 
   if (state.activeTabId === null) {
-    container.innerHTML = productTableHTML(state.selectedProduct);
-    bindProductTable(container, state.selectedProduct);
+    renderBaseSurface(container);
     return;
   }
 
@@ -1010,12 +1470,12 @@ function renderDashboardTabContent() {
     return;
   }
 
-  // A product-table row's tab (tab.type is a product id, not 'customer'/'ro') —
+  // A app-table row's tab (tab.type is a app id, not 'customer'/'ro') —
   // no real per-row detail view exists yet, so this is a filler until it does.
-  container.innerHTML = productTabFillerHTML(tab);
+  container.innerHTML = appTabFillerHTML(tab);
 }
 
-function productTabFillerHTML(tab) {
+function appTabFillerHTML(tab) {
   const app = getApp(tab.type);
   return `
     <div class="dashboard-placeholder">
@@ -1026,26 +1486,40 @@ function productTabFillerHTML(tab) {
   `;
 }
 
-function productTableHTML(appId) {
+// Base surface = whatever the selected app renders when no tab is
+// focused: a flat table, or — for apps in APP_SUBTABS — a sub-tab
+// row plus whichever view type (table/calendar/map/map-split) is active.
+function renderBaseSurface(container) {
+  const appId = state.selectedApp;
   if (!appId) {
-    return `<div class="dashboard-placeholder">
+    container.innerHTML = `<div class="dashboard-placeholder">
       <span class="material-icons">dashboard</span>
-      <div class="dashboard-placeholder-title">No products yet</div>
-      <p class="myk-body2">Add products from the rail's Edit button to see them here.</p>
+      <div class="dashboard-placeholder-title">No apps yet</div>
+      <p class="myk-body2">Add apps from the rail's Edit button to see them here.</p>
     </div>`;
+    return;
   }
-  const app = getApp(appId);
-  const table = productTableFor(appId);
+  if (appHasSubtabs(appId)) {
+    container.innerHTML = appSubtabShellHTML(appId);
+    bindAppSubtabs(container, appId);
+    renderSubtabContent(appId);
+    return;
+  }
+  container.innerHTML = appTableHTML(appId);
+  bindAppTable(container, appId);
+}
+
+function tableViewHTML(title, table) {
   const rows = table.rows();
   return `
-    <div class="product-table-wrap">
-      <h2 class="myk-h6">${escHtml(app.name)}</h2>
+    <div class="app-table-wrap">
+      <h2 class="myk-h6">${escHtml(title)}</h2>
       ${rows.length === 0 ? `<p class="myk-body2">No records yet.</p>` : `
-        <table class="product-table">
+        <table class="app-table">
           <thead><tr>${table.columns.map(c => `<th>${escHtml(c)}</th>`).join('')}</tr></thead>
           <tbody>
             ${rows.map(row => `
-              <tr class="${row.linkId ? 'clickable' : ''}"${row.linkId ? ` data-link-id="${row.linkId}"` : ''}>
+              <tr class="${row.linkId ? 'clickable' : ''}"${row.linkId ? ` data-link-id="${row.linkId}" tabindex="0"` : ''}>
                 ${row.cells.map(cell => `<td>${escHtml(cell)}</td>`).join('')}
               </tr>
             `).join('')}
@@ -1056,16 +1530,192 @@ function productTableHTML(appId) {
   `;
 }
 
-// Opens a tab identified by this product (icon + name), not by the row's
-// underlying customer/RO — tabs still dedupe per row (type=appId + targetId=linkId),
-// they just don't show the customer/RO's own detail view. See productTabFillerHTML.
-function bindProductTable(container, appId) {
-  if (!appId) return;
-  const app = getApp(appId);
-  container.querySelectorAll('tr.clickable').forEach(tr => {
-    tr.addEventListener('click', () => {
-      openTab(appId, tr.dataset.linkId, app.name);
+// Shared by every clickable-row view (tables, calendar events, map pins) —
+// selector varies by view type, but Enter/Space always mirrors a click.
+function bindClickableRows(container, selector, onClick) {
+  container.querySelectorAll(selector).forEach(el => {
+    const handler = () => onClick(el.dataset.linkId);
+    el.addEventListener('click', handler);
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
     });
+  });
+}
+
+function appTableHTML(appId) {
+  return tableViewHTML(getApp(appId).name, appTableFor(appId));
+}
+
+// Opens a tab identified by this app (icon + name), not by the row's
+// underlying customer/RO — tabs still dedupe per row (type=appId + targetId=linkId),
+// they just don't show the customer/RO's own detail view. See appTabFillerHTML.
+function bindAppTable(container, appId) {
+  const app = getApp(appId);
+  bindClickableRows(container, 'tr.clickable', linkId => openTab(appId, linkId, app.name));
+}
+
+/* ---- App sub-tabs (Payments, Inspect, Video, Pickup & Delivery, Mobile Service, Uber) ---- */
+// No page title here — the left nav rail already shows which app is
+// selected, so repeating its name above the sub-tab row would just be a
+// second label for the same thing while eating vertical space the sub-tabs
+// (the real navigation for this screen) could use instead.
+function appSubtabShellHTML(appId) {
+  const subtabs = getSubtabs(appId);
+  if (!subtabs.find(s => s.id === state.selectedSubTab)) state.selectedSubTab = subtabs[0].id;
+  return `
+    <div class="app-table-wrap app-subtab-wrap">
+      <div class="app-subtab-row" role="tablist">
+        ${subtabs.map(s => `
+          <button class="app-subtab${s.id === state.selectedSubTab ? ' active' : ''}" data-subtab-id="${s.id}" role="tab" aria-selected="${s.id === state.selectedSubTab}">${escHtml(s.name)}</button>
+        `).join('')}
+      </div>
+      <div class="app-subtab-content" id="app-subtab-content"></div>
+    </div>
+  `;
+}
+
+function bindAppSubtabs(container, appId) {
+  container.querySelectorAll('.app-subtab').forEach(btn => {
+    btn.addEventListener('click', () => selectSubTab(appId, btn.dataset.subtabId));
+  });
+}
+
+function selectSubTab(appId, subtabId) {
+  state.selectedSubTab = subtabId;
+  state.focusedTripId = null;
+  document.querySelectorAll('.app-subtab').forEach(btn => {
+    const active = btn.dataset.subtabId === subtabId;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', String(active));
+  });
+  renderSubtabContent(appId);
+}
+
+function renderSubtabContent(appId) {
+  const mount = document.getElementById('app-subtab-content');
+  const app = getApp(appId);
+  const def = getSubtabDef(appId, state.selectedSubTab);
+  if (!def) { mount.innerHTML = ''; return; }
+
+  if (def.view === 'table') {
+    mount.innerHTML = tableViewHTML(def.name, subtabTableFor(appId, def.id));
+    bindClickableRows(mount, 'tr.clickable', linkId => openTab(appId, linkId, app.name));
+    return;
+  }
+  if (def.view === 'calendar') {
+    mount.innerHTML = mobileScheduleCalendarHTML();
+    bindClickableRows(mount, '.mkos-cal-event', linkId => openTab(appId, linkId, app.name));
+    return;
+  }
+  if (def.view === 'map') {
+    mount.innerHTML = mobileGlobalMapHTML();
+    bindClickableRows(mount, '.mkos-map-pin', linkId => openTab(appId, linkId, app.name));
+    return;
+  }
+  if (def.view === 'map-split') {
+    mount.innerHTML = tripsMapSplitHTML();
+    bindTripsMapSplit(mount);
+    return;
+  }
+}
+
+function formatCalDate(iso) {
+  return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+}
+
+// Mobile Service's "Schedule" sub-tab — same underlying data as its
+// "Appointments" table sub-tab, grouped by date instead of listed flat.
+function mobileScheduleCalendarHTML() {
+  const byDate = {};
+  MOCK_MOBILE_APPTS.forEach(a => { (byDate[a.date] = byDate[a.date] || []).push(a); });
+  const dates = Object.keys(byDate).sort();
+  return `
+    <div class="mkos-calendar">
+      ${dates.map(date => `
+        <div class="mkos-calendar-day">
+          <div class="mkos-calendar-day-label">${escHtml(formatCalDate(date))}</div>
+          ${byDate[date].map(a => `
+            <button class="mkos-cal-event" data-link-id="${a.customerId}">
+              <span class="mkos-cal-event-time">${escHtml(a.time)}</span>
+              <span class="mkos-cal-event-title">${escHtml(custName(a.customerId))} — ${escHtml(a.service)}</span>
+              <span class="mkos-cal-event-status">${escHtml(a.status)}</span>
+            </button>
+          `).join('')}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// Mobile Service's "Global Map" sub-tab — every technician currently out
+// (En Route / On Site) as a pin; Available techs have no location to plot.
+function mobileGlobalMapHTML() {
+  const active = MOCK_MOBILE_TECHS.filter(t => t.mapX != null);
+  return `
+    <div class="mkos-map-pane mkos-map-standalone">
+      <div class="mkos-map-mock">
+        ${active.map(t => `
+          <button class="mkos-map-pin" data-link-id="${t.id}" style="left:${t.mapX}%; top:${t.mapY}%;" title="${escHtml(t.name)} — ${escHtml(t.status)}">
+            <span class="material-icons">build</span>
+            <span class="mkos-map-pin-label">${escHtml(t.name)}</span>
+          </button>
+        `).join('')}
+      </div>
+      <p class="myk-body2 mkos-map-caption">${active.length} of ${MOCK_MOBILE_TECHS.length} technicians are currently out on a job.</p>
+    </div>
+  `;
+}
+
+// Pickup & Delivery's "Trips" sub-tab — the table lists every trip regardless
+// of status; the map only plots trips currently In Route, since that's the
+// only status a live position means anything for. Clicking an active row
+// highlights its pin (select/focus) rather than opening a tab — the whole
+// point of this view is the live table↔map correlation, not navigating away
+// from it. Upcoming/Pending Approval rows have nothing to plot, so they
+// aren't interactive here.
+function tripsMapSplitHTML() {
+  const active = MOCK_TRIPS.filter(t => t.mapX != null);
+  return `
+    <div class="mkos-map-split">
+      <div class="mkos-map-split-table">
+        <table class="app-table">
+          <thead><tr><th>Customer</th><th>Vehicle</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>
+            ${MOCK_TRIPS.map(t => `
+              <tr class="${t.mapX != null ? 'clickable mkos-trip-row-active' : ''}${state.focusedTripId === t.id ? ' trip-focused' : ''}" data-trip-id="${t.id}"${t.mapX != null ? ' tabindex="0"' : ''}>
+                <td>${escHtml(custName(t.customerId))}</td>
+                <td>${escHtml(t.vehicle)}</td>
+                <td>${escHtml(t.type)}</td>
+                <td>${escHtml(t.status)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="mkos-map-pane">
+        <div class="mkos-map-mock">
+          ${active.map(t => `
+            <div class="mkos-map-pin${state.focusedTripId === t.id ? ' focused' : ''}" data-trip-id="${t.id}" style="left:${t.mapX}%; top:${t.mapY}%;" title="${escHtml(custName(t.customerId))} — ${escHtml(t.eta)} away">
+              <span class="material-icons">local_shipping</span>
+              <span class="mkos-map-pin-label">${escHtml(custName(t.customerId))}</span>
+            </div>
+          `).join('')}
+        </div>
+        <p class="myk-body2 mkos-map-caption">${active.length} of ${MOCK_TRIPS.length} trips are currently in route and shown on the map.</p>
+      </div>
+    </div>
+  `;
+}
+
+function bindTripsMapSplit(mount) {
+  mount.querySelectorAll('.mkos-trip-row-active').forEach(tr => {
+    const focus = () => {
+      state.focusedTripId = tr.dataset.tripId;
+      mount.querySelectorAll('tr[data-trip-id]').forEach(r => r.classList.toggle('trip-focused', r.dataset.tripId === state.focusedTripId));
+      mount.querySelectorAll('.mkos-map-pin').forEach(pin => pin.classList.toggle('focused', pin.dataset.tripId === state.focusedTripId));
+    };
+    tr.addEventListener('click', focus);
+    tr.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); focus(); } });
   });
 }
 
@@ -1126,8 +1776,14 @@ function bindWidgetGrid(container, { getList, setList, getSize, setSize, onRemov
     });
   }
 
+  bindDragReorder(container, '.dash-widget', getList, setList, onChange);
+}
+
+// Shared by any draggable, app-id-keyed grid (Customer/RO tab widgets, and
+// Edit Home Screen's app tiles) — reorders getList()/setList() on drop.
+function bindDragReorder(container, itemSelector, getList, setList, onChange) {
   let draggedId = null;
-  container.querySelectorAll('.dash-widget').forEach(el => {
+  container.querySelectorAll(itemSelector).forEach(el => {
     el.addEventListener('dragstart', () => {
       draggedId = el.dataset.appId;
       el.classList.add('dragging');
@@ -1437,6 +2093,7 @@ function openNotificationTarget(notifId) {
 
 function closeAllHeaderPopovers() {
   document.getElementById('dashboard-notif-panel').hidden = true;
+  document.getElementById('app-header-updates-panel').hidden = true;
   document.getElementById('dashboard-search-results').hidden = true;
   document.getElementById('app-header-avatar-menu').hidden = true;
 }
@@ -1521,15 +2178,15 @@ function handleSearchResultClick(kind, id) {
     const r = MOCK_ROS.find(x => x.id === id);
     openTab('ro', r.id, `${r.number} · ${r.vehicle}`);
   } else if (kind === 'app') {
-    focusNavProduct(id);
+    focusNavApp(id);
   }
   document.getElementById('dashboard-search-input').value = '';
   document.getElementById('dashboard-search-results').hidden = true;
 }
 
-function focusNavProduct(appId) {
-  if (state.navProducts.includes(appId)) {
-    selectProduct(appId);
+function focusNavApp(appId) {
+  if (state.navApps.includes(appId)) {
+    selectApp(appId);
   } else {
     showToast(`Add "${getApp(appId).name}" to your nav to see it here.`);
   }
@@ -1621,38 +2278,85 @@ function init() {
 
   document.getElementById('role-next-btn').addEventListener('click', confirmRoleSelection);
 
-  document.getElementById('app-header-manage-views-item').addEventListener('click', () => {
+  document.getElementById('app-header-signout-item').addEventListener('click', () => {
     toggleAvatarMenu(false);
-    renderManagerRoleList();
-    showScreen('manager');
-  });
-
-  document.getElementById('app-header-reset-password-item').addEventListener('click', () => {
-    toggleAvatarMenu(false);
-    showToast('Password reset isn\'t available in this prototype yet.');
+    showToast('Sign out isn\'t available in this prototype yet.');
   });
   document.getElementById('app-header-edit-profile-item').addEventListener('click', () => {
     toggleAvatarMenu(false);
     showToast('Profile editing isn\'t available in this prototype yet.');
   });
+  document.getElementById('app-header-reset-password-item').addEventListener('click', () => {
+    toggleAvatarMenu(false);
+    showToast('Password reset isn\'t available in this prototype yet.');
+  });
   document.getElementById('app-header-avatar-btn').addEventListener('click', e => {
     e.stopPropagation();
     toggleAvatarMenu();
+  });
+  // The presence dot toggles status directly on click — it shouldn't also
+  // open the avatar menu underneath it.
+  document.getElementById('app-header-presence-dot').addEventListener('click', e => {
+    e.stopPropagation();
+    togglePresenceQuick();
   });
 
   document.getElementById('app-header-help-btn').addEventListener('click', () => {
     showToast('Help isn\'t available in this prototype yet.');
   });
 
+  document.getElementById('app-header-settings-btn').addEventListener('click', () => {
+    renderSettingsScreen();
+    showScreen('settings');
+  });
+  document.getElementById('app-header-insights-btn').addEventListener('click', () => {
+    renderInsightsScreen();
+    showScreen('insights');
+  });
+  document.getElementById('app-header-updates-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    toggleUpdatesPanel();
+    renderUpdatesPanel();
+  });
+
+  document.querySelectorAll('.settings-presence-btn[data-presence]').forEach(btn => {
+    btn.addEventListener('click', () => setPresence(btn.dataset.presence));
+  });
+  document.querySelectorAll('.avatar-theme-btn').forEach(btn => {
+    btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+  });
+  document.getElementById('avatar-ooo-set-btn').addEventListener('click', () => {
+    const value = document.getElementById('avatar-ooo-date').value;
+    if (!value) return;
+    state.oooReturnDate = value;
+    setPresence('ooo');
+  });
+  document.getElementById('settings-manage-views-btn').addEventListener('click', () => {
+    renderManagerRoleList();
+    showScreen('manager');
+  });
+
   document.querySelectorAll('.dash-nav-mode-btn').forEach(btn => {
     btn.addEventListener('click', () => setNavMode(btn.dataset.mode));
   });
   document.getElementById('dash-nav-rail-edit-btn').addEventListener('click', () => {
+    homeAddAppOpen = false;
     renderHome();
     showScreen('home');
   });
+  document.getElementById('home-add-app-toggle-btn').addEventListener('click', () => {
+    homeAddAppOpen = true;
+    renderHome();
+  });
+  document.getElementById('home-add-app-close-btn').addEventListener('click', () => {
+    homeAddAppOpen = false;
+    renderHome();
+  });
   bindNavRailHover();
   loadNavMode();
+  loadTheme();
+  loadPresence();
+  document.getElementById('proto-theme-btn').addEventListener('click', toggleTheme);
 
   document.querySelectorAll('[data-back-to]').forEach(btn => {
     btn.addEventListener('click', () => showScreen(btn.dataset.backTo));
@@ -1695,7 +2399,10 @@ function init() {
     renderSearchResults(e.target.value);
   });
   document.addEventListener('click', e => {
-    if (!e.target.closest('.notif-bell-wrap')) document.getElementById('dashboard-notif-panel').hidden = true;
+    if (!e.target.closest('.notif-bell-wrap')) {
+      document.getElementById('dashboard-notif-panel').hidden = true;
+      document.getElementById('app-header-updates-panel').hidden = true;
+    }
     if (!e.target.closest('.dash-search')) document.getElementById('dashboard-search-results').hidden = true;
     if (!e.target.closest('.app-header-avatar-wrap')) document.getElementById('app-header-avatar-menu').hidden = true;
   });
@@ -1703,13 +2410,15 @@ function init() {
   /* Prototype toolbar */
   document.getElementById('proto-jump-select').addEventListener('change', e => {
     const target = e.target.value;
-    if ((target === 'home' || target === 'dashboard') && state.navProducts.length === 0) {
+    if (['home', 'dashboard', 'settings', 'insights'].includes(target) && !state.role) {
       state.role = 'service-advisor';
-      state.navProducts = [...RECOMMENDED['service-advisor']];
+      state.navApps = [...RECOMMENDED['service-advisor']];
     }
-    if (target === 'home') renderHome();
+    if (target === 'home') { homeAddAppOpen = false; renderHome(); }
     if (target === 'dashboard') renderDashboard();
     if (target === 'manager') renderManagerRoleList();
+    if (target === 'settings') renderSettingsScreen();
+    if (target === 'insights') renderInsightsScreen();
     showScreen(target);
   });
 
