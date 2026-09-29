@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>myKaarma — Current Production (V0)</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+<style>
+  :root {
+    --brand: #0377B3;
+    --brand-light: #EBF4FA;
+    --ink: #101828;
+    --ink-muted: #667085;
+    --border: #E4E7EC;
+    --bg-page: #F5F6F8;
+    --tab-bg: #F7F8F9;
+    --green: #12B76A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg-page); color: var(--ink);
+    font-family: 'Lato', -apple-system, sans-serif; font-size: 14px;
+  }
+  .material-icons { font-size: 20px; vertical-align: middle; }
+
+  /* ---- version switcher (not part of the real product) ---- */
+  .vsw { position: fixed; bottom: 16px; right: 16px; z-index: 99999; font-family: 'Lato', sans-serif; }
+  .vsw-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: #101828; color: #fff; border: none; border-radius: 999px;
+    padding: 7px 12px 7px 14px; font-size: 12px; font-weight: 700; letter-spacing: .02em;
+    cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.25);
+  }
+  .vsw-btn .material-icons { font-size: 16px; }
+  .vsw-menu {
+    display: none; position: absolute; bottom: calc(100% + 6px); right: 0; width: 240px;
+    background: #fff; border: 1px solid #E4E7EC; border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(16,24,40,.16); overflow: hidden;
+  }
+  .vsw.open .vsw-menu { display: block; }
+  .vsw-item { display: block; padding: 10px 14px; text-decoration: none; border-bottom: 1px solid #F2F4F7; }
+  .vsw-item:last-child { border-bottom: none; }
+  .vsw-item:hover { background: #F7F8F9; }
+  .vsw-item .vsw-label { display: block; font-size: 12.5px; font-weight: 800; color: #101828; }
+  .vsw-item .vsw-desc { display: block; font-size: 11.5px; color: #667085; margin-top: 2px; }
+  .vsw-item.current { background: #EBF4FA; }
+  .vsw-item.current .vsw-label { color: #0377B3; }
+
+  /* ---- top identity row ---- */
+  .top-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #fff; border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+  }
+  .dealer-id { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .dealer-logo {
+    width: 34px; height: 34px; border-radius: 8px; background: #ED6D22;
+    color: #fff; font-weight: 900; font-size: 20px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .dealer-name { font-size: 17px; font-weight: 700; }
+  .dealer-id .material-icons { font-size: 18px; color: var(--ink-muted); }
+
+  .top-actions { display: flex; align-items: center; gap: 10px; }
+  .top-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 34px; padding: 0 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: #fff; color: var(--ink);
+    font-size: 12.5px; font-weight: 700; letter-spacing: .02em; cursor: pointer;
+  }
+  .top-btn:hover { border-color: var(--brand); color: var(--brand); }
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 999px; border: none; background: none;
+    color: var(--ink-muted); cursor: pointer;
+  }
+  .icon-btn:hover { background: var(--bg-page); color: var(--ink); }
+  .icon-btn.rewards { color: #ED6D22; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 999px; background: #101828; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+  }
+  .presence { display: flex; flex-direction: column; line-height: 1.3; }
+  .presence-row { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; }
+  .presence-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--green); }
+  .presence a { font-size: 11.5px; color: var(--brand); text-decoration: none; }
+  .presence a:hover { text-decoration: underline; }
+
+  /* ---- horizontal tab row ---- */
+  .tab-row {
+    display: flex; align-items: center;
+    background: var(--tab-bg); border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+  .tab-item {
+    padding: 13px 14px; font-size: 14px; color: var(--ink-secondary, #344054);
+    cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
+  }
+  .tab-item:hover { color: var(--ink); }
+  .tab-item.active { color: var(--brand); font-weight: 700; border-bottom-color: var(--brand); }
+  .tab-addons { display: flex; align-items: center; gap: 2px; padding: 13px 14px; color: var(--ink-secondary, #344054); cursor: pointer; }
+  .tab-edit {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 999px; background: var(--border); color: var(--ink);
+    margin-left: 4px; cursor: pointer;
+  }
+  .tab-edit .material-icons { font-size: 14px; }
+  .tab-spacer { flex: 1; }
+  .text-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--brand-light); color: var(--brand); border: none;
+    padding: 7px 8px 7px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .text-btn .material-icons:last-child { font-size: 18px; }
+
+  /* ---- customer tab content ---- */
+  .content { padding: 22px 24px; }
+  .field-label { font-size: 15px; color: var(--ink); margin-bottom: 10px; }
+  .search-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .search-input-wrap { position: relative; width: 420px; }
+  .search-input-wrap input {
+    width: 100%; height: 38px; padding: 0 34px 0 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-family: inherit; font-size: 14px; color: var(--ink); outline: none;
+  }
+  .search-input-wrap input:focus { border-color: var(--brand); }
+  .search-clear {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; border-radius: 999px; background: var(--ink-muted); color: #fff;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .search-clear .material-icons { font-size: 12px; }
+  .action-pill {
+    height: 38px; padding: 0 18px; border-radius: 6px; border: none;
+    font-size: 13px; font-weight: 700; letter-spacing: .03em; cursor: pointer;
+  }
+  .action-pill.new { background: var(--brand-light); color: var(--brand); }
+  .action-pill.edit { background: var(--bg-page); color: var(--ink-muted); cursor: not-allowed; }
+
+  .lookup-link { display: inline-block; margin-bottom: 22px; font-size: 13px; color: var(--brand); text-decoration: underline; }
+  .lookup-link:hover { color: #025d8c; }
+
+  .contact-row { display: flex; gap: 40px; margin-bottom: 26px; }
+  .contact-field { flex: 0 0 340px; }
+  .contact-field-label { display: flex; align-items: center; justify-content: space-between; font-size: 15px; color: var(--ink); margin-bottom: 8px; }
+  .contact-field-label .material-icons { font-size: 16px; color: var(--ink-muted); cursor: pointer; }
+  .contact-input-wrap { display: flex; align-items: center; gap: 10px; }
+  .contact-input-wrap input {
+    flex: 1; height: 38px; padding: 0 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-family: inherit; font-size: 14px; color: var(--ink); outline: none;
+  }
+  .contact-input-wrap input:focus { border-color: var(--brand); }
+  .contact-input-wrap .material-icons { color: var(--ink-muted); cursor: pointer; flex-shrink: 0; }
+
+  .panels-row { display: flex; gap: 20px; }
+  .panel-placeholder { flex: 1; height: 420px; background: #EDEEF0; border-radius: 6px; }
+</style>
+</head>
+<body>
+
+  <div class="vsw" id="vsw">
+    <button class="vsw-btn" id="vsw-btn"><span class="material-icons">layers</span>V0 <span class="material-icons">expand_more</span></button>
+    <div class="vsw-menu">
+      <a class="vsw-item current" href="index.html"><span class="vsw-label">V0 — Current Production</span><span class="vsw-desc">Today's live horizontal nav (this page)</span></a>
+      <a class="vsw-item" href="../v1/index.html"><span class="vsw-label">V1 — Draft: Nav Rail Concept</span><span class="vsw-desc">Nav moved to a vertical rail, same header</span></a>
+      <a class="vsw-item" href="../index.html"><span class="vsw-label">V2 — Current Prototype</span><span class="vsw-desc">Full mkOS shell, in active development</span></a>
+    </div>
+  </div>
+
+  <div class="top-row">
+    <div class="dealer-id">
+      <div class="dealer-logo">k</div>
+      <span class="dealer-name">Galpin Ford</span>
+      <span class="material-icons">expand_more</span>
+    </div>
+    <div class="top-actions">
+      <button class="top-btn"><span class="material-icons" style="font-size:17px">storefront</span>MKSTORE</button>
+      <button class="top-btn"><span class="material-icons" style="font-size:17px">help_outline</span>HELP</button>
+      <button class="icon-btn rewards"><span class="material-icons">loyalty</span></button>
+      <button class="icon-btn"><span class="material-icons">notifications_none</span></button>
+      <div class="avatar">MG</div>
+      <div class="presence">
+        <div class="presence-row"><span class="presence-dot"></span>Available</div>
+        <a href="#">Configure</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-row">
+    <div class="tab-item active">Customer</div>
+    <div class="tab-item">Messages</div>
+    <div class="tab-item">Payments</div>
+    <div class="tab-item">Inspect</div>
+    <div class="tab-item">Pickup &amp; Delivery</div>
+    <div class="tab-item">Follow Up</div>
+    <div class="tab-item">Insights</div>
+    <div class="tab-item">News</div>
+    <div class="tab-item">Settings</div>
+    <div class="tab-addons">Add-Ons <span class="material-icons" style="font-size:18px">arrow_drop_down</span></div>
+    <div class="tab-edit"><span class="material-icons">edit</span></div>
+    <div class="tab-spacer"></div>
+    <button class="text-btn"><span class="material-icons">chat_bubble_outline</span>TEXT<span class="material-icons">arrow_drop_down</span></button>
+  </div>
+
+  <div class="content">
+    <div class="field-label">Lookup Contact</div>
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <input type="text" />
+        <div class="search-clear"><span class="material-icons">close</span></div>
+      </div>
+      <button class="action-pill new">NEW</button>
+      <button class="action-pill edit" disabled>EDIT</button>
+    </div>
+    <a href="#" class="lookup-link">Look up contact not working? Search here!</a>
+
+    <div class="contact-row">
+      <div class="contact-field">
+        <div class="contact-field-label">Phone <span class="material-icons">content_copy</span></div>
+        <div class="contact-input-wrap">
+          <input type="text" />
+          <span class="material-icons">edit</span>
+        </div>
+      </div>
+      <div class="contact-field">
+        <div class="contact-field-label">Email <span class="material-icons">content_copy</span></div>
+        <div class="contact-input-wrap">
+          <input type="text" />
+          <span class="material-icons">edit</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panels-row">
+      <div class="panel-placeholder"></div>
+      <div class="panel-placeholder"></div>
+    </div>
+  </div>
+
+  <script>
+    var vsw = document.getElementById('vsw');
+    document.getElementById('vsw-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      vsw.classList.toggle('open');
+    });
+    document.addEventListener('click', function () { vsw.classList.remove('open'); });
+  </script>
+</body>
+</html>

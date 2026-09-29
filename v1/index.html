@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mkOS — myKaarma</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -25,8 +25,6 @@
             <option value="dashboard">Dashboard</option>
             <option value="home">Edit Home Screen</option>
             <option value="manager">Manager / IT View</option>
-            <option value="settings">Settings</option>
-            <option value="insights">Insights / My Performance</option>
           </select>
         </div>
         <div class="proto-device-toggle" role="group" aria-label="Preview device size">
@@ -34,9 +32,6 @@
           <button class="proto-device-btn" data-device="tablet" title="Tablet"><span class="material-icons">tablet_mac</span></button>
           <button class="proto-device-btn" data-device="mobile" title="Mobile"><span class="material-icons">phone_iphone</span></button>
         </div>
-        <button class="proto-theme-btn" id="proto-theme-btn" title="Toggle dark mode">
-          <span class="material-icons" id="proto-theme-icon">dark_mode</span>
-        </button>
         <button class="mk-button tertiary-mk-button" id="proto-reset-btn">Reset</button>
       </div>
     </div>
@@ -76,77 +71,24 @@
              </div>
            </div>
 
-           <div class="notif-bell-wrap">
-             <button class="notif-bell-btn" id="app-header-updates-btn" title="Updates & System Status">
-               <span class="material-icons">campaign</span>
-               <span class="notif-badge notif-badge--dot" id="app-header-updates-badge" hidden></span>
-             </button>
-             <div class="notif-panel updates-panel" id="app-header-updates-panel" hidden>
-               <div class="updates-panel-section">
-                 <div class="updates-panel-section-label myk-subtitle1">System Status</div>
-                 <div id="app-header-system-status"></div>
-               </div>
-               <div class="updates-panel-section">
-                 <div class="updates-panel-section-label myk-subtitle1">What's New</div>
-                 <div class="notif-list" id="app-header-changelog-list"></div>
-               </div>
-             </div>
-           </div>
-
-           <button class="app-header-help-btn" id="app-header-insights-btn" title="Insights">
-             <span class="material-icons">bar_chart</span>
-           </button>
-
            <button class="app-header-help-btn" id="app-header-help-btn" title="Help">
              <span class="material-icons">help_outline</span>
-           </button>
-
-           <button class="app-header-help-btn" id="app-header-settings-btn" title="Settings">
-             <span class="material-icons">settings</span>
            </button>
 
            <div class="app-header-avatar-wrap">
              <button class="app-header-avatar-btn" id="app-header-avatar-btn" title="Account">
                <span id="app-header-avatar-initials">JD</span>
-               <span class="app-header-presence-dot" id="app-header-presence-dot" title="Toggle Available / Out of Office"></span>
              </button>
              <div class="app-header-avatar-menu" id="app-header-avatar-menu" hidden>
                <div class="app-header-avatar-role" id="app-header-avatar-role"></div>
-
-               <button class="app-header-avatar-item" id="app-header-edit-profile-item">
-                 <span class="material-icons">person</span> Edit profile
+               <button class="app-header-avatar-item" id="app-header-manage-views-item" hidden>
+                 <span class="material-icons">admin_panel_settings</span> Manage Dealership Views
                </button>
                <button class="app-header-avatar-item" id="app-header-reset-password-item">
                  <span class="material-icons">lock_reset</span> Reset password
                </button>
-
-               <div class="avatar-menu-availability">
-                 <div class="avatar-menu-availability-label myk-body2">Appearance</div>
-                 <div class="settings-presence-toggle" id="avatar-theme-toggle" role="group" aria-label="Appearance">
-                   <button class="settings-presence-btn avatar-theme-btn" data-theme="light">
-                     <span class="material-icons">light_mode</span> Light
-                   </button>
-                   <button class="settings-presence-btn avatar-theme-btn" data-theme="dark">
-                     <span class="material-icons">dark_mode</span> Dark
-                   </button>
-                 </div>
-               </div>
-
-               <div class="avatar-menu-availability">
-                 <div class="avatar-menu-availability-label myk-body2">Availability</div>
-                 <div class="settings-presence-toggle" id="avatar-presence-toggle" role="group" aria-label="Availability status">
-                   <button class="settings-presence-btn" data-presence="available">Available</button>
-                   <button class="settings-presence-btn" data-presence="ooo">Out of Office</button>
-                 </div>
-                 <div class="avatar-ooo-schedule">
-                   <input type="date" id="avatar-ooo-date" />
-                   <button class="mk-button tertiary-mk-button" id="avatar-ooo-set-btn">Set</button>
-                 </div>
-                 <p class="myk-body2 settings-ooo-current" id="avatar-ooo-current" hidden></p>
-               </div>
-
-               <button class="app-header-avatar-item" id="app-header-signout-item">
-                 <span class="material-icons">logout</span> Sign out
+               <button class="app-header-avatar-item" id="app-header-edit-profile-item">
+                 <span class="material-icons">person</span> Edit profile
                </button>
              </div>
            </div>
@@ -256,7 +198,7 @@
         <!-- ===================== EDIT HOME SCREEN (always editable) ===================== -->
         <section class="screen" id="screen-home" data-screen hidden>
           <div class="home-content-header">
-            <div class="home-role-sub myk-body2">Drag to reorder, remove with the ✕, or add more below.</div>
+            <div class="home-role-sub myk-body2">Edit your products — remove with the ✕, or add more below.</div>
             <button class="mk-button primary-mk-button" id="home-to-dashboard-btn">
               <span class="material-icons">check</span> Done
             </button>
@@ -270,17 +212,8 @@
 
           <div class="home-grid" id="home-grid"></div>
 
-          <button class="mk-button functional-mk-button" id="home-add-app-toggle-btn">
-            <span class="material-icons">add</span> Add App
-          </button>
-
-          <div class="home-add-catalog" id="home-add-catalog" hidden>
-            <div class="tab-widget-add-header">
-              <div class="myk-subtitle1">Add an App</div>
-              <button class="mk-button tertiary-mk-button" id="home-add-app-close-btn">
-                <span class="material-icons">close</span> Close
-              </button>
-            </div>
+          <div class="home-add-catalog">
+            <div class="myk-subtitle1">Add a Widget</div>
             <div id="home-marketplace"></div>
           </div>
         </section>
@@ -291,7 +224,7 @@
             <nav class="dash-nav-rail" id="dash-nav-rail" data-mode="expanded">
               <div class="dash-nav-rail-list" id="dash-nav-rail-list"></div>
               <div class="dash-nav-rail-footer">
-                <button class="dash-nav-rail-edit-btn" id="dash-nav-rail-edit-btn" title="Edit apps">
+                <button class="dash-nav-rail-edit-btn" id="dash-nav-rail-edit-btn" title="Edit products">
                   <span class="material-icons">edit</span><span class="dash-nav-rail-label">Edit</span>
                 </button>
                 <div class="dash-nav-mode-toggle" id="dash-nav-mode-toggle" role="group" aria-label="Nav rail mode">
@@ -311,7 +244,7 @@
         <!-- ===================== MANAGER / IT VIEW ===================== -->
         <section class="screen" id="screen-manager" data-screen hidden>
           <div class="manager-header">
-            <button class="back-link" data-back-to="settings"><span class="material-icons">arrow_back</span> Back to Settings</button>
+            <button class="back-link" data-back-to="home"><span class="material-icons">arrow_back</span> Back to home screen</button>
             <div>
               <h1 class="onboarding-h1" style="text-align:left">Manage dealership views</h1>
               <p class="onboarding-sub myk-body2" style="text-align:left;margin:0">
@@ -338,44 +271,6 @@
             <div class="scratch-footer">
               <button class="mk-button primary-mk-button" id="manager-edit-save-btn">Save view</button>
             </div>
-          </div>
-        </section>
-
-        <!-- ===================== SETTINGS (manager-admin only) ===================== -->
-        <section class="screen" id="screen-settings" data-screen hidden>
-          <div class="scratch-layout">
-            <button class="back-link" data-back-to="dashboard"><span class="material-icons">arrow_back</span> Back to Dashboard</button>
-            <h1 class="onboarding-h1">Settings</h1>
-            <p class="onboarding-sub myk-body2" style="text-align:left;margin:0 0 16px">Product and user configuration for your dealership. Personal account settings (profile, password, availability) are under your avatar.</p>
-
-            <div id="settings-admin-section" hidden>
-              <div class="settings-section">
-                <div class="myk-subtitle1">Product Configurations</div>
-                <div class="settings-row">
-                  <div>
-                    <div class="settings-row-label">Manage Dealership Views</div>
-                    <p class="myk-body2 settings-row-sub">Set default app views and lock/editable status per role.</p>
-                  </div>
-                  <button class="mk-button tertiary-mk-button" id="settings-manage-views-btn">Open</button>
-                </div>
-              </div>
-
-              <div class="settings-section">
-                <div class="myk-subtitle1">User Management</div>
-                <p class="myk-body2 settings-row-sub" style="margin-bottom: var(--space-3);">Set each user's authority level.</p>
-                <div class="settings-user-list" id="settings-user-list"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ===================== INSIGHTS / MY PERFORMANCE (role-swapped) ===================== -->
-        <section class="screen" id="screen-insights" data-screen hidden>
-          <div class="scratch-layout">
-            <button class="back-link" data-back-to="dashboard"><span class="material-icons">arrow_back</span> Back to Dashboard</button>
-            <h1 class="onboarding-h1" id="insights-heading">Insights</h1>
-            <p class="onboarding-sub myk-body2" style="text-align:left;margin:0 0 16px" id="insights-sub"></p>
-            <div class="insights-tile-grid" id="insights-tile-grid"></div>
           </div>
         </section>
 
@@ -449,11 +344,11 @@
     .vsw-item.current .vsw-label { color: #0377B3; }
   </style>
   <div class="vsw" id="vsw">
-    <button class="vsw-btn" id="vsw-btn"><span class="material-icons">layers</span>V2 <span class="material-icons">expand_more</span></button>
+    <button class="vsw-btn" id="vsw-btn"><span class="material-icons">layers</span>V1 <span class="material-icons">expand_more</span></button>
     <div class="vsw-menu">
-      <a class="vsw-item" href="v0/index.html"><span class="vsw-label">V0 — Current Production</span><span class="vsw-desc">Today's live horizontal nav</span></a>
-      <a class="vsw-item" href="v1/index.html"><span class="vsw-label">V1 — Draft: Nav Rail Concept</span><span class="vsw-desc">Nav moved to a vertical rail, same header</span></a>
-      <a class="vsw-item current" href="index.html"><span class="vsw-label">V2 — Current Prototype</span><span class="vsw-desc">Full mkOS shell, in active development (this page)</span></a>
+      <a class="vsw-item" href="../v0/index.html"><span class="vsw-label">V0 — Current Production</span><span class="vsw-desc">Today's live horizontal nav</span></a>
+      <a class="vsw-item current" href="index.html"><span class="vsw-label">V1 — Draft: Nav Rail Concept</span><span class="vsw-desc">Nav moved to a vertical rail, same header (this page)</span></a>
+      <a class="vsw-item" href="../index.html"><span class="vsw-label">V2 — Current Prototype</span><span class="vsw-desc">Full mkOS shell, in active development</span></a>
     </div>
   </div>
   <script>
