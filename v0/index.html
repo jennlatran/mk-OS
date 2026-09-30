@@ -216,13 +216,6 @@
   .add-app-toggle:hover { border-color: var(--brand); color: var(--brand); }
   .add-app-toggle.added { background: var(--brand-light); border-color: var(--brand-light); color: var(--brand); }
   .add-app-toggle.locked { color: #C7CDD6; border-color: var(--border); cursor: not-allowed; }
-  .add-app-home-btn {
-    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-    width: 26px; height: 26px; border: none; background: none; color: #C7CDD6; cursor: pointer;
-  }
-  .add-app-home-btn:hover { color: var(--ink-muted); }
-  .add-app-home-btn.is-home { color: #F5A623; }
-  .add-app-home-btn .material-icons { font-size: 18px; }
   .add-app-empty { padding: 16px; font-size: 12.5px; color: var(--ink-muted); text-align: center; }
 
   .add-app-divider { border-top: 1px solid var(--border); margin: 4px 10px 6px; }
@@ -483,22 +476,10 @@
     var activeTabIds = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up'];
     var tabViewMode = 'icon-text';
 
-    // Home tab: which tab is active on load. Separate from "locked" (which
-    // just means "can't be removed") — any added app can be the home tab.
-    // Persisted per-browser, same convention as other prototype settings.
-    function loadHomeTabId() {
-      var saved = null;
-      try { saved = localStorage.getItem('mkos-v0-home-tab'); } catch (e) { /* ignore */ }
-      return saved && activeTabIds.indexOf(saved) !== -1 ? saved : 'customer';
-    }
-    var homeTabId = loadHomeTabId();
-    var activeTabId = homeTabId;
-
-    function setHomeTab(id) {
-      homeTabId = id;
-      try { localStorage.setItem('mkos-v0-home-tab', id); } catch (e) { /* ignore */ }
-      renderAddAppList(addAppSearchInput.value);
-    }
+    // No separate "default tab" setting — since tabs are freely reorderable
+    // (Customer included), whichever tab ends up first in activeTabIds is
+    // the one that loads by default, same rule on every subsequent load.
+    var activeTabId = activeTabIds[0];
 
     // Continuous Chrome-tab-style shrink (see .tab-item CSS) handles fitting
     // more tabs in the same space automatically — no measurement/resize JS
@@ -574,17 +555,10 @@
         : '<button class="add-app-toggle' + (active ? ' added' : '') + '" data-app-id="' + a.id + '">' + (active ? 'Remove' : 'Add') + '</button>';
       var handleHtml = opts.draggable ? '<span class="material-icons add-app-drag-handle" title="Drag to reorder">drag_indicator</span>' : '';
       var draggableAttr = opts.draggable ? ' draggable="true"' : '';
-      var isHome = a.id === homeTabId;
-      var homeHtml = opts.showHome
-        ? '<button class="add-app-home-btn' + (isHome ? ' is-home' : '') + '" data-home-id="' + a.id + '" title="' +
-          (isHome ? 'Home tab — shown when you open this screen' : 'Set as home tab') + '">' +
-          '<span class="material-icons">' + (isHome ? 'star' : 'star_outline') + '</span></button>'
-        : '';
       return '<div class="add-app-row' + (isHighlighted ? ' highlighted' : '') + '"' + draggableAttr + ' data-app-id="' + a.id + '">' +
         handleHtml +
         '<div class="' + tileClass + '"><span class="material-icons">' + a.icon + '</span></div>' +
         '<div class="add-app-info"><div class="add-app-name">' + highlightMatch(a.name, query) + '</div><div class="add-app-by">by ' + escHtml(a.createdBy) + '</div></div>' +
-        homeHtml +
         toggleHtml +
         '</div>';
     }
@@ -608,7 +582,7 @@
 
       if (addedApps.length) {
         html += '<div class="add-app-section-label">Your Tabs</div>' +
-          addedApps.map(function (a) { return rowHtml(a, { draggable: !a.locked, showHome: true }, q); }).join('');
+          addedApps.map(function (a) { return rowHtml(a, { draggable: true }, q); }).join('');
       }
 
       if (appViewFilter === 'all') {
@@ -637,12 +611,6 @@
         btn.addEventListener('click', function (e) {
           e.stopPropagation();
           toggleApp(btn.dataset.appId);
-        });
-      });
-      list.querySelectorAll('.add-app-home-btn').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          setHomeTab(btn.dataset.homeId);
         });
       });
       list.querySelectorAll('.add-app-create').forEach(function (btn) {
@@ -712,8 +680,7 @@
         var app = getApp(id);
         if (app && app.locked) return;
         activeTabIds.splice(idx, 1);
-        if (activeTabId === id) activeTabId = 'customer';
-        if (homeTabId === id) setHomeTab('customer');
+        if (activeTabId === id) activeTabId = activeTabIds[0];
       }
       renderTabRow();
       renderAddAppList(addAppSearchInput.value);
@@ -814,11 +781,7 @@
         return !a.locked && a.name.toLowerCase().indexOf(q) !== -1 && activeTabIds.indexOf(a.id) !== -1;
       }).map(function (a) { return a.id; });
       activeTabIds = activeTabIds.filter(function (id) { return toRemove.indexOf(id) === -1; });
-      if (toRemove.indexOf(activeTabId) !== -1) activeTabId = 'customer';
-      if (toRemove.indexOf(homeTabId) !== -1) {
-        homeTabId = 'customer';
-        try { localStorage.setItem('mkos-v0-home-tab', homeTabId); } catch (e) { /* ignore */ }
-      }
+      if (toRemove.indexOf(activeTabId) !== -1) activeTabId = activeTabIds[0];
       renderTabRow();
       renderAddAppList(addAppSearchInput.value);
       addAppSearchInput.focus();
