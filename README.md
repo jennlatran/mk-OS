@@ -22,11 +22,13 @@ To walk stakeholders through the planned rollout, the repo is published to **Git
 
 | Version | Folder | Live URL | What it is |
 |---|---|---|---|
-| **V0** | `v0/` | https://jennlatran.github.io/mk-OS/v0/ | Pixel-accurate recreation of today's live production UI (horizontal nav) — the baseline everyone currently uses. Includes a "Try New View" button linking to V1. |
-| **V1 — Vertical Nav** | `v1/` | https://jennlatran.github.io/mk-OS/v1/ | Draft concept: same Customer-tab content as V0, but with the nav moved to a collapsible/hover-expand vertical rail, a dealer-group switcher, dark mode, an "Ask MK" AI entry point, and a "Switch to Old View" button that prompts for feedback before navigating back to V0 (logged to `localStorage` for now — no backend yet). |
+| **V0** | `v0/` | https://jennlatran.github.io/mk-OS/v0/ | Pixel-accurate recreation of today's live production UI (horizontal nav) — the baseline everyone currently uses. Includes a "Try New View" button linking to V1. Supports horizontal nav and opening (not creating) custom apps — picking from the existing catalog only, no "Create Your Own App" affordance. |
+| **V1 — Vertical Nav** | `v1/` | https://jennlatran.github.io/mk-OS/v1/ | Draft concept: same Customer-tab content as V0, but with the nav moved to a collapsible/hover-expand vertical rail, a dealer-group switcher, dark mode, an "Ask MK" AI entry point, and a "Switch to Old View" button that prompts for feedback before navigating back to V0 (logged to `localStorage` for now — no backend yet). Vertical nav only (no horizontal option). The rail has its own app search (apps only — never customers/ROs, that stays a V2-only capability) that opens a new instance per click, so the same app can be open multiple times side by side; each instance can be dragged to reorder or pinned (📌) to survive a reload — unpinned instances reset to the default set every session. |
 | **V2 — Current Prototype** | `/` (this repo's root, described below) | https://jennlatran.github.io/mk-OS/ | The actively-developed mkOS shell prototype. |
 
 V0 and V1 are self-contained single-file pages (their own inline CSS/JS) so they render correctly as static GitHub Pages content independent of this root prototype's `app.js`/`styles.css` — V1 does link to the root `styles.css` for its header/nav-rail styling, matching the real app's design tokens.
+
+**Insights, News, and Settings are back in the nav itself** in both V0 and V1, moved from the standalone top-right header icons they used to be. In both versions they're fixed/locked — always present, not removable, not reorderable (unlike Customer, which is locked against removal but still draggable).
 
 ## What's Built
 

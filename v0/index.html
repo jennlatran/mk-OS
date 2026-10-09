@@ -218,22 +218,6 @@
   .add-app-toggle.locked { color: #C7CDD6; border-color: var(--border); cursor: not-allowed; }
   .add-app-empty { padding: 16px; font-size: 12.5px; color: var(--ink-muted); text-align: center; }
 
-  .add-app-divider { border-top: 1px solid var(--border); margin: 4px 10px 6px; }
-  .add-app-create {
-    display: flex; align-items: center; gap: 10px; width: calc(100% - 12px); margin: 0 6px; text-align: left;
-    padding: 8px 10px; border-radius: 8px; border: 1.5px dashed #C7CDD6; background: var(--bg-page);
-    cursor: pointer; font-family: inherit; font-size: 13.5px; color: var(--ink-muted); font-weight: 600;
-  }
-  .add-app-create-icon {
-    flex-shrink: 0; width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center;
-    justify-content: center; background: #fff; border: 1px dashed #C7CDD6; color: var(--ink-muted);
-  }
-  .add-app-create .add-app-match { color: var(--brand); font-weight: 700; }
-  .add-app-create.highlighted {
-    border-style: solid; border-color: var(--brand); background: var(--brand-light); color: var(--ink);
-  }
-  .add-app-create.highlighted .add-app-create-icon { border-style: solid; border-color: var(--brand); color: var(--brand); }
-
   .add-app-footer {
     display: flex; align-items: center; gap: 14px; padding: 8px 12px; border-top: 1px solid var(--border);
     background: var(--bg-page); flex-shrink: 0;
@@ -338,9 +322,6 @@
       </a>
       <button class="top-btn"><span class="material-icons" style="font-size:17px">storefront</span>MKSTORE</button>
       <button class="top-btn"><span class="material-icons" style="font-size:17px">help_outline</span>HELP</button>
-      <button class="icon-btn" title="Insights"><span class="material-icons">bar_chart</span></button>
-      <button class="icon-btn" title="News"><span class="material-icons">article</span></button>
-      <button class="icon-btn" title="Settings"><span class="material-icons">settings</span></button>
       <button class="icon-btn" title="mK University"><span class="material-icons">school</span></button>
       <button class="icon-btn"><span class="material-icons">notifications_none</span></button>
       <div class="avatar">MG</div>
@@ -469,11 +450,17 @@
       { id: 'vehicle-tracking', name: 'Vehicle Tracking', icon: 'my_location', createdBy: 'myKaarma' },
       { id: 'mb-vehicle-diagnosis', name: 'MB Vehicle Diagnosis', icon: 'widgets', createdBy: 'You', custom: true },
       { id: 'tire-recommendation', name: 'Tire Recommendation', icon: 'widgets', createdBy: 'You', custom: true },
-      { id: 'loaner-tracker', name: 'Loaner Tracker', icon: 'widgets', createdBy: 'You', custom: true }
+      { id: 'loaner-tracker', name: 'Loaner Tracker', icon: 'widgets', createdBy: 'You', custom: true },
+      // Fixed/utility tabs — moved back into the nav from the top-right
+      // header icons. locked (can't be removed, same as Customer) AND
+      // fixed (can't be dragged/reordered either, unlike Customer).
+      { id: 'insights', name: 'Insights', icon: 'bar_chart', createdBy: 'myKaarma', locked: true, fixed: true },
+      { id: 'news', name: 'News', icon: 'article', createdBy: 'myKaarma', locked: true, fixed: true },
+      { id: 'settings', name: 'Settings', icon: 'settings', createdBy: 'myKaarma', locked: true, fixed: true }
     ];
     function getApp(id) { return APP_CATALOG.filter(function (a) { return a.id === id; })[0]; }
 
-    var activeTabIds = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up'];
+    var activeTabIds = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up', 'insights', 'news', 'settings'];
     var tabViewMode = 'icon-text';
 
     // No separate "default tab" setting — since tabs are freely reorderable
@@ -573,16 +560,18 @@
       var addedApps = activeTabIds.map(getApp).filter(matchesQuery);
       var notAdded = APP_CATALOG.filter(function (a) { return activeTabIds.indexOf(a.id) === -1 && matchesQuery(a); });
 
+      // V0 does not support creating new custom apps (no hasCreate/"__create__"
+      // affordance here) — users can only select from the existing default
+      // and custom apps already in the catalog. V2's root prototype still has
+      // the full create flow.
       appVisibleIds = addedApps.map(function (a) { return a.id; });
       if (appViewFilter === 'all') appVisibleIds = appVisibleIds.concat(notAdded.map(function (a) { return a.id; }));
-      var hasCreate = q && appViewFilter === 'all';
-      if (hasCreate) appVisibleIds.push('__create__');
 
       if (appVisibleIds.indexOf(appHighlightId) === -1) appHighlightId = appVisibleIds.length ? appVisibleIds[0] : null;
 
       if (addedApps.length) {
         html += '<div class="add-app-section-label">Your Tabs</div>' +
-          addedApps.map(function (a) { return rowHtml(a, { draggable: true }, q); }).join('');
+          addedApps.map(function (a) { return rowHtml(a, { draggable: !a.fixed }, q); }).join('');
       }
 
       if (appViewFilter === 'all') {
@@ -592,16 +581,8 @@
         if (customs.length) html += '<div class="add-app-section-label">Custom Apps</div>' + customs.map(function (a) { return rowHtml(a, {}, q); }).join('');
       }
 
-      if (!addedApps.length && (appViewFilter === 'added' || (appViewFilter === 'all' && !notAdded.length && !hasCreate))) {
+      if (!addedApps.length && (appViewFilter === 'added' || (appViewFilter === 'all' && !notAdded.length))) {
         html += '<div class="add-app-empty">' + (appViewFilter === 'added' ? 'Nothing added yet' : 'No apps match "' + escHtml(q) + '"') + '</div>';
-      }
-
-      if (hasCreate) {
-        if (addedApps.length || notAdded.length) html += '<div class="add-app-divider"></div>';
-        html += '<button class="add-app-create' + (appHighlightId === '__create__' ? ' highlighted' : '') + '" data-app-id="__create__">' +
-          '<span class="add-app-create-icon"><span class="material-icons">add</span></span>' +
-          '<span>Create new app: <span class="add-app-match">' + escHtml(q) + '</span></span>' +
-          '</button>';
       }
 
       list.innerHTML = html;
@@ -613,10 +594,7 @@
           toggleApp(btn.dataset.appId);
         });
       });
-      list.querySelectorAll('.add-app-create').forEach(function (btn) {
-        btn.addEventListener('click', function () { createApp(); });
-      });
-      list.querySelectorAll('.add-app-row, .add-app-create').forEach(function (row) {
+      list.querySelectorAll('.add-app-row').forEach(function (row) {
         row.addEventListener('mouseenter', function () {
           appHighlightId = row.dataset.appId;
           syncAppHighlight();
@@ -686,19 +664,6 @@
       renderAddAppList(addAppSearchInput.value);
     }
 
-    function createApp() {
-      var name = addAppSearchInput.value.trim();
-      if (!name) return;
-      var id = 'custom-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + (APP_CATALOG.length + 1);
-      APP_CATALOG.push({ id: id, name: name, icon: 'widgets', createdBy: 'You', custom: true });
-      activeTabIds.push(id);
-      appHighlightId = id;
-      addAppSearchInput.value = '';
-      renderTabRow();
-      renderAddAppList('');
-      addAppSearchInput.focus();
-    }
-
     function updateAppToolbar(addedApps, notAdded) {
       var allCount = APP_CATALOG.length;
       var addedCount = activeTabIds.length;
@@ -740,8 +705,7 @@
       else if (e.key === 'ArrowUp') { e.preventDefault(); moveAppHighlight(-1); }
       else if (e.key === 'Enter') {
         e.preventDefault();
-        if (appHighlightId === '__create__') createApp();
-        else if (appHighlightId) toggleApp(appHighlightId);
+        if (appHighlightId) toggleApp(appHighlightId);
       } else if (e.key === 'Escape') {
         e.preventDefault();
         addAppWrap.classList.remove('open');

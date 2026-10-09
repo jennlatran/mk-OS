@@ -157,6 +157,53 @@
   #shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-submenu {
     display: none;
   }
+  .dash-nav-rail-pin-btn {
+    display: flex; align-items: center; justify-content: center; font-size: 15px !important;
+    color: var(--text-muted); cursor: pointer; opacity: 0; transition: opacity .1s ease;
+    background: none; border: none; padding: 0; width: 16px; height: 16px;
+  }
+  .dash-nav-rail-group:hover .dash-nav-rail-pin-btn,
+  .dash-nav-rail-pin-btn.pinned { opacity: 1; }
+  .dash-nav-rail-pin-btn.pinned { color: var(--brand); }
+  .dash-nav-rail-instance-count { font-size: 11px; color: var(--text-muted); margin-left: 2px; }
+
+  /* ---- Nav rail search — searches the app catalog only (never customers
+     or ROs, which V1 doesn't support searching at all) and opens a new
+     instance into the reorderable list below. Hidden in collapsed/
+     hover-collapsed state, same as other trailing/expand-only content. ---- */
+  .dash-nav-rail-search {
+    position: relative; display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; margin-bottom: 4px; border-bottom: 1px solid var(--border);
+  }
+  .dash-nav-rail-search .material-icons { font-size: 18px; color: var(--text-muted); flex-shrink: 0; }
+  .dash-nav-rail-search input {
+    flex: 1; min-width: 0; border: none; outline: none; background: none;
+    font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text-primary);
+  }
+  .dash-nav-rail-search input::placeholder { color: var(--text-muted); }
+  #shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-search,
+  #shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-search {
+    display: none;
+  }
+  .v1-nav-search-results {
+    display: none; position: absolute; top: calc(100% + 2px); left: 8px; right: 8px;
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg); z-index: 200; max-height: 220px; overflow-y: auto; padding: 4px;
+  }
+  .v1-nav-search-results.open { display: block; }
+  .v1-nav-search-result {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    border: none; background: none; border-radius: var(--radius-sm); padding: 8px;
+    font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text-primary); cursor: pointer;
+  }
+  .v1-nav-search-result:hover { background: var(--row-hover); }
+  .v1-nav-search-result .material-icons { font-size: 18px; color: var(--text-muted); }
+  .v1-nav-search-empty { padding: 10px 8px; font-size: 12.5px; color: var(--text-muted); }
+
+  /* ---- Fixed/utility nav items (Insights, News, Settings) — always
+     present, not draggable, not removable, separated from the
+     reorderable/searchable app list by a divider. ---- */
+  .dash-nav-rail-fixed { border-top: 1px solid var(--border); padding-top: 4px; margin-top: 4px; }
 
   /* ---- Nav rail footer: dark mode toggle + nav-display popup (replaces
      the old 3-icons-in-a-row layout with 2 controls so the bottom-left
@@ -325,9 +372,6 @@
                 <span class="notif-badge notif-badge--dot"></span>
               </button>
             </div>
-            <button class="app-header-help-btn" id="app-header-insights-btn" title="Insights">
-              <span class="material-icons">bar_chart</span>
-            </button>
             <button class="app-header-help-btn" id="app-header-store-btn" title="myKaarma Store">
               <span class="material-icons">storefront</span>
             </button>
@@ -336,9 +380,6 @@
             </button>
             <button class="app-header-help-btn" id="app-header-help-btn" title="Help">
               <span class="material-icons">help_outline</span>
-            </button>
-            <button class="app-header-help-btn" id="app-header-settings-btn" title="Settings">
-              <span class="material-icons">settings</span>
             </button>
             <div class="notif-bell-wrap">
               <button class="notif-bell-btn" id="dashboard-bell-btn" title="Notifications">
@@ -365,7 +406,13 @@
         <section class="screen" id="screen-dashboard" data-screen>
           <div class="dash-shell">
             <nav class="dash-nav-rail" id="dash-nav-rail" data-mode="hover">
+              <div class="dash-nav-rail-search">
+                <span class="material-icons">search</span>
+                <input type="text" id="v1-nav-search-input" placeholder="Open an app…" autocomplete="off" />
+                <div class="v1-nav-search-results" id="v1-nav-search-results"></div>
+              </div>
               <div class="dash-nav-rail-list" id="dash-nav-rail-list"></div>
+              <div class="dash-nav-rail-fixed" id="dash-nav-rail-fixed"></div>
               <div class="dash-nav-rail-footer">
                 <button class="dash-nav-rail-footer-btn" id="v1-theme-toggle-btn" title="Switch to dark mode">
                   <span class="material-icons" id="v1-theme-icon">dark_mode</span>
@@ -479,37 +526,87 @@
             { id: 'mb-vehicle-diagnosis', icon: 'build', label: 'MB Vehicle Diagnosis' },
             { id: 'tire-recommendation', icon: 'donut_large', label: 'Tire Recommendation' }
           ]
-        }
+        },
+        // Searchable-only entries (not part of the default rail, not inside
+        // the Add-Ons group) — surfaced only via the nav search below.
+        'mb-vehicle-diagnosis': { icon: 'build', label: 'MB Vehicle Diagnosis' },
+        'tire-recommendation': { icon: 'donut_large', label: 'Tire Recommendation' },
+        'loaner-tracker': { icon: 'inventory_2', label: 'Loaner Tracker' }
       };
-      var DEFAULT_NAV_ORDER = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up', 'add-ons'];
 
-      function loadNavOrder() {
-        try {
-          var saved = JSON.parse(localStorage.getItem('mkos-v1-nav-order') || 'null');
-          if (Array.isArray(saved) && saved.length === DEFAULT_NAV_ORDER.length && saved.every(function (id) { return NAV_ITEMS[id]; })) {
-            return saved;
-          }
-        } catch (e) { /* ignore malformed/unavailable storage */ }
-        return DEFAULT_NAV_ORDER.slice();
+      // Fixed/utility items — moved back into the nav from the top-right
+      // header icons. Always present, never draggable, never removable,
+      // rendered in their own section below the reorderable app list.
+      var FIXED_NAV_ITEMS = [
+        { id: 'insights', icon: 'bar_chart', label: 'Insights' },
+        { id: 'news', icon: 'article', label: 'News' },
+        { id: 'settings', icon: 'settings', label: 'Settings' }
+      ];
+
+      // Apps a user can search for and open — every NAV_ITEMS entry except
+      // the 'add-ons' group container itself (which isn't a real single app).
+      var SEARCHABLE_APP_IDS = Object.keys(NAV_ITEMS).filter(function (id) { return id !== 'add-ons'; });
+
+      var DEFAULT_NAV_IDS = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up', 'add-ons'];
+      var instanceCounter = 0;
+
+      function makeDefaultInstances() {
+        return DEFAULT_NAV_IDS.map(function (id) { return { uid: id, appId: id, pinned: false }; });
       }
 
-      var navOrder = loadNavOrder();
-      var activeNavId = 'customer';
+      // Only pinned instances persist across reload (mirrors the real app's
+      // tab-pinning rule) — anything unpinned, including reordering of the
+      // default set, resets to the base list every session.
+      function loadNavInstances() {
+        var instances = makeDefaultInstances();
+        try {
+          var pinned = JSON.parse(localStorage.getItem('mkos-v1-pinned-instances') || '[]');
+          pinned.forEach(function (inst) {
+            if (inst && inst.uid && NAV_ITEMS[inst.appId] && !instances.some(function (b) { return b.uid === inst.uid; })) {
+              instances.push({ uid: inst.uid, appId: inst.appId, pinned: true });
+            }
+          });
+        } catch (e) { /* ignore malformed/unavailable storage */ }
+        return instances;
+      }
+
+      function savePinnedInstances() {
+        var pinned = navInstances.filter(function (inst) { return inst.pinned; })
+          .map(function (inst) { return { uid: inst.uid, appId: inst.appId }; });
+        try { localStorage.setItem('mkos-v1-pinned-instances', JSON.stringify(pinned)); } catch (e) { /* ignore */ }
+      }
+
+      var navInstances = loadNavInstances();
+      var activeUid = 'customer';
       var activeSubId = null;
       var addonsExpanded = false;
-      var draggedNavId = null;
+      var draggedUid = null;
 
       function renderNavList() {
         var list = document.getElementById('dash-nav-rail-list');
-        list.innerHTML = navOrder.map(function (id) {
-          var item = NAV_ITEMS[id];
+
+        // Count instances per appId up front so repeated apps get a "2",
+        // "3", … suffix instead of being indistinguishable in the list.
+        var seenCounts = {};
+        var totalCounts = {};
+        navInstances.forEach(function (inst) { totalCounts[inst.appId] = (totalCounts[inst.appId] || 0) + 1; });
+
+        list.innerHTML = navInstances.map(function (inst) {
+          var item = NAV_ITEMS[inst.appId];
+          seenCounts[inst.appId] = (seenCounts[inst.appId] || 0) + 1;
+          var countSuffix = totalCounts[inst.appId] > 1
+            ? '<span class="dash-nav-rail-instance-count">' + seenCounts[inst.appId] + '</span>' : '';
+          var pinBtn = '<button class="material-icons dash-nav-rail-pin-btn' + (inst.pinned ? ' pinned' : '') +
+            '" data-uid="' + inst.uid + '" title="' + (inst.pinned ? 'Unpin' : 'Pin to keep across reloads') + '">push_pin</button>';
           var trailing = '<span class="dash-nav-rail-item-trailing">' +
+            countSuffix +
             (item.children ? '<span class="material-icons dash-nav-rail-expand-caret' + (addonsExpanded ? ' expanded' : '') + '">expand_more</span>' : '') +
+            pinBtn +
             '<span class="material-icons dash-nav-rail-drag-handle" title="Drag to reorder">drag_indicator</span>' +
             '</span>';
-          var active = !item.children && id === activeNavId;
+          var active = !item.children && inst.uid === activeUid;
           var itemHtml =
-            '<button class="dash-nav-rail-item' + (active ? ' active' : '') + '" data-app-id="' + id + '" title="' + escHtml(item.label) + '">' +
+            '<button class="dash-nav-rail-item' + (active ? ' active' : '') + '" data-uid="' + inst.uid + '" title="' + escHtml(item.label) + '">' +
               '<span class="material-icons">' + item.icon + '</span>' +
               '<span class="dash-nav-rail-item-label">' + escHtml(item.label) + '</span>' +
               trailing +
@@ -523,16 +620,17 @@
                 '</button>';
             }).join('') + '</div>';
           }
-          return '<div class="dash-nav-rail-group" data-app-id="' + id + '" draggable="true">' + itemHtml + submenuHtml + '</div>';
+          return '<div class="dash-nav-rail-group" data-uid="' + inst.uid + '" draggable="true">' + itemHtml + submenuHtml + '</div>';
         }).join('');
 
         list.querySelectorAll('.dash-nav-rail-item').forEach(function (btn) {
           btn.addEventListener('click', function () {
-            var id = btn.dataset.appId;
-            if (NAV_ITEMS[id].children) {
+            var uid = btn.dataset.uid;
+            var inst = navInstances.filter(function (i) { return i.uid === uid; })[0];
+            if (inst && NAV_ITEMS[inst.appId].children) {
               addonsExpanded = !addonsExpanded;
             } else {
-              activeNavId = id;
+              activeUid = uid;
             }
             renderNavList();
           });
@@ -544,40 +642,103 @@
             renderNavList();
           });
         });
+        list.querySelectorAll('.dash-nav-rail-pin-btn').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var inst = navInstances.filter(function (i) { return i.uid === btn.dataset.uid; })[0];
+            if (!inst) return;
+            inst.pinned = !inst.pinned;
+            savePinnedInstances();
+            renderNavList();
+          });
+        });
 
-        // Drag to reorder top-level items (mirrors the real app's
-        // bindDragReorder() in app.js — splice the dragged id to the
-        // dropped-on id's position, then re-render).
+        // Drag to reorder — mirrors the real app's bindDragReorder() in
+        // app.js — splice the dragged instance to the dropped-on instance's
+        // position, then re-render. Keyed by uid, not appId, so duplicate
+        // instances of the same app reorder independently of each other.
         list.querySelectorAll('.dash-nav-rail-group').forEach(function (el) {
           el.addEventListener('dragstart', function () {
-            draggedNavId = el.dataset.appId;
+            draggedUid = el.dataset.uid;
             el.classList.add('dragging');
           });
           el.addEventListener('dragend', function () {
             el.classList.remove('dragging');
-            draggedNavId = null;
+            draggedUid = null;
           });
           el.addEventListener('dragover', function (e) {
             e.preventDefault();
-            if (el.dataset.appId !== draggedNavId) el.classList.add('drag-over');
+            if (el.dataset.uid !== draggedUid) el.classList.add('drag-over');
           });
           el.addEventListener('dragleave', function () { el.classList.remove('drag-over'); });
           el.addEventListener('drop', function (e) {
             e.preventDefault();
             el.classList.remove('drag-over');
-            var targetId = el.dataset.appId;
-            if (!draggedNavId || draggedNavId === targetId) return;
-            var from = navOrder.indexOf(draggedNavId);
-            var to = navOrder.indexOf(targetId);
+            var targetUid = el.dataset.uid;
+            if (!draggedUid || draggedUid === targetUid) return;
+            var from = navInstances.map(function (i) { return i.uid; }).indexOf(draggedUid);
+            var to = navInstances.map(function (i) { return i.uid; }).indexOf(targetUid);
             if (from === -1 || to === -1) return;
-            navOrder.splice(from, 1);
-            navOrder.splice(to, 0, draggedNavId);
-            try { localStorage.setItem('mkos-v1-nav-order', JSON.stringify(navOrder)); } catch (e) { /* ignore */ }
+            var moved = navInstances.splice(from, 1)[0];
+            navInstances.splice(to, 0, moved);
             renderNavList();
           });
         });
       }
       renderNavList();
+
+      // Fixed/utility section — rendered once, no reorder/remove affordance.
+      (function renderFixedNavItems() {
+        var fixed = document.getElementById('dash-nav-rail-fixed');
+        fixed.innerHTML = FIXED_NAV_ITEMS.map(function (item) {
+          return '<button class="dash-nav-rail-item" data-fixed-id="' + item.id + '" title="' + escHtml(item.label) + '">' +
+            '<span class="material-icons">' + item.icon + '</span>' +
+            '<span class="dash-nav-rail-item-label">' + escHtml(item.label) + '</span>' +
+            '</button>';
+        }).join('');
+      })();
+
+      // Nav search — searches apps only, never customers/ROs (that's a V2
+      // feature). Selecting a result always opens a brand-new instance, so
+      // the same app can be opened multiple times side by side in the rail.
+      (function initNavSearch() {
+        var input = document.getElementById('v1-nav-search-input');
+        var results = document.getElementById('v1-nav-search-results');
+
+        function renderResults(query) {
+          var q = query.trim().toLowerCase();
+          if (!q) { results.classList.remove('open'); results.innerHTML = ''; return; }
+          var matches = SEARCHABLE_APP_IDS.filter(function (id) {
+            return NAV_ITEMS[id].label.toLowerCase().indexOf(q) !== -1;
+          });
+          results.innerHTML = matches.length
+            ? matches.map(function (id) {
+                return '<button class="v1-nav-search-result" data-app-id="' + id + '">' +
+                  '<span class="material-icons">' + NAV_ITEMS[id].icon + '</span>' + escHtml(NAV_ITEMS[id].label) +
+                  '</button>';
+              }).join('')
+            : '<div class="v1-nav-search-empty">No apps match &ldquo;' + escHtml(query) + '&rdquo;</div>';
+          results.classList.add('open');
+          results.querySelectorAll('.v1-nav-search-result').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              instanceCounter += 1;
+              var uid = btn.dataset.appId + '--' + instanceCounter;
+              navInstances.push({ uid: uid, appId: btn.dataset.appId, pinned: false });
+              activeUid = uid;
+              input.value = '';
+              results.classList.remove('open');
+              results.innerHTML = '';
+              renderNavList();
+            });
+          });
+        }
+
+        input.addEventListener('input', function () { renderResults(input.value); });
+        input.addEventListener('focus', function () { if (input.value.trim()) renderResults(input.value); });
+        document.addEventListener('click', function (e) {
+          if (!e.target.closest('.dash-nav-rail-search')) { results.classList.remove('open'); }
+        });
+      })();
 
       // Nav rail mode (collapsed / expanded / hover-to-expand) — now chosen from
       // a popup instead of 3 always-visible icons, to keep the footer uncluttered.
