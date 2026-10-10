@@ -172,6 +172,11 @@
   #shell.light .dash-nav-rail-list { flex: 0 1 auto; min-height: 0; }
   #shell.light .dash-nav-rail-fixed,
   #shell.light .dash-nav-rail-footer { flex-shrink: 0; }
+  /* Pin the footer (dark mode + nav display) to the bottom edge, same as
+     before — margin-top:auto soaks up the leftover space above it instead
+     of leaving it stranded right under the fixed section with blank space
+     below, which plain flex-start alone would do. */
+  #shell.light .dash-nav-rail-footer { margin-top: auto; }
 
   /* ---- Fixed/utility nav items (Insights, News, Settings) — always
      present, not draggable, not removable, separated from the
