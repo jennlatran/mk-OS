@@ -128,11 +128,28 @@
   }
 
   /* ---- Nav rail items — every app (default or custom) sits flat, no
-     grouping/expand submenu. Reorder/pin/remove all live in the Customize
-     picker, not inline in the rail — see .v1-customize-row for the
-     drag-to-reorder equivalent used there. ---- */
+     grouping/expand submenu. Drag-to-reorder, pin, and remove all live
+     inline on each row (shown on hover, except pin which stays visible
+     once set) — search/Customize is for adding new instances only, since
+     the user already sees what's open right here in the rail. ---- */
   .dash-nav-rail-group { position: relative; }
+  .dash-nav-rail-group.dragging { opacity: .4; }
+  .dash-nav-rail-group.drag-over > .dash-nav-rail-item { box-shadow: inset 0 2px 0 var(--brand); }
   .dash-nav-rail-item-trailing { margin-left: auto; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .dash-nav-rail-drag-handle {
+    font-size: 16px !important; color: var(--text-muted); cursor: grab; opacity: 0; transition: opacity .1s ease;
+  }
+  .dash-nav-rail-group:hover .dash-nav-rail-drag-handle { opacity: 1; }
+  .dash-nav-rail-pin-btn, .dash-nav-rail-remove-btn {
+    display: flex; align-items: center; justify-content: center; font-size: 15px !important;
+    color: var(--text-muted); cursor: pointer; opacity: 0; transition: opacity .1s ease;
+    background: none; border: none; padding: 0; width: 16px; height: 16px; flex-shrink: 0;
+  }
+  .dash-nav-rail-group:hover .dash-nav-rail-pin-btn,
+  .dash-nav-rail-group:hover .dash-nav-rail-remove-btn,
+  .dash-nav-rail-pin-btn.pinned { opacity: 1; }
+  .dash-nav-rail-pin-btn.pinned { color: var(--brand); font-variation-settings: 'FILL' 1; }
+  .dash-nav-rail-remove-btn:hover { color: var(--text-primary); }
   /* Collapsed/hover-collapsed rail: hide trailing controls, same pattern
      styles.css already uses to hide .dash-nav-rail-item-label. */
   #shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item-trailing,
@@ -169,15 +186,12 @@
      reorderable/app list by a divider. ---- */
   .dash-nav-rail-fixed { flex-shrink: 0; border-top: 1px solid var(--border); padding: var(--space-2) 0; }
 
-  /* ---- Customize picker — same shape as V0's Customize popover (search +
-     "Your Apps" + "All Apps", add/remove/reorder), reached via a footer
-     button instead of an always-visible inline search bar. Unlike V0, "All
-     Apps" rows always add a new instance rather than toggling, since the
-     same app can be open more than once; removal/reorder/pin happen only
-     on the specific instance in "Your Apps". ---- */
-  /* Search bar lives inline at the top of the rail, always visible (same
-     spot it was in originally) — only the Your Apps/All Apps menu below it
-     opens on demand, once the user focuses/starts typing. */
+  /* ---- Customize picker is add-only: search/browse "All Apps" and click
+     to open a new instance. Search bar lives inline at the top of the
+     rail, always visible (same spot it was in originally) — only the
+     dropdown menu below it opens on demand, once the user focuses/starts
+     typing. Reorder/pin/remove for existing instances live inline in the
+     rail itself (see .dash-nav-rail-drag-handle/-pin-btn/-remove-btn). ---- */
   .v1-customize-wrap { position: relative; width: 100%; flex-shrink: 0; }
   .v1-customize-search {
     display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border);
@@ -199,33 +213,6 @@
   }
   .v1-customize-wrap.open .v1-customize-panel { display: flex; flex-direction: column; }
   .v1-customize-list { max-height: 360px; overflow-y: auto; padding: 6px; }
-  .v1-customize-section-label {
-    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--text-muted); padding: 8px 8px 4px;
-  }
-  .v1-customize-row {
-    display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: var(--radius-sm);
-  }
-  .v1-customize-row:hover { background: var(--row-hover); }
-  .v1-customize-row.dragging { opacity: .4; }
-  .v1-customize-row.drag-over { box-shadow: inset 0 2px 0 var(--brand); }
-  .v1-customize-row .material-icons.v1-customize-row-icon { font-size: 18px; color: var(--text-muted); flex-shrink: 0; }
-  .v1-customize-row-label {
-    flex: 1; min-width: 0; font-size: 13px; color: var(--text-primary);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .v1-customize-row-action {
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    width: 24px; height: 24px; border-radius: var(--radius-sm); border: none; background: none;
-    color: var(--text-muted); cursor: pointer;
-  }
-  .v1-customize-row-action:hover { background: var(--chip-bg); color: var(--text-primary); }
-  .v1-customize-row-action.pinned { color: var(--brand); }
-  .v1-customize-row-action.pinned .material-icons { font-variation-settings: 'FILL' 1; }
-  .v1-customize-row-drag {
-    font-size: 16px !important; color: var(--text-muted); cursor: grab; opacity: 0; transition: opacity .1s ease;
-  }
-  .v1-customize-row:hover .v1-customize-row-drag { opacity: 1; }
   .v1-customize-add-row {
     display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 7px 8px;
     border-radius: var(--radius-sm); border: none; background: none; cursor: pointer;
@@ -612,14 +599,12 @@
 
       var navInstances = loadNavInstances();
       var activeUid = 'customer';
+      var draggedUid = null;
 
-      // Compact rail: just clickable instances (icon + label), nothing else
-      // — no inline drag handle or pin button cluttering every row. All
-      // add/remove/reorder/pin management lives in the Customize picker
-      // below, same split V0 uses (plain tab row vs. its Customize popover).
-      // This is what keeps the rail itself usable even with many apps open.
       // Every app (default or custom) sits flat at the same level — no
-      // grouping/expand submenu.
+      // grouping/expand submenu. Drag-to-reorder, pin, and remove live
+      // inline on each row; search/Customize is for adding new instances
+      // only, since the user already sees what's open right here.
       function renderNavList() {
         var list = document.getElementById('dash-nav-rail-list');
         var totalCounts = {};
@@ -631,9 +616,13 @@
           seenCounts[inst.appId] = (seenCounts[inst.appId] || 0) + 1;
           var countSuffix = totalCounts[inst.appId] > 1
             ? '<span class="dash-nav-rail-instance-count">' + seenCounts[inst.appId] + '</span>' : '';
-          var trailing = countSuffix ? '<span class="dash-nav-rail-item-trailing">' + countSuffix + '</span>' : '';
+          var pinBtn = '<button class="material-icons dash-nav-rail-pin-btn' + (inst.pinned ? ' pinned' : '') +
+            '" data-uid="' + inst.uid + '" title="' + (inst.pinned ? 'Unpin' : 'Pin to keep across reloads') + '">push_pin</button>';
+          var removeBtn = '<button class="material-icons dash-nav-rail-remove-btn" data-uid="' + inst.uid + '" title="Remove">close</button>';
+          var trailing = '<span class="dash-nav-rail-item-trailing">' + countSuffix + pinBtn + removeBtn +
+            '<span class="material-icons dash-nav-rail-drag-handle" title="Drag to reorder">drag_indicator</span></span>';
           var active = inst.uid === activeUid;
-          return '<div class="dash-nav-rail-group" data-uid="' + inst.uid + '">' +
+          return '<div class="dash-nav-rail-group" data-uid="' + inst.uid + '" draggable="true">' +
             '<button class="dash-nav-rail-item' + (active ? ' active' : '') + '" data-uid="' + inst.uid + '" title="' + escHtml(item.label) + '">' +
               '<span class="material-icons">' + item.icon + '</span>' +
               '<span class="dash-nav-rail-item-label">' + escHtml(item.label) + '</span>' +
@@ -644,6 +633,59 @@
         list.querySelectorAll('.dash-nav-rail-item').forEach(function (btn) {
           btn.addEventListener('click', function () {
             activeUid = btn.dataset.uid;
+            renderNavList();
+          });
+        });
+        list.querySelectorAll('.dash-nav-rail-pin-btn').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var inst = navInstances.filter(function (i) { return i.uid === btn.dataset.uid; })[0];
+            if (!inst) return;
+            inst.pinned = !inst.pinned;
+            savePinnedInstances();
+            renderNavList();
+          });
+        });
+        list.querySelectorAll('.dash-nav-rail-remove-btn').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var idx = navInstances.map(function (i) { return i.uid; }).indexOf(btn.dataset.uid);
+            if (idx === -1) return;
+            var removingActive = navInstances[idx].uid === activeUid;
+            navInstances.splice(idx, 1);
+            if (removingActive) activeUid = navInstances[0] ? navInstances[0].uid : null;
+            savePinnedInstances();
+            renderNavList();
+          });
+        });
+
+        // Drag to reorder — mirrors the real app's bindDragReorder() in
+        // app.js — keyed by uid so duplicate instances of the same app
+        // reorder independently of each other.
+        list.querySelectorAll('.dash-nav-rail-group').forEach(function (el) {
+          el.addEventListener('dragstart', function () {
+            draggedUid = el.dataset.uid;
+            el.classList.add('dragging');
+          });
+          el.addEventListener('dragend', function () {
+            el.classList.remove('dragging');
+            draggedUid = null;
+          });
+          el.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            if (el.dataset.uid !== draggedUid) el.classList.add('drag-over');
+          });
+          el.addEventListener('dragleave', function () { el.classList.remove('drag-over'); });
+          el.addEventListener('drop', function (e) {
+            e.preventDefault();
+            el.classList.remove('drag-over');
+            var targetUid = el.dataset.uid;
+            if (!draggedUid || draggedUid === targetUid) return;
+            var from = navInstances.map(function (i) { return i.uid; }).indexOf(draggedUid);
+            var to = navInstances.map(function (i) { return i.uid; }).indexOf(targetUid);
+            if (from === -1 || to === -1) return;
+            var moved = navInstances.splice(from, 1)[0];
+            navInstances.splice(to, 0, moved);
             renderNavList();
           });
         });
@@ -661,63 +703,31 @@
         }).join('');
       })();
 
-      // ---- Customize picker — same shape as V0's Customize popover:
-      // search, "Your Apps" (reorder/pin/remove each instance), "All Apps"
-      // (click to open). Unlike V0, clicking an "All Apps" row always adds
-      // a brand-new instance rather than toggling, since the same app can
-      // be open more than once — only "Your Apps" rows ever get removed,
-      // and only by their own explicit × button. ----
+      // Search is for adding apps only — the user already sees their open
+      // apps in the rail itself, so there's no "Your Apps" section here
+      // duplicating that list. Drag-to-reorder/pin/remove all live inline
+      // on the rail items instead (see renderNavList below).
       (function initCustomizePicker() {
         var wrap = document.getElementById('v1-customize-wrap');
         var searchInput = document.getElementById('v1-customize-search-input');
         var list = document.getElementById('v1-customize-list');
-        var draggedUid = null;
 
         function renderPicker() {
           var q = searchInput.value.trim().toLowerCase();
-          var yourApps = navInstances.filter(function (inst) {
-            return NAV_ITEMS[inst.appId].label.toLowerCase().indexOf(q) !== -1;
-          });
           var allApps = SEARCHABLE_APP_IDS.filter(function (id) {
             return NAV_ITEMS[id].label.toLowerCase().indexOf(q) !== -1;
           });
 
-          var totalCounts = {};
-          navInstances.forEach(function (inst) { totalCounts[inst.appId] = (totalCounts[inst.appId] || 0) + 1; });
-          var seenCounts = {};
-
-          var html = '';
-          if (yourApps.length) {
-            html += '<div class="v1-customize-section-label">Your Apps</div>' +
-              yourApps.map(function (inst) {
-                var item = NAV_ITEMS[inst.appId];
-                seenCounts[inst.appId] = (seenCounts[inst.appId] || 0) + 1;
-                var label = escHtml(item.label) + (totalCounts[inst.appId] > 1 ? ' ' + seenCounts[inst.appId] : '');
-                return '<div class="v1-customize-row" draggable="true" data-uid="' + inst.uid + '">' +
-                  '<span class="material-icons v1-customize-row-drag" title="Drag to reorder">drag_indicator</span>' +
-                  '<span class="material-icons v1-customize-row-icon">' + item.icon + '</span>' +
-                  '<span class="v1-customize-row-label">' + label + '</span>' +
-                  '<button class="v1-customize-row-action' + (inst.pinned ? ' pinned' : '') + '" data-action="pin" data-uid="' + inst.uid + '" title="' +
-                    (inst.pinned ? 'Unpin' : 'Pin to keep across reloads') + '"><span class="material-icons">push_pin</span></button>' +
-                  '<button class="v1-customize-row-action" data-action="remove" data-uid="' + inst.uid + '" title="Remove">' +
-                    '<span class="material-icons">close</span></button>' +
-                  '</div>';
-              }).join('');
-          }
-          if (allApps.length) {
-            html += '<div class="v1-customize-section-label">All Apps</div>' +
-              allApps.map(function (id) {
+          var html = allApps.length
+            ? allApps.map(function (id) {
                 var item = NAV_ITEMS[id];
                 return '<button class="v1-customize-add-row" data-app-id="' + id + '">' +
                   '<span class="material-icons v1-customize-row-icon">' + item.icon + '</span>' +
                   '<span class="v1-customize-add-row-label">' + escHtml(item.label) + '</span>' +
                   '<span class="material-icons v1-customize-add-icon" title="Add">add</span>' +
                   '</button>';
-              }).join('');
-          }
-          if (!yourApps.length && !allApps.length) {
-            html = '<div class="v1-customize-empty">No apps match &ldquo;' + escHtml(searchInput.value) + '&rdquo;</div>';
-          }
+              }).join('')
+            : '<div class="v1-customize-empty">No apps match &ldquo;' + escHtml(searchInput.value) + '&rdquo;</div>';
           list.innerHTML = html;
 
           list.querySelectorAll('.v1-customize-add-row').forEach(function (row) {
@@ -726,60 +736,6 @@
               var uid = row.dataset.appId + '--' + instanceCounter;
               navInstances.push({ uid: uid, appId: row.dataset.appId, pinned: false });
               activeUid = uid;
-              renderNavList();
-              renderPicker();
-            });
-          });
-          list.querySelectorAll('[data-action="pin"]').forEach(function (rowBtn) {
-            rowBtn.addEventListener('click', function () {
-              var inst = navInstances.filter(function (i) { return i.uid === rowBtn.dataset.uid; })[0];
-              if (!inst) return;
-              inst.pinned = !inst.pinned;
-              savePinnedInstances();
-              renderNavList();
-              renderPicker();
-            });
-          });
-          list.querySelectorAll('[data-action="remove"]').forEach(function (rowBtn) {
-            rowBtn.addEventListener('click', function () {
-              var idx = navInstances.map(function (i) { return i.uid; }).indexOf(rowBtn.dataset.uid);
-              if (idx === -1) return;
-              var removingActive = navInstances[idx].uid === activeUid;
-              navInstances.splice(idx, 1);
-              if (removingActive) activeUid = navInstances[0] ? navInstances[0].uid : null;
-              savePinnedInstances();
-              renderNavList();
-              renderPicker();
-            });
-          });
-
-          // Drag to reorder "Your Apps" — mirrors the real app's
-          // bindDragReorder() in app.js — keyed by uid so duplicate
-          // instances of the same app reorder independently of each other.
-          list.querySelectorAll('.v1-customize-row').forEach(function (row) {
-            row.addEventListener('dragstart', function () {
-              draggedUid = row.dataset.uid;
-              row.classList.add('dragging');
-            });
-            row.addEventListener('dragend', function () {
-              row.classList.remove('dragging');
-              draggedUid = null;
-            });
-            row.addEventListener('dragover', function (e) {
-              e.preventDefault();
-              if (row.dataset.uid !== draggedUid) row.classList.add('drag-over');
-            });
-            row.addEventListener('dragleave', function () { row.classList.remove('drag-over'); });
-            row.addEventListener('drop', function (e) {
-              e.preventDefault();
-              row.classList.remove('drag-over');
-              var targetUid = row.dataset.uid;
-              if (!draggedUid || draggedUid === targetUid) return;
-              var from = navInstances.map(function (i) { return i.uid; }).indexOf(draggedUid);
-              var to = navInstances.map(function (i) { return i.uid; }).indexOf(targetUid);
-              if (from === -1 || to === -1) return;
-              var moved = navInstances.splice(from, 1)[0];
-              navInstances.splice(to, 0, moved);
               renderNavList();
               renderPicker();
             });
