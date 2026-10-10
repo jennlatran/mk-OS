@@ -127,30 +127,16 @@
     padding-right: 0;
   }
 
-  /* ---- Nav rail: Add-Ons expandable group. Reorder/pin/remove all live in
-     the Customize picker now, not inline in the rail — see
-     .v1-customize-row for the drag-to-reorder equivalent used there. ---- */
+  /* ---- Nav rail items — every app (default or custom) sits flat, no
+     grouping/expand submenu. Reorder/pin/remove all live in the Customize
+     picker, not inline in the rail — see .v1-customize-row for the
+     drag-to-reorder equivalent used there. ---- */
   .dash-nav-rail-group { position: relative; }
   .dash-nav-rail-item-trailing { margin-left: auto; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-  .dash-nav-rail-expand-caret {
-    font-size: 18px !important; color: var(--text-muted); transition: transform .12s ease;
-  }
-  .dash-nav-rail-expand-caret.expanded { transform: rotate(180deg); }
-  .dash-nav-rail-submenu { display: flex; flex-direction: column; padding-left: 34px; }
-  .dash-nav-rail-subitem {
-    display: flex; align-items: center; gap: var(--space-2); width: 100%; text-align: left;
-    border: none; background: none; border-radius: var(--radius-sm); padding: 6px var(--space-3);
-    font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text-secondary); cursor: pointer;
-  }
-  .dash-nav-rail-subitem .material-icons { font-size: 16px; }
-  .dash-nav-rail-subitem:hover { background: var(--row-hover); }
-  .dash-nav-rail-subitem.active { background: var(--rail-active-bg); color: var(--brand); font-weight: 700; }
-  /* Collapsed/hover-collapsed rail: hide trailing controls and the submenu,
-     same pattern styles.css already uses to hide .dash-nav-rail-item-label. */
+  /* Collapsed/hover-collapsed rail: hide trailing controls, same pattern
+     styles.css already uses to hide .dash-nav-rail-item-label. */
   #shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item-trailing,
-  #shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item-trailing,
-  #shell.light .dash-nav-rail[data-mode="collapsed"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-submenu,
-  #shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-submenu {
+  #shell.light .dash-nav-rail[data-mode="hover"]:not(.dash-nav-rail--hover-expanded) .dash-nav-rail-item-trailing {
     display: none;
   }
   .dash-nav-rail-instance-count { font-size: 11px; color: var(--text-muted); margin-left: 2px; }
@@ -563,6 +549,12 @@
         });
       }
 
+      // Custom apps (dealer-created, not myKaarma-built) share one generic
+      // icon — same convention as V0's APP_CATALOG, which hardcodes
+      // icon:'widgets' for every custom app since there's no designed icon
+      // to show per app. They sit flat, at the same level as the default
+      // apps, not nested under a group — same as everything else here.
+      var CUSTOM_APP_ICON = 'widgets';
       var NAV_ITEMS = {
         customer: { icon: 'person', label: 'Customer' },
         messages: { icon: 'chat_bubble_outline', label: 'Messages' },
@@ -570,18 +562,9 @@
         inspect: { icon: 'fact_check', label: 'Inspect' },
         'pickup-delivery': { icon: 'local_shipping', label: 'Pickup & Delivery' },
         'follow-up': { icon: 'event_repeat', label: 'Follow Up' },
-        'add-ons': {
-          icon: 'extension', label: 'Apps',
-          children: [
-            { id: 'mb-vehicle-diagnosis', icon: 'build', label: 'MB Vehicle Diagnosis' },
-            { id: 'tire-recommendation', icon: 'donut_large', label: 'Tire Recommendation' }
-          ]
-        },
-        // Searchable-only entries (not part of the default rail, not inside
-        // the Add-Ons group) — surfaced only via the nav search below.
-        'mb-vehicle-diagnosis': { icon: 'build', label: 'MB Vehicle Diagnosis' },
-        'tire-recommendation': { icon: 'donut_large', label: 'Tire Recommendation' },
-        'loaner-tracker': { icon: 'inventory_2', label: 'Loaner Tracker' }
+        'mb-vehicle-diagnosis': { icon: CUSTOM_APP_ICON, label: 'MB Vehicle Diagnosis' },
+        'tire-recommendation': { icon: CUSTOM_APP_ICON, label: 'Tire Recommendation' },
+        'loaner-tracker': { icon: CUSTOM_APP_ICON, label: 'Loaner Tracker' }
       };
 
       // Fixed/utility items — moved back into the nav from the top-right
@@ -593,11 +576,12 @@
         { id: 'settings', icon: 'settings', label: 'Settings' }
       ];
 
-      // Apps a user can search for and open — every NAV_ITEMS entry except
-      // the 'add-ons' group container itself (which isn't a real single app).
-      var SEARCHABLE_APP_IDS = Object.keys(NAV_ITEMS).filter(function (id) { return id !== 'add-ons'; });
+      // Apps a user can search for and open — every entry in NAV_ITEMS.
+      var SEARCHABLE_APP_IDS = Object.keys(NAV_ITEMS);
 
-      var DEFAULT_NAV_IDS = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up', 'add-ons'];
+      // Custom apps aren't in the default rail (same as V0 — they're
+      // dealer-added extras, not part of the myKaarma-recommended default).
+      var DEFAULT_NAV_IDS = ['customer', 'messages', 'payments', 'inspect', 'pickup-delivery', 'follow-up'];
       var instanceCounter = 0;
 
       function makeDefaultInstances() {
@@ -628,14 +612,14 @@
 
       var navInstances = loadNavInstances();
       var activeUid = 'customer';
-      var activeSubId = null;
-      var addonsExpanded = false;
 
       // Compact rail: just clickable instances (icon + label), nothing else
       // — no inline drag handle or pin button cluttering every row. All
       // add/remove/reorder/pin management lives in the Customize picker
       // below, same split V0 uses (plain tab row vs. its Customize popover).
       // This is what keeps the rail itself usable even with many apps open.
+      // Every app (default or custom) sits flat at the same level — no
+      // grouping/expand submenu.
       function renderNavList() {
         var list = document.getElementById('dash-nav-rail-list');
         var totalCounts = {};
@@ -647,46 +631,19 @@
           seenCounts[inst.appId] = (seenCounts[inst.appId] || 0) + 1;
           var countSuffix = totalCounts[inst.appId] > 1
             ? '<span class="dash-nav-rail-instance-count">' + seenCounts[inst.appId] + '</span>' : '';
-          var trailing = (item.children || countSuffix)
-            ? '<span class="dash-nav-rail-item-trailing">' + countSuffix +
-              (item.children ? '<span class="material-icons dash-nav-rail-expand-caret' + (addonsExpanded ? ' expanded' : '') + '">expand_more</span>' : '') +
-              '</span>'
-            : '';
-          var active = !item.children && inst.uid === activeUid;
-          var itemHtml =
+          var trailing = countSuffix ? '<span class="dash-nav-rail-item-trailing">' + countSuffix + '</span>' : '';
+          var active = inst.uid === activeUid;
+          return '<div class="dash-nav-rail-group" data-uid="' + inst.uid + '">' +
             '<button class="dash-nav-rail-item' + (active ? ' active' : '') + '" data-uid="' + inst.uid + '" title="' + escHtml(item.label) + '">' +
               '<span class="material-icons">' + item.icon + '</span>' +
               '<span class="dash-nav-rail-item-label">' + escHtml(item.label) + '</span>' +
               trailing +
-            '</button>';
-          var submenuHtml = '';
-          if (item.children && addonsExpanded) {
-            submenuHtml = '<div class="dash-nav-rail-submenu">' + item.children.map(function (child) {
-              var subActive = child.id === activeSubId;
-              return '<button class="dash-nav-rail-subitem' + (subActive ? ' active' : '') + '" data-sub-id="' + child.id + '">' +
-                '<span class="material-icons">' + child.icon + '</span>' + escHtml(child.label) +
-                '</button>';
-            }).join('') + '</div>';
-          }
-          return '<div class="dash-nav-rail-group" data-uid="' + inst.uid + '">' + itemHtml + submenuHtml + '</div>';
+            '</button></div>';
         }).join('');
 
         list.querySelectorAll('.dash-nav-rail-item').forEach(function (btn) {
           btn.addEventListener('click', function () {
-            var uid = btn.dataset.uid;
-            var inst = navInstances.filter(function (i) { return i.uid === uid; })[0];
-            if (inst && NAV_ITEMS[inst.appId].children) {
-              addonsExpanded = !addonsExpanded;
-            } else {
-              activeUid = uid;
-            }
-            renderNavList();
-          });
-        });
-        list.querySelectorAll('.dash-nav-rail-subitem').forEach(function (btn) {
-          btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            activeSubId = btn.dataset.subId;
+            activeUid = btn.dataset.uid;
             renderNavList();
           });
         });
